@@ -1,5 +1,7 @@
 # ALANameMatchingService
 
+This is a very basic prototype written just to support a proof of concept with GBIF's pipelines data processing backend.
+
 How to start the ALANameMatchingService application
 ---
 
@@ -11,3 +13,8 @@ Health Check
 ---
 
 To see your applications health enter url `http://localhost:8081/healthcheck`
+
+Test
+---
+
+`http://localhost:9179/search?q=macropus+rufus`
