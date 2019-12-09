@@ -1,5 +1,7 @@
 package au.org.ala.names.ws.resources;
 
+import au.org.ala.names.model.LinnaeanRankClassification;
+import au.org.ala.names.model.MatchType;
 import au.org.ala.names.model.NameSearchResult;
 import au.org.ala.names.search.ALANameSearcher;
 import au.org.ala.names.ws.api.NameSearch;
@@ -12,7 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
+import java.util.Set;
 
 @Path("/search")
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,27 +37,53 @@ public class NameSearchResource {
     @Timed
     public NameSearch search(@QueryParam("q") String name) {
         try {
-            return create(searcher.searchForRecord(name));
+            NameSearchResult nsr = searcher.searchForRecord(name);
+            if (nsr != null){
+                MatchType matchType = nsr.getMatchType();
+                if (nsr.getAcceptedLsid() != null && nsr.getLsid() != nsr.getAcceptedLsid()){
+                    nsr = searcher.searchForRecordByLsid(nsr.getAcceptedLsid());
+                }
+                Set<String> vernacularNames = searcher.getCommonNamesForLSID(nsr.getLsid(), 1);
+                return create(nsr, vernacularNames, matchType);
+            } else {
+                return NameSearch.FAIL;
+            }
         } catch (Exception e){
-            LOG.error(e.getMessage(), e);
+            LOG.warn("Problem matching name : " + e.getMessage() + " with name: " + name);
         }
-        return new NameSearch(false);
+        return NameSearch.FAIL;
     }
 
-    static NameSearch create(NameSearchResult nsr){
-        if(nsr != null){
-            return new NameSearch(
-                    true,
-                    nsr.getCleanName(),
-                    nsr.getMatchType() != null ? nsr.getMatchType().toString() : "",
-                    nsr.getLsid(),
-                    nsr.getAcceptedLsid(),
-                    nsr.getRank() != null ? nsr.getRank().getRank() : "",
-                    nsr.getLeft(),
-                    nsr.getRight()
-            );
+    private NameSearch create(NameSearchResult nsr, Set<String> vernacularNames, MatchType matchType){
+        if(nsr != null && nsr.getRankClassification() != null){
+            LinnaeanRankClassification lrc = nsr.getRankClassification();
+            return NameSearch.builder()
+                    .success(true)
+                    .scientificName(lrc.getScientificName())
+                    .scientificNameAuthorship(lrc.getAuthorship())
+                    .taxonConceptID(nsr.getLsid())
+                    .rank(nsr.getRank().getRank())
+                    .matchType(matchType != null ? matchType.toString() : "")
+                    .left(nsr.getLeft() != null ? Integer.parseInt(nsr.getLeft()) : null)
+                    .right(nsr.getRight() != null ? Integer.parseInt(nsr.getRight()) : null)
+                    .kingdom(lrc.getKingdom())
+                    .kingdomID(lrc.getKid())
+                    .phylum(lrc.getPhylum())
+                    .phylumID(lrc.getPid())
+                    .classs(lrc.getKlass())
+                    .classID(lrc.getCid())
+                    .order(lrc.getOrder())
+                    .orderID(lrc.getOid())
+                    .family(lrc.getFamily())
+                    .familyID(lrc.getFid())
+                    .genus(lrc.getGenus())
+                    .genusID(lrc.getGid())
+                    .species(lrc.getSpecies())
+                    .speciesID(lrc.getSid())
+                    .vernacularName(!vernacularNames.isEmpty() ? vernacularNames.iterator().next() : null)
+                    .build();
         } else {
-            return new NameSearch(false);
+            return NameSearch.FAIL;
         }
     }
 }
