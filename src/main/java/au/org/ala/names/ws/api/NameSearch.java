@@ -15,6 +15,7 @@ public class NameSearch {
     private String scientificNameAuthorship;
     private String taxonConceptID;
     private String rank;
+    private Integer rankID;
     private Integer left;
     private Integer right;
     private String matchType;

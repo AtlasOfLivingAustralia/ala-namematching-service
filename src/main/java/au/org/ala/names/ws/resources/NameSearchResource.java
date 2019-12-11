@@ -57,12 +57,14 @@ public class NameSearchResource {
     private NameSearch create(NameSearchResult nsr, Set<String> vernacularNames, MatchType matchType){
         if(nsr != null && nsr.getRankClassification() != null){
             LinnaeanRankClassification lrc = nsr.getRankClassification();
+
             return NameSearch.builder()
                     .success(true)
                     .scientificName(lrc.getScientificName())
                     .scientificNameAuthorship(lrc.getAuthorship())
                     .taxonConceptID(nsr.getLsid())
-                    .rank(nsr.getRank().getRank())
+                    .rank(nsr.getRank() != null ? nsr.getRank().getRank() : null)
+                    .rankID(nsr.getRank() != null ? nsr.getRank().getId() : null)
                     .matchType(matchType != null ? matchType.toString() : "")
                     .left(nsr.getLeft() != null ? Integer.parseInt(nsr.getLeft()) : null)
                     .right(nsr.getRight() != null ? Integer.parseInt(nsr.getRight()) : null)
