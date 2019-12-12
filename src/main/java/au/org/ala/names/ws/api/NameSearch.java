@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Value;
 
+import java.util.List;
+
 @JsonDeserialize(builder = NameSearch.NameSearchBuilder.class)
 @Value
 @Builder
@@ -34,6 +36,9 @@ public class NameSearch {
     private String species;
     private String speciesID;
     private String vernacularName;
+    private List<String> speciesGroup;
+    private List<String> speciesSubgroup;
+
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class NameSearchBuilder {}

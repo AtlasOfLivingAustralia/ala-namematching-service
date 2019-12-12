@@ -5,6 +5,8 @@ import au.org.ala.names.model.MatchType;
 import au.org.ala.names.model.NameSearchResult;
 import au.org.ala.names.search.ALANameSearcher;
 import au.org.ala.names.ws.api.NameSearch;
+import au.org.ala.names.ws.core.SpeciesGroup;
+import au.org.ala.names.ws.core.SpeciesGroupsUtil;
 import com.codahale.metrics.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 import java.util.Set;
 
 @Path("/search")
@@ -24,14 +27,29 @@ public class NameSearchResource {
 
     private ALANameSearcher searcher = null;
 
+    private SpeciesGroupsUtil speciesGroupsUtil = null;
+
     public NameSearchResource(){
         try {
             searcher = new ALANameSearcher("/data/lucene/namematching");
+            speciesGroupsUtil = SpeciesGroupsUtil.getInstance();
         } catch (Exception e){
             LOG.error(e.getMessage(), e);
             throw new RuntimeException("Unable to initialise searcher: " + e.getMessage(), e);
         }
     }
+
+//    @GET
+//    @Timed
+//    public List<SpeciesGroup> groups() throws Exception {
+//        return speciesGroupsUtil.getSpeciesGroups();
+//    }
+
+//    @GET
+//    @Timed
+//    public List<SpeciesGroup> subgroups() throws Exception {
+//        return speciesGroupsUtil.getSpeciesSubgroups();
+//    }
 
     @GET
     @Timed
@@ -54,10 +72,15 @@ public class NameSearchResource {
         return NameSearch.FAIL;
     }
 
-    private NameSearch create(NameSearchResult nsr, Set<String> vernacularNames, MatchType matchType){
-        if(nsr != null && nsr.getRankClassification() != null){
-            LinnaeanRankClassification lrc = nsr.getRankClassification();
+    private NameSearch create(NameSearchResult nsr, Set<String> vernacularNames, MatchType matchType) throws Exception {
+        if(nsr != null && nsr.getRankClassification() != null)  {
 
+
+            speciesGroupsUtil.getSpeciesGroups(Integer.parseInt(nsr.getLeft()));
+
+
+
+            LinnaeanRankClassification lrc = nsr.getRankClassification();
             return NameSearch.builder()
                     .success(true)
                     .scientificName(lrc.getScientificName())
@@ -83,6 +106,8 @@ public class NameSearchResource {
                     .species(lrc.getSpecies())
                     .speciesID(lrc.getSid())
                     .vernacularName(!vernacularNames.isEmpty() ? vernacularNames.iterator().next() : null)
+                    .speciesGroup(speciesGroupsUtil.getSpeciesGroups(Integer.parseInt(nsr.getLeft())))
+                    .speciesSubgroup(speciesGroupsUtil.getSpeciesSubGroups(Integer.parseInt(nsr.getLeft())))
                     .build();
         } else {
             return NameSearch.FAIL;
