@@ -18,8 +18,8 @@ public class NameSearch {
     private String taxonConceptID;
     private String rank;
     private Integer rankID;
-    private Integer left;
-    private Integer right;
+    private Integer lft;
+    private Integer rgt;
     private String matchType;
     private String kingdom;
     private String kingdomID;
