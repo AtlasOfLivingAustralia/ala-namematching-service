@@ -6,5 +6,4 @@ import org.hibernate.validator.constraints.*;
 import javax.validation.constraints.*;
 
 public class ALANameMatchingServiceConfiguration extends Configuration {
-    // TODO: implement service configuration
 }
