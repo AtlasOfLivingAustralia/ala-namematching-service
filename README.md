@@ -6,7 +6,7 @@ How to start the ALANameMatchingService application
 ---
 
 1. Run `mvn clean install` to build your application
-1. Download a pre-built name matching index, and unpackage zip or tar to `/data/lucene/namematching`
+1. Download a pre-built name matching index (e.g https://archives.ala.org.au/archives/nameindexes/latest/namematching-20190213.tgz), and unpackage zip or tar to `/data/lucene/namematching`
 1. Start application with `java -jar target/ala-name-matching-service-1.0-SNAPSHOT.jar server config.yml`
 1. To check that your application is running enter url `http://localhost:9180`
 1. Test with `http://localhost:9179/api/search?q=Acacia`. The response should look similar to:
