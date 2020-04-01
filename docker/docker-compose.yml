@@ -1,0 +1,6 @@
+version: '3'
+services:
+  ala-namematching-service:
+    build: .
+    ports:
+      - "9179:9179"
