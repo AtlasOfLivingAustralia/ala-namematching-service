@@ -8,7 +8,11 @@ import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
 import au.org.ala.names.ws.core.SpeciesGroupsUtil;
 import com.codahale.metrics.annotation.Timed;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
+import org.cache2k.Cache;
+import org.cache2k.Cache2kBuilder;
+import org.cache2k.integration.CacheLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,20 +25,34 @@ import java.util.Set;
  */
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/api")
+@Slf4j
 public class NameSearchResource {
-
-    private Logger LOG = LoggerFactory.getLogger("mylogger");
 
     private ALANameSearcher searcher = null;
 
     private SpeciesGroupsUtil speciesGroupsUtil = null;
 
+    //Cache2k instance
+    private final Cache<NameSearch, NameUsageMatch> cache;
+
     public NameSearchResource(){
         try {
-            searcher = new ALANameSearcher("/data/lucene/namematching");
-            speciesGroupsUtil = SpeciesGroupsUtil.getInstance();
+            this.searcher = new ALANameSearcher("/data/lucene/namematching");
+            this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance();
+            this.cache = Cache2kBuilder.of(NameSearch.class, NameUsageMatch.class)
+                    .eternal(true)    //never expire entries
+                    .entryCapacity(100000) //maximum capacity
+                    .suppressExceptions(false) //communicate errors
+                    .loader(new CacheLoader<NameSearch, NameUsageMatch>() {
+                        @Override
+                        public NameUsageMatch load(NameSearch nameSearch) throws Exception {
+                            return search(nameSearch);
+                        }
+                    }) //auto populating function
+                    .permitNullValues(true) //allow nulls
+                    .build();
         } catch (Exception e){
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException("Unable to initialise searcher: " + e.getMessage(), e);
         }
     }
@@ -44,9 +62,9 @@ public class NameSearchResource {
     @Path("/searchByClassification")
     public NameUsageMatch searchByClassification(NameSearch nameSearch) {
         try {
-            return search(nameSearch);
+            return this.cache.get(nameSearch);
         } catch (Exception e){
-            LOG.warn("Problem matching name : " + e.getMessage() + " with nameSearch: " + nameSearch);
+            log.warn("Problem matching name : " + e.getMessage() + " with nameSearch: " + nameSearch);
         }
         return NameUsageMatch.FAIL;
     }
@@ -189,7 +207,7 @@ public class NameSearchResource {
                 return NameUsageMatch.FAIL;
             }
         } catch (Exception e){
-            LOG.warn("Problem matching name : " + e.getMessage() + " with name: " + name);
+            log.warn("Problem matching name : " + e.getMessage() + " with name: " + name);
         }
         return NameUsageMatch.FAIL;
     }

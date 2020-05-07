@@ -3,12 +3,14 @@ package au.org.ala.names.ws.core;
 import au.org.ala.names.model.NameSearchResult;
 import au.org.ala.names.search.ALANameSearcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class SpeciesGroupsUtil {
 
     ALANameSearcher nameindex;
@@ -36,9 +38,13 @@ public class SpeciesGroupsUtil {
         return nameindex;
     }
 
-    public List<SpeciesGroup> getSpeciesGroups() throws Exception { return speciesGroups; }
-    public List<SpeciesGroup> getSpeciesSubgroups() throws Exception { return speciesSubgroups; }
+    public List<SpeciesGroup> getSpeciesGroups() throws Exception {
+        return speciesGroups;
+    }
 
+    public List<SpeciesGroup> getSpeciesSubgroups() throws Exception {
+        return speciesSubgroups;
+    }
 
     /**
      * Retrieve species groups.
@@ -57,7 +63,7 @@ public class SpeciesGroupsUtil {
             List<String> excludedValues = (List<String>) config.getOrDefault("excluded", new ArrayList<String>());
             String parent = (String) config.getOrDefault("parent", "");
             groups.add(createSpeciesGroup(speciesGroup, rank, values, excludedValues, parent));
-            System.out.println("Species group: " + speciesGroup + " _ " + rank + " _ " +  values + " _ " +  excludedValues + " _ " +  parent);
+            log.info("Species group: " + speciesGroup + " _ " + rank + " _ " +  values + " _ " +  excludedValues + " _ " +  parent);
         }
 
 

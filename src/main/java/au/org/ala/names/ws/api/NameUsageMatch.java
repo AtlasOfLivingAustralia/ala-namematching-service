@@ -3,6 +3,7 @@ package au.org.ala.names.ws.api;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @JsonDeserialize(builder = NameUsageMatch.NameUsageMatchBuilder.class)
 @Value
 @Builder
+@EqualsAndHashCode
 public class NameUsageMatch {
 
     boolean success;
@@ -38,7 +40,6 @@ public class NameUsageMatch {
     String vernacularName;
     List<String> speciesGroup;
     List<String> speciesSubgroup;
-
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class NameUsageMatchBuilder {}

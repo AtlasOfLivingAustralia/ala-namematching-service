@@ -3,11 +3,13 @@ package au.org.ala.names.ws.api;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 @JsonDeserialize(builder = NameSearch.NameSearchBuilder.class)
 @Value
 @Builder
+@EqualsAndHashCode
 public class NameSearch {
    public String kingdom;
    public String phylum;
