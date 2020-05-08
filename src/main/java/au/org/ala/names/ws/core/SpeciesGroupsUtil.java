@@ -63,7 +63,7 @@ public class SpeciesGroupsUtil {
             List<String> excludedValues = (List<String>) config.getOrDefault("excluded", new ArrayList<String>());
             String parent = (String) config.getOrDefault("parent", "");
             groups.add(createSpeciesGroup(speciesGroup, rank, values, excludedValues, parent));
-            log.info("Species group: " + speciesGroup + " _ " + rank + " _ " +  values + " _ " +  excludedValues + " _ " +  parent);
+            log.info("Species group: {} _ {} _ {} _ {} _ {}", speciesGroup, rank, values, excludedValues, parent);
         }
 
 

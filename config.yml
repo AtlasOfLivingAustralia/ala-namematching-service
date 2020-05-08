@@ -1,7 +1,7 @@
 logging:
   level: INFO
   loggers:
-    au.org.ala: DEBUG
+    au.org.ala: WARN
 server:
   applicationConnectors:
     - type: http
@@ -15,7 +15,6 @@ server:
       selectorThreads: 2
       acceptQueueSize: 1024
       reuseAddress: true
-      soLingerTime: 600s
   adminConnectors:
     - type: http
       port: 9180

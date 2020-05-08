@@ -18,7 +18,6 @@ public class ALANameMatchingServiceApplication extends Application<ALANameMatchi
 
     @Override
     public void initialize(final Bootstrap<ALANameMatchingServiceConfiguration> bootstrap) {
-        // TODO: application initialization
     }
 
     @Override

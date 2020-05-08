@@ -56,3 +56,12 @@ Test
 ---
 
 `http://localhost:9179/search?q=macropus+rufus`
+
+
+Building the docker image
+---
+
+`
+docker build -f docker/Dockerfile . -t ala-namematching-service:v20200214-2
+`
+

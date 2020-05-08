@@ -16,6 +16,7 @@ import org.cache2k.integration.CacheLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Set;
@@ -26,6 +27,7 @@ import java.util.Set;
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/api")
 @Slf4j
+@Singleton
 public class NameSearchResource {
 
     private ALANameSearcher searcher = null;
@@ -37,6 +39,7 @@ public class NameSearchResource {
 
     public NameSearchResource(){
         try {
+            log.info("Initialising NameSearchResource.....");
             this.searcher = new ALANameSearcher("/data/lucene/namematching");
             this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance();
             this.cache = Cache2kBuilder.of(NameSearch.class, NameUsageMatch.class)
