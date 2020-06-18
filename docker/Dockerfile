@@ -13,7 +13,7 @@ COPY ./target/ala-namematching-service-1.0-SNAPSHOT.jar /data/ala-namematching-s
 COPY ./config.yml /data/config.yml
 
 RUN if [ "$ENV" = "gbif-backbone" ]; then \
-    curl -sf  -o /data/lucene/namematching.tgz -L https://demo.gbif.es/local-files/nameindex-gbif-backbone-nov-2019-11-08.tgz; else \
+    curl -sf  -o /data/lucene/namematching.tgz -L https://datos.gbif.es/others/namematching-gbif-backbone-2020-06-18.tgz; else \
     curl -sf  -o /data/lucene/namematching.tgz -L https://archives.ala.org.au/archives/nameindexes/latest/namematching-20200214.tgz; fi
 #COPY namematching.tgz /data/lucene/namematching.tgz
 
