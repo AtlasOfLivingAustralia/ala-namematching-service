@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "scientificName": "Acacia dealbata",
+  "scientificNameAuthorship": "Link",
+  "taxonConceptID": "https://id.biodiversity.org.au/taxon/apni/51286863",
+  "rank": "species",
+  "rankID": 7000,
+  "lft": 607769,
+  "rgt": 607791,
+  "matchType": "exactMatch",
+  "kingdom": "Plantae",
+  "kingdomID": "https://id.biodiversity.org.au/taxon/apni/51337710",
+  "phylum": "Charophyta",
+  "phylumID": "https://id.biodiversity.org.au/taxon/apni/51337706",
+  "classs": "Equisetopsida",
+  "classID": "https://id.biodiversity.org.au/taxon/apni/51337705",
+  "order": "Fabales",
+  "orderID": "https://id.biodiversity.org.au/taxon/apni/51311090",
+  "family": "Fabaceae",
+  "familyID": "https://id.biodiversity.org.au/taxon/apni/51311092",
+  "genus": "Acacia",
+  "genusID": "https://id.biodiversity.org.au/taxon/apni/51311124",
+  "species": "Acacia dealbata",
+  "speciesID": "https://id.biodiversity.org.au/taxon/apni/51286863",
+  "vernacularName": null,
+  "speciesGroup": [
+    "Plants"
+  ],
+  "speciesSubgroup": []
+}
