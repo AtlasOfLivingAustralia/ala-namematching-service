@@ -1,5 +1,6 @@
 package au.org.ala.names.ws;
 
+import au.org.ala.names.ws.core.NameSearchConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import lombok.Getter;

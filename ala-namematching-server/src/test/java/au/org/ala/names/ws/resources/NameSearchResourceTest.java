@@ -1,6 +1,6 @@
 package au.org.ala.names.ws.resources;
 
-import au.org.ala.names.ws.NameSearchConfiguration;
+import au.org.ala.names.ws.core.NameSearchConfiguration;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
 import org.junit.After;
@@ -85,17 +85,18 @@ public class NameSearchResourceTest {
     public void testMisapplied1() throws Exception {
         NameSearch search = NameSearch.builder().scientificName("Corybas macranthus").build();
         NameUsageMatch match = this.resource.searchByClassification(search);
-        assertFalse(match.isSuccess());
-        assertEquals(Arrays.asList("homonym", "misappliedName"), match.getIssues());
+        assertTrue(match.isSuccess());
+        assertEquals("https://id.biodiversity.org.au/node/apni/2915977", match.getTaxonConceptID());
+        assertEquals(Arrays.asList("misappliedName"), match.getIssues());
     }
 
     @Test
     public void testSynonym1() throws Exception {
-        NameSearch search = NameSearch.builder().scientificName("Lepidium dubium").build();
+        NameSearch search = NameSearch.builder().scientificName("Acacia derwentii").build();
         NameUsageMatch match = this.resource.searchByClassification(search);
         assertTrue(match.isSuccess());
-        assertEquals("https://id.biodiversity.org.au/node/apni/2898429", match.getTaxonConceptID());
-        assertEquals("wellformed", match.getNameType());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        assertEquals("SCIENTIFIC", match.getNameType());
         assertEquals("SUBJECTIVE_SYNONYM", match.getSynonymType());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
@@ -107,7 +108,7 @@ public class NameSearchResourceTest {
         NameUsageMatch match = this.resource.searchByClassification(search);
         assertTrue(match.isSuccess());
         assertEquals("https://id.biodiversity.org.au/name/apni/152298", match.getTaxonConceptID());
-        assertEquals("hybrid", match.getNameType());
+        assertEquals("HYBRID", match.getNameType());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 

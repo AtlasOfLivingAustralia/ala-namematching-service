@@ -2,7 +2,7 @@ package au.org.ala.names.ws.resources;
 
 import au.org.ala.names.model.*;
 import au.org.ala.names.search.ALANameSearcher;
-import au.org.ala.names.ws.NameSearchConfiguration;
+import au.org.ala.names.ws.core.NameSearchConfiguration;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
 import au.org.ala.names.ws.core.SpeciesGroupsUtil;
@@ -10,7 +10,7 @@ import com.codahale.metrics.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.Cache;
 import org.cache2k.integration.CacheLoader;
-import org.gbif.ecat.voc.NameType;
+import org.gbif.api.vocabulary.NameType;
 
 import javax.inject.Singleton;
 import javax.ws.rs.*;
@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Singleton
 public class NameSearchResource {
-
+    /** Searcher for names */
     private ALANameSearcher searcher;
-
+    /** Map taxa onto species groups */
     private SpeciesGroupsUtil speciesGroupsUtil;
 
     //Cache2k instance
@@ -39,7 +39,7 @@ public class NameSearchResource {
         try {
             log.info("Initialising NameSearchResource.....");
             this.searcher = new ALANameSearcher(configuration.getIndex());
-            this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance();
+            this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);
             this.cache = configuration.getCache().builder(NameSearch.class, NameUsageMatch.class)
                     .loader(new CacheLoader<NameSearch, NameUsageMatch>() {
                         @Override

@@ -2,6 +2,7 @@ package au.org.ala.names.ws.client;
 
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
+import au.org.ala.util.TestUtils;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -14,7 +15,7 @@ import java.io.InputStreamReader;
 
 import static org.junit.Assert.*;
 
-public class ALANameUsageMatchServiceClientTest {
+public class ALANameUsageMatchServiceClientTest extends TestUtils {
     private MockWebServer server;
     private ClientConfiguration configuration;
     private ALANameUsageMatchServiceClient client;
@@ -69,28 +70,6 @@ public class ALANameUsageMatchServiceClientTest {
         RecordedRequest req = server.takeRequest();
         assertEquals("/api/searchByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
-    }
-
-    private String getResource(String name) throws Exception {
-        InputStreamReader reader = null;
-
-        try {
-            reader = new InputStreamReader(this.getClass().getResourceAsStream(name));
-            StringBuilder builder = new StringBuilder(1024);
-            char[] buffer = new char[1024];
-            int n;
-
-            while ((n = reader.read(buffer)) >= 0) {
-                if (n == 0)
-                    Thread.sleep(100);
-                else
-                    builder.append(buffer, 0, n);
-            }
-            return builder.toString();
-        } finally {
-            if (reader != null)
-                reader.close();
-        }
     }
 
 }

@@ -1,0 +1,57 @@
+[{
+  "name": "Animals",
+  "rank": "kingdom",
+  "included": ["Animalia"],
+  "excluded": [],
+  "parent": null
+},
+  {
+    "name": "Mammals",
+    "rank": "classs",
+    "included": ["Mammalia"],
+    "excluded": [],
+    "parent": "Animals"
+  },
+  {
+    "name": "Birds",
+    "rank": "classs",
+    "included": ["Aves"],
+    "excluded": [],
+    "parent": "Animals"
+  },
+  {
+    "name": "Arthropods",
+    "rank": "phylum",
+    "included": ["Arthropoda"],
+    "excluded": [],
+    "parent": "Animals"
+  },
+  {
+    "name": "Crustaceans",
+    "rank": "classs",
+    "included": ["Branchiopoda", "Remipedia", "Maxillopoda", "Ostracoda", "Malacostraca"],
+    "excluded": [],
+    "parent": "Arthropods"
+  },
+  {
+    "name": "Insects",
+    "rank": "classs",
+    "included": ["Insecta"],
+    "excluded": [],
+    "parent": "Arthropods"
+  },
+  {
+    "name": "Plants",
+    "rank": "kingdom",
+    "included": ["Plantae"],
+    "excluded": [],
+    "parent": null
+  },
+  {
+    "name": "Bryophytes",
+    "rank": "phylum",
+    "included": ["Bryophyta", "Marchantiophyta", "Anthocerotophyta"],
+    "excluded": [],
+    "parent": "Plants"
+  }
+]

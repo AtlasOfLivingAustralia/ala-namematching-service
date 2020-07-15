@@ -1,8 +1,9 @@
-package au.org.ala.names.ws;
+package au.org.ala.names.ws.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.cache2k.Cache2kBuilder;
 
 /**
@@ -14,6 +15,7 @@ import org.cache2k.Cache2kBuilder;
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@EqualsAndHashCode
 public class CacheConfiguration {
     /** If true, allow JMX interrogation. False by default */
     @JsonProperty

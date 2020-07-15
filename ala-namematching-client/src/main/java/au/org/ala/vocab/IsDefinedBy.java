@@ -3,10 +3,13 @@ package au.org.ala.vocab;
 import java.lang.annotation.*;
 
 /**
- * A reference to the defining term for a parameter, field, methods etc.
- * Allowing references to the intention of the element to be documented
+ * A reference to the defining term for a parameter, field, methods etc
+ * allowing references to the intention of the element to be documented
  * and propagated.
- * Generally, the value is the URI for the equivalent term.
+ * <p>
+ * Generally, the value is the URI for the equivalent term or the fully qualified name
+ * of a class that provides a vocabulary.
+ * </p>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

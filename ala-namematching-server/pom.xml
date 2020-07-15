@@ -12,6 +12,10 @@
     <artifactId>ala-namematching-server</artifactId>
     <name>ALA Namematching Service Server</name>
 
+    <properties>
+        <mainClass>au.org.ala.names.ws.ALANameMatchingServiceApplication</mainClass>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.parent.groupId}</groupId>
@@ -22,12 +26,28 @@
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
+            <version>${dropwizard.version}</version>
         </dependency>
 
         <dependency>
             <groupId>au.org.ala</groupId>
             <artifactId>ala-name-matching</artifactId>
-            <version>3.3</version>
+            <version>3.4</version>
+            <!-- Stop jetty 1.x infecting everything -->
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.gbif.registry</groupId>
+                    <artifactId>registry-ws-client</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Caching -->

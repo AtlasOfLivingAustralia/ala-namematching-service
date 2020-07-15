@@ -1,0 +1,64 @@
+[
+  {
+    "speciesGroup": "Mammals",
+    "taxonRank": "order",
+    "taxa": [
+      {
+        "name": "DASYUROMORPHIA",
+        "common": "Carnivorous Marsupials"
+      },
+      {
+        "name": "DIPROTODONTIA",
+        "common": "Herbivorous Marsupials"
+      },
+      {
+        "name": "NOTORYCTEMORPHIA",
+        "common": "Marsupial Moles"
+      },
+      {
+        "name": "PERAMELEMORPHIA",
+        "common": "Bandicoots, Bilbies"
+      }
+    ]
+  },
+  {
+    "speciesGroup": "Birds",
+    "taxonRank": "order",
+    "taxa": [
+      {
+        "name": "ANSERIFORMES",
+        "common": "Ducks, Geese, Swans"
+      },
+      {
+        "name": "APODIFORMES",
+        "common": "Hummingbirds, Swifts"
+      }
+    ]
+  },
+  {
+    "speciesGroup": "Plants",
+    "facetName": "species_group",
+    "taxa": [
+      {
+        "name": "Monocots",
+        "common": "Monocots"
+      },
+      {
+        "name": "Dicots",
+        "common": "Dicots"
+      },
+      {
+        "name": "Angiosperms",
+        "common": "Flowering plants"
+      },
+      {
+        "name": "FernsAndAllies",
+        "common": "Ferns and Allies"
+      },
+      {
+        "name": "Gymnosperms",
+        "common": "Conifers, Cycads"
+      }
+    ]
+  }
+]

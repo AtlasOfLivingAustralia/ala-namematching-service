@@ -3,58 +3,58 @@ package au.org.ala.names.ws.core;
 import au.org.ala.names.model.NameSearchResult;
 import au.org.ala.names.search.ALANameSearcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.FileInputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A resource that contains mappings from taxa onto species groups.
+ */
 @Slf4j
 public class SpeciesGroupsUtil {
+    /** Making resources is fairly expensive. Reuse existing instances */
+    private static final Map<NameSearchConfiguration, SpeciesGroupsUtil> managerCache = new HashMap<>();
 
-    ALANameSearcher nameindex;
-    List<SpeciesGroup> speciesGroups;
-    List<SpeciesGroup> speciesSubgroups;
+    /** The name index used to match names to actual taxon entries */
+    private final ALANameSearcher nameIndex;
+    /** The list of possible species groups */
+    @Getter
+    private final List<SpeciesGroup> speciesGroups;
+    /** The list of possible species subgroups */
+    @Getter
+    private final List<SpeciesGroup> speciesSubgroups;
 
-    private SpeciesGroupsUtil(){ }
-
-    public static SpeciesGroupsUtil getInstance() throws Exception {
-        return new SpeciesGroupsUtil().init();
-    }
-
-    private SpeciesGroupsUtil init() throws Exception {
+    /**
+     * Construct for a name index configuration
+     *
+     * @param configuration The name index configuration
+     *
+     * @throws IllegalArgumentException if unable to open any of the resources specified in the configuration, which makes an invalid configuration
+     */
+    private SpeciesGroupsUtil(NameSearchConfiguration configuration) throws IllegalArgumentException {
         try {
-            nameindex = new ALANameSearcher("/data/lucene/namematching");
-            this.speciesGroups = initSpeciesGroups();
-            this.speciesSubgroups = initSpeciesSubgroups();
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to initialise searcher: " + e.getMessage(), e);
+            this.nameIndex = new ALANameSearcher(configuration.getIndex());
+            this.speciesGroups = this.readSpeciesGroups(configuration.getGroups());
+            this.speciesSubgroups = this.readSpeciesSubgroups(configuration.getSubgroups());
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Invalid name searcher configuration", ex);
         }
-        return this;
-    }
-
-    public ALANameSearcher nameIndex() {
-        return nameindex;
-    }
-
-    public List<SpeciesGroup> getSpeciesGroups() throws Exception {
-        return speciesGroups;
-    }
-
-    public List<SpeciesGroup> getSpeciesSubgroups() throws Exception {
-        return speciesSubgroups;
     }
 
     /**
      * Retrieve species groups.
      */
-    private List<SpeciesGroup> initSpeciesGroups() throws Exception {
+    private List<SpeciesGroup> readSpeciesGroups(URL source) throws Exception {
 
         List<SpeciesGroup> groups = new ArrayList<SpeciesGroup>();
 
         ObjectMapper om = new ObjectMapper();
-        List<Map<String, Object>> groupsConfig = om.readValue(new FileInputStream("/data/ala-namematching-service/config/groups.json"), List.class);
+        List<Map<String, Object>> groupsConfig = om.readValue(source, List.class);
 
         for (Map<String, Object> config: groupsConfig){
             String speciesGroup = config.getOrDefault("name", "").toString();
@@ -65,19 +65,17 @@ public class SpeciesGroupsUtil {
             groups.add(createSpeciesGroup(speciesGroup, rank, values, excludedValues, parent));
             log.info("Species group: {} _ {} _ {} _ {} _ {}", speciesGroup, rank, values, excludedValues, parent);
         }
-
-
         return groups;
     }
 
     /**
-     * Subgroups to use when indexing records.
+     * Retrieve subgroups to use when indexing records.
      */
-    private List<SpeciesGroup> initSpeciesSubgroups() throws Exception {
+    private List<SpeciesGroup> readSpeciesSubgroups(URL source) throws Exception {
 
         List<SpeciesGroup> subgroups = new ArrayList<SpeciesGroup>();
         ObjectMapper om = new ObjectMapper();
-        List<Map<String, Object>> list = om.readValue(new FileInputStream("/data/ala-namematching-service/config/subgroups.json"), List.class);
+        List<Map<String, Object>> list = om.readValue(source, List.class);
 
         for (Map<String, Object> map : list){
             String parentGroup = (String) map.getOrDefault("speciesGroup", "");
@@ -131,17 +129,16 @@ public class SpeciesGroupsUtil {
     private SpeciesGroup createSpeciesGroup(String title, String rank,  List<String> values,  List<String> excludedValues, String parent) throws Exception {
 
         List<LftRgtValues> lftRgts = new ArrayList<LftRgtValues>();
-        ALANameSearcher nameIndex = nameIndex();
 
         List<String> namesToLookup = new ArrayList<String>();
 
         for (String v: values) {
 
-            NameSearchResult snr = nameIndex.searchForRecord(v, au.org.ala.names.model.RankType.getForName(rank));
+            NameSearchResult snr = this.nameIndex.searchForRecord(v, au.org.ala.names.model.RankType.getForName(rank));
 
             if (snr != null) {
                 if (snr.isSynonym())
-                    snr = nameIndex.searchForRecordByLsid(snr.getAcceptedLsid());
+                    snr = this.nameIndex.searchForRecordByLsid(snr.getAcceptedLsid());
                 if (snr != null && snr.getLeft() != null && snr.getRight() != null) {
                     lftRgts.add(
                             LftRgtValues.builder()
@@ -228,5 +225,21 @@ public class SpeciesGroupsUtil {
             }
         }
         return matchedGroups;
+    }
+
+    /**
+     * Get an instance of the species group resource, based on configuration.
+     * <p>
+     * It's a bit of a pain to import the groups.
+     * So keep a copy available.
+     * </p>
+     * @param configuration The configuration
+     *
+     * @return An species group resource
+     *
+     * @throws Exception if unable to load the resource
+     */
+    synchronized public static SpeciesGroupsUtil getInstance(NameSearchConfiguration configuration) throws Exception {
+        return managerCache.computeIfAbsent(configuration, c -> new SpeciesGroupsUtil(c));
     }
 }
