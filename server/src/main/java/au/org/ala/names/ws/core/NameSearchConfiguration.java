@@ -1,6 +1,5 @@
 package au.org.ala.names.ws.core;
 
-import au.org.ala.names.ws.core.CacheConfiguration;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

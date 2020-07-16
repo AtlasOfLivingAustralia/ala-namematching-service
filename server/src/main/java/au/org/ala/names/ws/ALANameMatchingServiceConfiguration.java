@@ -1,8 +1,10 @@
 package au.org.ala.names.ws;
 
 import au.org.ala.names.ws.core.NameSearchConfiguration;
+import au.org.ala.names.ws.resources.NameSearchResource;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +12,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 public class ALANameMatchingServiceConfiguration extends Configuration {
+    /** The swagger configuration */
+    @Valid
+    @NotNull
+    @JsonProperty
+    @Getter
+    @Setter
+    private SwaggerBundleConfiguration swagger = new SwaggerBundleConfiguration();
     /** The name search configuration */
     @Valid
     @NotNull
@@ -17,4 +26,21 @@ public class ALANameMatchingServiceConfiguration extends Configuration {
     @Getter
     @Setter
     private NameSearchConfiguration search = new NameSearchConfiguration();
+
+    /**
+     * Construct with default setttings.
+     * <p>
+     * The settings can be overridden in the
+     * </p>
+     */
+    public ALANameMatchingServiceConfiguration()  {
+        this.swagger.setTitle("ALA Namematching API");
+        this.swagger.setDescription("A taxonomy service that maps scientific name queries onto taxon concepts");
+        this.swagger.setContactUrl("https://ala.org.au");
+        this.swagger.setContactEmail("support@ala.org.au");
+        this.swagger.setResourcePackage(NameSearchResource.class.getPackage().getName());
+        this.swagger.setLicense("Mozilla Public Licence 1.1");
+        this.swagger.setVersion("1.0-SNAPSHOT");
+        this.swagger.getSwaggerViewConfiguration().setPageTitle("ALA Namematching API");
+    }
 }

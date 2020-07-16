@@ -1,8 +1,9 @@
 package au.org.ala.names.ws.api;
 
-import au.org.ala.vocab.IsDefinedBy;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -14,64 +15,207 @@ import java.util.List;
 @Value
 @Builder
 @EqualsAndHashCode
+@ApiModel(
+        value = "Name Search Result",
+        description = "A matching taxon (or not) from a search."
+)
 public class NameUsageMatch {
-
+    @ApiModelProperty(
+            value = "Found/not found flag. A not-found result may be because the query is ambigious",
+            allowEmptyValue = false
+    )
     boolean success;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/scientificName")
+    @ApiModelProperty(
+            value = "The scientific name",
+            example = "Anas superciliosa superciliosa",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/scientificName"
+    )
     String scientificName;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/scientificNameAuthorship")
+    @ApiModelProperty(
+            value = "The scientific name authorship (with the scientific name, corresponds to the taxon concept)",
+            example = "Gmelin, 1789",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/scientificNameAuthorship"
+    )
     String scientificNameAuthorship;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/taxonConceptID")
+    @ApiModelProperty(
+            value = "The taxon concept identifier (placement in a taxonomy)",
+            example = "urn:lsid:biodiversity.org.au:afd.taxon:7d8e4927-90d6-40ba-a1e9-d6e917d2270b",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/taxonConceptID"
+    )
     String taxonConceptID;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/taxonRank")
+    @ApiModelProperty(
+            value = "The Linnaean rank (kingdom, family, species, etc.) of the taxon",
+            example = "subspecies",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/taxonRank"
+    )
     String rank;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/rankID")
+    @ApiModelProperty(
+            value = "The identifier for the Linnaean rank",
+            example = "8000",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/rankID"
+    )
     Integer rankID;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/left")
+    @ApiModelProperty(
+            value = "The left-value for the position of this taxon in the taxonomic tree",
+            example = "892340",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/left"
+    )
     Integer lft;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/right")
+    @ApiModelProperty(
+            value = "The right-value for the position of this taxon in the taxonomic tree",
+            example = "892345",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/right"
+    )
     Integer rgt;
-    @IsDefinedBy("au.org.ala.names.model.MatchType")
+    @ApiModelProperty(
+            value = "The type of taxon match",
+            allowableValues = "exactMatch,canonicalMatch,phraseMatch,fuzzyMatch,vernacularMatch,higherMatch,taxonIdMatch",
+            example = "fuzzyMatch",
+            allowEmptyValue = true,
+            notes = "au.org.ala.names.model.MatchType"
+    )
     String matchType;
-    @IsDefinedBy("org.gbif.api.vocabulary.NameType")
+    @ApiModelProperty(
+            value = "The type of supplied name",
+            allowableValues = "SCIENTIFIC,VIRUS,HYBRID,INFORMAL,CULTIVAR,CANDIDATUS,OTU,DOUBTFUL,PLACEHOLDER,NO_NAME",
+            example = "SCIENTIFIC",
+            allowEmptyValue = true,
+            notes = "org.gbif.api.vocabulary.NameType"
+    )
     String nameType;
-    @IsDefinedBy("au.org.ala.names.model.SynonymType")
+    @ApiModelProperty(
+            value = "The type of synonymy, if the supplied name was a synonym of the matched name",
+            example = "SUBJECTIVE_SYNONYM",
+            allowEmptyValue = true,
+            notes = "au.org.ala.names.model.SynonymType"
+    )
     String synonymType;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/kingdom")
+    @ApiModelProperty(
+            value = "The Linnaean kingdom",
+            example = "Animalia",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/kingdom"
+    )
     String kingdom;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/kingdomID")
+    @ApiModelProperty(
+            value = "The kingdom identifier",
+            example = "urn:lsid:biodiversity.org.au:afd.taxon:4647863b-760d-4b59-aaa1-502c8cdf8d3c",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/kingdomID"
+    )
     String kingdomID;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/phylum")
+    @ApiModelProperty(
+            value = "The Linnaean phylum",
+            example = "Chordata",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/phylum"
+    )
     String phylum;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/phylumID")
+    @ApiModelProperty(
+            value = "The phylum identifier",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/phylumID"
+    )
     String phylumID;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/class")
+    @ApiModelProperty(
+            value = "The Linnaean class",
+            example = "Aves",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/class"
+    )
     String classs;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/classID")
+    @ApiModelProperty(
+            value = "The class identifier",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/classID"
+    )
     String classID;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/order")
+    @ApiModelProperty(
+            value = "The Linnaean order",
+            example = "Anseriformes",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/order"
+    )
     String order;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/orderID")
+    @ApiModelProperty(
+            value = "The order identifier",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/orderID"
+    )
     String orderID;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/family")
+    @ApiModelProperty(
+            value = "The Linnaean family",
+            example = "Anatidae",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/family"
+    )
     String family;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/familyID")
+    @ApiModelProperty(
+            value = "The family identifier",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/familyID"
+    )
     String familyID;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/genus")
+    @ApiModelProperty(
+            value = "The Linnaean genus",
+            example = "Anas",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/genus"
+    )
     String genus;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/genusID")
+    @ApiModelProperty(
+            value = "The genus identifier",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/genusID"
+    )
     String genusID;
-    @IsDefinedBy("http://rs.gbif.org/terms/1.0/species")
+    @ApiModelProperty(
+            value = "The species name",
+            example = "Osphranter rufus",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/species"
+    )
     String species;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/speciesID")
+    @ApiModelProperty(
+            value = "The species identifier",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/speciesID"
+    )
     String speciesID;
-    @IsDefinedBy("http://rs.tdwg.org/dwc/terms/vernacularName")
+    @ApiModelProperty(
+            value = "The main vernacular (common) name",
+            example = "Red Kangaroo",
+            allowEmptyValue = true,
+            notes = "http://rs.tdwg.org/dwc/terms/vernacularName"
+    )
     String vernacularName;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/speciesGroup")
+    @ApiModelProperty(
+            value = "Species groups for the taxon",
+            example = "Animals, Mammals",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/speciesGroup"
+    )
     List<String> speciesGroup;
-    @IsDefinedBy("http://id.ala.org.au/terms/1.0/speciesSubgroup")
+    @ApiModelProperty(
+            value = "Species sub-groups for the taxon",
+            example = "Herbivorous Marsupials",
+            allowEmptyValue = true,
+            notes = "http://id.ala.org.au/terms/1.0/speciesSubgroup"
+    )
     List<String> speciesSubgroup;
-    @IsDefinedBy("au.org.ala.names.model.ErrorType")
+    @ApiModelProperty(
+            value = "Any issues with the matching process. A successful match will return noMatch. Otherwise a list of problems or possible problems with the match",
+            example = "homonym, misappliedName",
+            allowEmptyValue = true,
+            notes = "au.org.ala.names.model.ErrorType"
+    )
     List<String> issues;
 
     @JsonPOJOBuilder(withPrefix = "")

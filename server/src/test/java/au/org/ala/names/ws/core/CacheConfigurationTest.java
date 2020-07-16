@@ -1,13 +1,14 @@
 package au.org.ala.names.ws.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import au.org.ala.util.TestUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.cache2k.Cache;
 import org.junit.Test;
 
 import java.io.StringWriter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class CacheConfigurationTest extends TestUtils {
     @Test

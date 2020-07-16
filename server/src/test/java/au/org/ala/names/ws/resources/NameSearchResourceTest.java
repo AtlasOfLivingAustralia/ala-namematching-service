@@ -1,8 +1,8 @@
 package au.org.ala.names.ws.resources;
 
-import au.org.ala.names.ws.core.NameSearchConfiguration;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
+import au.org.ala.names.ws.core.NameSearchConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +34,20 @@ public class NameSearchResourceTest {
         assertEquals("Acacia dealbata", match.getScientificName());
         assertEquals("species", match.getRank());
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        assertEquals("exactMatch", match.getMatchType());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+
+    // Vernacular name in scientific name
+    @Test
+    public void testSearch2() throws Exception {
+        NameUsageMatch match = this.resource.search("Violet Daisy-Bush");
+        assertTrue(match.isSuccess());
+        assertEquals("Olearia iodochroa", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://id.biodiversity.org.au/node/apni/2908670", match.getTaxonConceptID());
+        assertEquals("vernacularMatch", match.getMatchType());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 
@@ -52,6 +66,37 @@ public class NameSearchResourceTest {
     public void testSearchByClassification2() throws Exception {
         NameSearch search = NameSearch.builder().scientificName("Osphranter rufus").build();
         NameUsageMatch match = this.resource.searchByClassification(search);
+        assertTrue(match.isSuccess());
+        assertEquals("Osphranter rufus", match.getScientificName());
+        assertEquals("Animalia", match.getKingdom());
+        assertEquals("Osphranter", match.getGenus());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+    @Test
+    public void testSearchByClassification3() throws Exception {
+        NameSearch search = NameSearch.builder().genus("Osphranter").specificEpithet("rufus").build();
+        NameUsageMatch match = this.resource.searchByClassification(search);
+        assertTrue(match.isSuccess());
+        assertEquals("Osphranter rufus", match.getScientificName());
+        assertEquals("Animalia", match.getKingdom());
+        assertEquals("Osphranter", match.getGenus());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+    @Test
+    public void testSearchByClassification4() throws Exception {
+        NameUsageMatch match = this.resource.searchByClassification("Osphranter rufus", null, null, null, null, null, null, null, null, null);
+        assertTrue(match.isSuccess());
+        assertEquals("Osphranter rufus", match.getScientificName());
+        assertEquals("Animalia", match.getKingdom());
+        assertEquals("Osphranter", match.getGenus());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+    @Test
+    public void testSearchByClassification5() throws Exception {
+        NameUsageMatch match = this.resource.searchByClassification(null, null, null, null, null, null, "Osphranter", "rufus", null, null);
         assertTrue(match.isSuccess());
         assertEquals("Osphranter rufus", match.getScientificName());
         assertEquals("Animalia", match.getKingdom());
@@ -98,6 +143,30 @@ public class NameSearchResourceTest {
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
         assertEquals("SCIENTIFIC", match.getNameType());
         assertEquals("SUBJECTIVE_SYNONYM", match.getSynonymType());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+
+    @Test
+    public void testGetByTaxonID1() throws Exception {
+        NameUsageMatch match = this.resource.getByTaxonID("https://id.biodiversity.org.au/taxon/apni/51286863");
+        assertTrue(match.isSuccess());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertNull(match.getNameType());
+        assertEquals("taxonIdMatch", match.getMatchType());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+
+    @Test
+    public void testSearchByVerncaularName1() throws Exception {
+        NameUsageMatch match = this.resource.searchByVernacularName("Common Wombat");
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:e079f94d-3d7f-4deb-ae29-053fec4d1b53", match.getTaxonConceptID());
+        assertEquals("Vombatus ursinus", match.getScientificName());
+        assertEquals("INFORMAL", match.getNameType());
+        assertEquals("vernacularMatch", match.getMatchType());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 

@@ -28,6 +28,13 @@
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+
+        <!-- Documentation -->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.6.0</version> <!-- Compatibility with dropwizard-swagger 2.0.0-1 -->
+        </dependency>
     </dependencies>
 
 </project>
