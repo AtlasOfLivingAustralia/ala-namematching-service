@@ -3,16 +3,43 @@ package au.org.ala.names.ws.client;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.Headers;
-import retrofit2.http.POST;
+import retrofit2.http.*;
 
 /**
  * ALA name matching Retrofit Service client.
+ *
+ * @see ALANameMatchService
  */
 interface ALANameUsageMatchRetrofitService {
 
     @POST("/api/searchByClassification")
     @Headers({"Content-Type: application/json"})
-    Call<NameUsageMatch> match(@Body NameSearch nameMatch);
+    Call<NameUsageMatch> match(@Body NameSearch search);
+
+    @GET("/api/searchByClassification")
+    @Headers({"Content-Type: application/json"})
+    Call<NameUsageMatch> match(
+            @Query("scientificName") String scientificName,
+            @Query("kingdom") String kingdom,
+            @Query("phylum") String phylum,
+            @Query("class") String clazz,
+            @Query("order") String order,
+            @Query("family") String family,
+            @Query("genus") String genus,
+            @Query("specificEpithet") String specificEpithet,
+            @Query("infraspecificEpithet") String infraspecificEpithet,
+            @Query("rank") String rank
+    );
+
+    @GET("/api/search")
+    @Headers({"Content-Type: application/json"})
+    Call<NameUsageMatch> match(@Query("q") String scientificName);
+
+    @GET("/api/searchByVernacularName")
+    @Headers({"Content-Type: application/json"})
+    Call<NameUsageMatch> matchVernacular(@Query("vernacularName") String vernacularName);
+
+    @GET("/api/getByTaxonID")
+    @Headers({"Content-Type: application/json"})
+    Call<NameUsageMatch> get(@Query("taxonID") String taxonID);
 }

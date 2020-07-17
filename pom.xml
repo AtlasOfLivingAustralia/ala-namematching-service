@@ -36,8 +36,9 @@
         <retrofit.version>2.6.2</retrofit.version>
         <okhttp.version>4.3.1</okhttp.version>
         <okio.version>2.4.3</okio.version>
-        <kvs.version>1.6</kvs.version>
         <dwc-api.version>1.27</dwc-api.version>
+        <slf4j.version>1.7.5</slf4j.version>
+        <log4j.version>2.13.2</log4j.version>
     </properties>
 
     <dependencyManagement>
