@@ -35,16 +35,19 @@ public class ClientConfiguration {
     private URL baseUrl;
     /** The timeout for connection in milliseconds (defaults to 30 seconds) */
     @JsonProperty
-    private long timeOut = 30 * 1000;
+    @Builder.Default
+    private long timeOut = (long) 30 * 1000;
     /** Cache results (defaults to true) */
     @JsonProperty
+    @Builder.Default
     private boolean cache = true;
     /** Cache directory (defaults to a temporary directory if null) */
     @JsonProperty
     private Path cacheDir;
     /** Maxiumum cache size (defaults to 50Mb) */
     @JsonProperty
-    private long cacheSize = 50 * 1024 * 1024;
+    @Builder.Default
+    private long cacheSize = (long) 50 * 1024 * 1024;
 
     /**
      * Get the timeout duration.
