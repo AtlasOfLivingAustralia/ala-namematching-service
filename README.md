@@ -64,4 +64,7 @@ Building the docker image
 `
 docker build -f docker/Dockerfile . -t ala-namematching-service:v20200214-2
 `
-
+for use ALA namematching and for use the GBIF backbone:
+`
+docker build -f docker/Dockerfile . -t  ala-namematching-service:v2020061714-2 --build-arg ENV=gbif-backbone
+`
