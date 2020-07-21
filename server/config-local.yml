@@ -1,0 +1,27 @@
+logging:
+  level: INFO
+  loggers:
+    au.org.ala: WARN
+server:
+  applicationConnectors:
+    - type: http
+      port: 9179
+      outputBufferSize: 32KiB
+      idleTimeout: 30 seconds
+      minBufferPoolSize: 64 bytes
+      bufferPoolIncrement: 1KiB
+      maxBufferPoolSize: 64KiB
+      acceptorThreads: 1
+      selectorThreads: 2
+      acceptQueueSize: 1024
+      reuseAddress: true
+  adminConnectors:
+    - type: http
+      port: 9180
+search:
+  index: /data/lucene/namematching-20200214
+  groups: file:src/main/resources/groups.json
+  subgroups: file:src/main/resources/subgroups.json
+  cache:
+    entryCapacity: 1000
+    enableJmx: true
