@@ -24,4 +24,4 @@ RUN if [ "$ENV" != "gbif-backbone" ]; then \
 EXPOSE 9179
 EXPOSE 9180
 
-CMD ["java", "-jar", "/data/ala-namematching-service.jar", "server", "/data/config.yml"]
+CMD ["java", "-jar", "/data/ala-namematching-server.jar", "server", "/data/config.yml"]

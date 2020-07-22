@@ -20,6 +20,8 @@ public class NameSearchResourceTest {
     public void setUp() throws Exception {
         this.configuration = new NameSearchConfiguration();
         this.configuration.setIndex("/data/lucene/namematching-20200214"); // Ensure consistent index
+        this.configuration.setGroups(this.getClass().getResource("../core/test-groups-1.json"));
+        this.configuration.setSubgroups(this.getClass().getResource("../core/test-subgroups-1.json"));
         this.resource = new NameSearchResource(this.configuration);
     }
 

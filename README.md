@@ -1,16 +1,21 @@
-# ALA Name Matching Service
+# ALA Name Matching Service [![Build Status](https://travis-ci.org/AtlasOfLivingAustralia/ala-namematching-service.svg?branch=master)](https://travis-ci.org/AtlasOfLivingAustralia/ala-namematching-service)
 
-This is a very basic prototype written just to support a proof of concept with GBIF's pipelines data processing backend.
+This priovides a set of web services for name matching, using the `ala-name-matching` library.
+It consists of three components. all with maven groupId `au.org.ala.names`:
 
-How to start the ALANameMatchingService application
----
+* `ala-namematching-core` A core library containing common objects
+* `ala-namematching-client` A client library that can be linked into other applications and which accesses the web services
+* `ala-namemacthing-server` A server application that can be used for name searches
+
+## How to start the ALANameMatchingService application
+
 
 1. Run `mvn clean install` to build your application
-1. Download a pre-built name matching index (e.g https://archives.ala.org.au/archives/nameindexes/latest/namematching-20190213.tgz), and unpackage zip or tar to `/data/lucene/namematching`
-1. Start application with `java -jar target/ala-name-matching-service-1.0-SNAPSHOT.jar server config.yml`
+1. Download a pre-built name matching index (e.g https://archives.ala.org.au/archives/nameindexes/latest/namematching-20200214.tgz), and untar in `/data/lucene` This will create a `/data/lucene/namematching-20200214` directory.
+1. cd to the `server` subdirectory
+1. Start application with `java -jar target/ala-name-matching-server-1.0-SNAPSHOT.jar server config-local.yml`
 1. To check that your application is running enter url `http://localhost:9180`
 1. Test with `http://localhost:9179/api/search?q=Acacia`. The response should look similar to:
-
 
 ```json
 
@@ -24,6 +29,8 @@ How to start the ALANameMatchingService application
     "lft": 590410,
     "rgt": 593264,
     "matchType": "exactMatch",
+    "nameType": "SCIENTIFIC",
+    "synonymType": null,
     "kingdom": "Plantae",
     "kingdomID": "http://id.biodiversity.org.au/node/apni/9443092",
     "phylum": "Charophyta",
@@ -42,29 +49,37 @@ How to start the ALANameMatchingService application
     "speciesGroup": [
         "Plants"
     ],
-    "speciesSubgroup": []
+    "speciesSubgroup": [],
+    "issues": [
+       "noIssue"
+    ]
 }
 
 ```
 
-Health Check
----
+### Web Services
+
+To see complete documentation of the webservices available enter url `http://localhost:9179`
+
+### Health Check
+
 
 To see your applications health enter url `http://localhost:9180/healthcheck`
 
-Test
----
+### Test
 
 `http://localhost:9179/search?q=macropus+rufus`
 
 
-Building the docker image
----
+## Building the docker image
+
+
+Change directory to the `server` module.
 
 `
-docker build -f docker/Dockerfile . -t ala-namematching-service:v20200214-2
+docker build -f docker/Dockerfile . -t ala-namematching-service:v20200722-1
 `
 for use ALA namematching and for use the GBIF backbone:
 `
-docker build -f docker/Dockerfile . -t  ala-namematching-service:v2020061714-2 --build-arg ENV=gbif-backbone
+docker build -f docker/Dockerfile . -t  ala-namematching-service:v20200722-1 --build-arg ENV=gbif-backbone
 `
