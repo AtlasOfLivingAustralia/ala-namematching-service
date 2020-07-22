@@ -6,7 +6,6 @@ jdk:
 branches:
   only:
   - master
-
 before_install:
 - mkdir -p ~/.m2; wget -q -O ~/.m2/settings.xml https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_maven_settings_simple.xml
 - sudo mkdir -p /data/lucene; sudo wget -O /data/lucene/namematching-20200214.tgz https://archives.ala.org.au/archives/nameindexes/20200214/namematching-20200214.tgz
@@ -16,11 +15,9 @@ before_install:
 - ls -laF
 - cd $TRAVIS_BUILD_DIR
 - echo TRAVIS_PULL_REQUEST = ${TRAVIS_PULL_REQUEST}
-
 script:
-- "[ \"${TRAVIS_PULL_REQUEST}\" = \"false\" ] && mvn -P travis clean install deploy || mvn -P travis clean install"
-
+- '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && mvn -P travis clean install deploy || mvn -P travis clean install'
 env:
   global:
-  - secure: KccCleAFdCTTPEtUYcsBSsIbIIvpbZJ16aV0F8ydRErupFrTIsniWM5xmyUyL3VYaViIViBFke1hAiVEoYG3U33a4X3RVdZV0vS6KhS1K36q0jg61wnyzYqucVk8XBh8X0JHS6DmZ++IV2JAEpY6mEWKG+LpNGkyZ58gqj1AJsY=
-  - secure: c7HoUh8T4Qdw9tdQCukkENzLkn9dipvxT3PDf9lM/znrsr8ef7h/qXkLs+85comuoJL2vJ1VcB9RnAwJPVq/IUUchAm2Gj87DYGRPKWKXhtBBhgz6nciOwWjXHkCOKzJeF7Ljx12bh1SqELkJUHcNRw7zJb7vh9zZkYQeXg1JfM=
+  - secure: DHhZau8rR7tbHByl4I1A9ESVq+GjmyshEJzlfn573zlS5bTz94X/Xwn/8s7L4ZkT9HqTG/D/Hm9a7RaRJ6OqyFlTjw4q62JiKwHCDQp4GsLQ57JXhe5E2UWj8h8tObyv+mbeiWt/x0froG4xKkNaTBoPTcqbdVULF7xprbFRIwvy9E6IRlZT5zF+qNMpsxnmDJu9a+g1U6pwhXwn4+CIGi6G2dEkX6/DNPe1xKKA7ZmZ9wlR2o97PREZkXz/emuKy4V1RIMt4F28e2UHtyFbokjMnklmwQxvBF2e95vu2XGVWvjQoWg+1vVSyx09P/XiPeuYjZwJq9i4FuRAmo831p2KAK9NL+e/nR+TsqHWNE4wYbOYTxvYkcrCyyXm9sqUKEpKdqXmKTGjuL48ba4kVNADQvN4vapY5MUAh8hpAnI45fW2SqEj8xl5vBdMX1eE9jrR1JugWPZ7TGYMo/xsrztF8JpqEqV/oLUxad3F2idezZ9Ua26Huh2V0sUnhdhWyUoHpZsFYDTRfKTsQbcKjJtY49y+Ghu8yxsremJYdC94GKDKYsmPED5CQmPvHyG4C0NLOToZ8xbMKfIJXco6qZ0VzIvvlWEpUQ4kEP0RekG1clN7Ll32fOCI7rqhOYO94JvhJuzCR3nEgY8pEM16Ji4Tz/Q7+CQrIDSo7L4brzQ=
+  - secure: mHezyDR2h4MXyxj2IjYgezSrLkgIa3zgsmWlsHV28O2nVxIX1tbSWJ6jzYvNAtdonN8GHe9TCtz60SQCrTfZZ052jzAu3XrfR4VojL9iTnteLMfrzCzvSpmU/dbrlmgz6bhZmVbbZwH6CvutYaViaroXpKDHWbzWL/3eoWhnFIS+A8uXdyzShMFAZlU3zAxPVsQiC2pSxhQ99sFNdqnro22aCOoDEuaV6hUT6XXVqgPBgPVjdxIIT9/OwN1pzcOTA9UNoSFdRHCif/k+ICoKv59c9MfM3SAR1qeUydLeK/ITDS/FjE+z0+8rMSzHqTmnej6+x2/ZEYfKcmoRdxtGqn4s/TEJx1qXRnEAcnK9zfKhhJGU65/rV6BCEHad1L51I8YRxazeBWaxGm27ervA7pVkjOSh+sAyPSHeu7kqoCMwbvzN2BpCnzwfZQOm+/4DQrEzw5gqXVFDUnhRvekutlqsprZLe1oAcnALlMF20N++Gj2riq+7TIaa0v7C3sRpcr9fXPlNP30SzDO5lmV3hbWuMtOx3tSKoGfR6v9KCMZwLcIYxfS3m+/QHI56lMaV3LXI8nMd/5wHe6ZAIKIfgAe3wfIB+7C5N9ZUioqhigeAiqUElJIwx2TuRtwC9XB5gVgXGpCtBoXlKdVeu28nvylTu77R8Mjlf4TNFwSwe5s=
