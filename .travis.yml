@@ -15,7 +15,7 @@ before_install:
 - sudo ln -s namematching-20200214 namematching
 - ls -laF
 - cd $TRAVIS_BUILD_DIR
-- echo TAVIS_PULL_REQUEST = ${TRAVIS_PULL_REQUEST}
+- echo TRAVIS_PULL_REQUEST = ${TRAVIS_PULL_REQUEST}
 
 script:
 - "[ \"${TRAVIS_PULL_REQUEST}\" = \"false\" ] && mvn -P travis clean install deploy || mvn -P travis clean install"
