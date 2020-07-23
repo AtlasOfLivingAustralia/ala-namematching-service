@@ -2,6 +2,7 @@ package au.org.ala.names.ws.resources;
 
 import au.org.ala.names.model.*;
 import au.org.ala.names.search.ALANameSearcher;
+import au.org.ala.names.ws.api.NameMatchService;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
 import au.org.ala.names.ws.core.NameSearchConfiguration;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
 @Path("/api")
 @Slf4j
 @Singleton
-public class NameSearchResource {
+public class NameSearchResource implements NameMatchService {
     /** Searcher for names */
     private final ALANameSearcher searcher;
     /** Map taxa onto species groups */
@@ -73,6 +74,7 @@ public class NameSearchResource {
         }
     }
 
+
     @ApiOperation(
             value = "Search by full classification",
             notes = "Search based on a partially filled out classification. " +
@@ -81,7 +83,7 @@ public class NameSearchResource {
     @POST
     @Timed
     @Path("/searchByClassification")
-    public NameUsageMatch searchByClassification(NameSearch search) {
+    public NameUsageMatch match(NameSearch search) {
         try {
             return this.cache.get(search);
         } catch (Exception e){
@@ -98,7 +100,7 @@ public class NameSearchResource {
     @GET
     @Timed
     @Path("/searchByClassification")
-    public NameUsageMatch searchByClassification(
+    public NameUsageMatch match(
             @ApiParam(value = "The scientific name. If not supplied, inferred from other parameters", example = "Dentimitrella austrina") @QueryParam("scientificName") String scientificName,
             @ApiParam(value = "The kingdom name", example = "Animalia") @QueryParam("kingdom") String kingdom,
             @ApiParam(value = "The phylum name") @QueryParam("phylum") String phylum,
@@ -138,7 +140,7 @@ public class NameSearchResource {
     @GET
     @Timed
     @Path("/search")
-    public NameUsageMatch search(
+    public NameUsageMatch match(
             @ApiParam(value = "The scientific name", required = true, example = "Acacia dealbata") @QueryParam("q") String name
     ) {
         try {
@@ -158,7 +160,7 @@ public class NameSearchResource {
     @GET
     @Timed
     @Path("/searchByVernacularName")
-    public NameUsageMatch searchByVernacularName(
+    public NameUsageMatch matchVernacular(
             @ApiParam(value = "The common name", required = true, example = "Red Kangaroo") @QueryParam("vernacularName") String vernacularName
     ) {
         try {
@@ -176,7 +178,7 @@ public class NameSearchResource {
     @GET
     @Timed
     @Path("/getByTaxonID")
-    public NameUsageMatch getByTaxonID(
+    public NameUsageMatch get(
             @ApiParam(value = "The unique taxon identifier", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonID") String taxonID
     ) {
         try {
@@ -375,5 +377,12 @@ public class NameSearchResource {
                     .build();
 
         }
+    }
+
+    /**
+     * Close the resource.
+     */
+    @Override
+    public void close()  {
     }
 }

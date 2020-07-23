@@ -1,13 +1,13 @@
-package au.org.ala.names.ws.client;
-
-import au.org.ala.names.ws.api.NameSearch;
-import au.org.ala.names.ws.api.NameUsageMatch;
-import au.org.ala.ws.ClientException;
-import retrofit2.HttpException;
+package au.org.ala.names.ws.api;
 
 import java.io.Closeable;
 
-public interface ALANameMatchService extends Closeable {
+/**
+ * Name matching interface.
+ *
+ * Clients implement this interface to provide a lookup for taxonomic information.
+ */
+public interface NameMatchService extends Closeable {
     /**
      * Find a matching taxon based on a search specification.
      * <p>
@@ -62,9 +62,6 @@ public interface ALANameMatchService extends Closeable {
      * @param scientificName The scientific name of the taxon
      *
      * @return A matching taxon, with success=false if not found
-     *
-     * @throws HttpException to propagate an error from the service
-     * @throws ClientException if unable to contact the service
      */
     NameUsageMatch match(String scientificName);
 
