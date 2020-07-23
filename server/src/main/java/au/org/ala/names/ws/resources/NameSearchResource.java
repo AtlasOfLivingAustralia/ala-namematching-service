@@ -2,6 +2,7 @@ package au.org.ala.names.ws.resources;
 
 import au.org.ala.names.model.*;
 import au.org.ala.names.search.ALANameSearcher;
+import au.org.ala.names.search.SearchResultException;
 import au.org.ala.names.ws.api.NameMatchService;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
@@ -20,6 +21,7 @@ import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,10 @@ public class NameSearchResource implements NameMatchService {
     private final ALANameSearcher searcher;
     /** Map taxa onto species groups */
     private final SpeciesGroupsUtil speciesGroupsUtil;
+    /** Use hints to guide search */
+    private final boolean useHints;
+    /** Use hints to check search */
+    private final boolean checkHints;
 
     //Cache2k instance
     private final Cache<NameSearch, NameUsageMatch> cache;
@@ -45,6 +51,8 @@ public class NameSearchResource implements NameMatchService {
             log.info("Initialising NameSearchResource.....");
             this.searcher = new ALANameSearcher(configuration.getIndex());
             this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);
+            this.useHints = configuration.isUseHints();
+            this.checkHints = configuration.isCheckHints();
             this.cache = configuration.getCache().builder(NameSearch.class, NameUsageMatch.class)
                     .loader(new CacheLoader<NameSearch, NameUsageMatch>() {
                         @Override
@@ -201,8 +209,6 @@ public class NameSearchResource implements NameMatchService {
      * @throws Exception if something goes horribly wrong
      */
     private NameUsageMatch search(NameSearch search) throws Exception {
-        // First get rid of strange stuff
-        search = search.normalised();
 
         //attempt 1: search via taxonConceptID or taxonID if provided
         NameSearchResult idnsr = null;
@@ -217,85 +223,34 @@ public class NameSearchResource implements NameMatchService {
             Set<String> vernacularNames = searcher.getCommonNamesForLSID(idnsr.getLsid(), 1);
             return create(idnsr, vernacularNames, idnsr.getMatchType(), null, null, null);
         }
-
-
-        LinnaeanRankClassification lrc = new LinnaeanRankClassification();
-        lrc.setAuthorship(search.getScientificNameAuthorship());
-        lrc.setFamily(search.getFamily());
-        lrc.setGenus(search.getGenus());
-        lrc.setInfraspecificEpithet(search.getInfraspecificEpithet());
-        lrc.setKingdom(search.getKingdom());
-        lrc.setKlass(search.getClazz());
-        lrc.setOrder(search.getOrder());
-        lrc.setPhylum(search.getPhylum());
-        lrc.setScientificName(search.getScientificName());
-        lrc.setSpecificEpithet(search.getSpecificEpithet());
-        lrc.setRank(search.getRank());
-
-        // Make an annotated version of the classification with whatever extra information we have
-        LinnaeanRankClassification alrc = new LinnaeanRankClassification(lrc);
-        boolean annotated = false;
-        String inferredScientificName = null;
-        RankType inferredRank = null;
-        //set the scientificName using available elements of the higher classification
-        if (search.getGenus() != null && search.getSpecificEpithet() != null && search.getInfraspecificEpithet() != null) {
-            inferredScientificName = search.getGenus() + " " + search.getSpecificEpithet() + " " + search.getInfraspecificEpithet();
-            inferredRank = RankType.SUBSPECIES;
-        } else if (search.getGenus() != null && search.getSpecificEpithet() != null) {
-            inferredScientificName = search.getGenus() + " " + search.getSpecificEpithet();
-            inferredRank = RankType.SPECIES;
-        } else if (search.getGenus() != null) {
-            inferredScientificName = search.getGenus();
-            inferredRank = RankType.GENUS;
-        } else if (search.getFamily() != null) {
-            inferredScientificName = search.getFamily();
-            inferredRank = RankType.FAMILY;
-        } else if (search.getOrder() != null) {
-            inferredScientificName = search.getOrder();
-            inferredRank = RankType.ORDER;
-        } else if (search.getClazz() != null) {
-            inferredScientificName = search.getClazz();
-            inferredRank = RankType.CLASS;
-        } else if (search.getPhylum() != null) {
-            inferredScientificName = search.getPhylum();
-            inferredRank = RankType.PHYLUM;
-        } else if (search.getKingdom() != null) {
-            inferredScientificName = search.getKingdom();
-            inferredRank = RankType.KINGDOM;
-        }
-        if (search.getRank() == null && inferredRank != null) {
-            alrc.setRank(inferredRank.getRank());
-            annotated = true;
-        }
-        if (search.getScientificName() == null && inferredScientificName != null) {
-            alrc.setScientificName(inferredScientificName);
-            annotated = true;
-        }
-
-        // First try the annotated version, then try the raw version if that doesn't work out
+        // Start searching by names
+        final NameSearch nsearch = search.normalised();
         MetricsResultDTO metrics = null;
         NameSearchResult result = null;
-        if (alrc.getScientificName() != null) {
-            metrics = searcher.searchForRecordMetrics(alrc, true, true);
-            result = metrics.getResult();
-            if (result == null && annotated && lrc.getScientificName() != null) {
-                metrics = searcher.searchForRecordMetrics(lrc, true, true);
-                result = metrics.getResult();
-            }
+        // Get the first result that works
+        if (useHints) {
+            metrics = nsearch.hintStream().map(s -> this.findMetrics(s, false)).filter(m -> m != null && m.getResult() != null).findFirst().orElse(null);
+            result = metrics == null ? null : metrics.getResult();
+        }
+
+        // Try fuzzier approaches
+        if (result == null) {
+            metrics = nsearch.bareStream().filter(s -> !s.equals(nsearch)).map(s -> this.findMetrics(s, true)).filter(m -> m != null && m.getResult() != null).findFirst().orElseGet(() -> this.findMetrics(nsearch, true));
+            result = metrics == null ? null : metrics.getResult();
         }
 
         // Last resort, search using a vernacular name in either the vernacular or scientific slots
         if (metrics == null)
             metrics = new MetricsResultDTO();
-        if (result ==  null && search.getVernacularName() != null) {
-            result = this.searcher.searchForCommonName(search.getVernacularName());
+        if (result  == null && nsearch.getVernacularName() != null) {
+            result = this.searcher.searchForCommonName(nsearch.getVernacularName());
             if (result != null) {
                 metrics.setNameType(NameType.INFORMAL);
                 metrics.setResult(result);
             }
         }
-        if (result ==  null && search.getScientificName() != null) {
-            result = this.searcher.searchForCommonName(search.getScientificName());
+        if (result == null && nsearch.getScientificName() != null) {
+            result = this.searcher.searchForCommonName(nsearch.getScientificName());
             if (result != null) {
                 metrics.setNameType(NameType.INFORMAL);
                 metrics.setResult(result);
@@ -315,7 +270,31 @@ public class NameSearchResource implements NameMatchService {
         } else {
             return create(metrics.getResult(), null, null, metrics.getNameType(), null, metrics.getErrors());
         }
+    }
 
+    private MetricsResultDTO findMetrics(NameSearch search, boolean approximate) {
+        if (search.getScientificName() == null)
+            return null;
+        LinnaeanRankClassification lrc = new LinnaeanRankClassification();
+        lrc.setAuthorship(search.getScientificNameAuthorship());
+        lrc.setFamily(search.getFamily());
+        lrc.setGenus(search.getGenus());
+        lrc.setInfraspecificEpithet(search.getInfraspecificEpithet());
+        lrc.setKingdom(search.getKingdom());
+        lrc.setKlass(search.getClazz());
+        lrc.setOrder(search.getOrder());
+        lrc.setPhylum(search.getPhylum());
+        lrc.setScientificName(search.getScientificName());
+        lrc.setSpecificEpithet(search.getSpecificEpithet());
+        lrc.setRank(search.getRank());
+
+        MetricsResultDTO metrics = null;
+        try {
+            metrics = searcher.searchForRecordMetrics(lrc, approximate, approximate);
+        } catch (SearchResultException ex) {
+            log.warn("Unable to complete search for " + lrc, ex);
+        }
+        return metrics;
     }
 
     /**

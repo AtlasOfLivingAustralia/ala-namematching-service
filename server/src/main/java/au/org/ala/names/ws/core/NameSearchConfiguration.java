@@ -24,6 +24,12 @@ public class NameSearchConfiguration {
     /** The location of the species subgroups. Defaults to <code>file:///data/ala-namematching-service/config/groups.json</code> */
     @JsonProperty
     private URL subgroups;
+    /** Use hints when matching (true by default) */
+    @JsonProperty
+    private boolean useHints = true;
+    /** Use hints to confirm the matching result (true by default) */
+    @JsonProperty
+    private boolean checkHints = true;
     /** The cache configuration */
     @JsonProperty
     private CacheConfiguration cache = new CacheConfiguration();
