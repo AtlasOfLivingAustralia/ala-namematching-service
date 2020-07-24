@@ -247,6 +247,7 @@ public class NameSearch {
      * A stream is returned so that we can stop generating after finding one.
      * </p>
      * <p>
+     * If there are no hints, the bare stream is returned.
      * Hints are tried in {@link #HINT_ORDER} order, since there are a few elements that can be quickly used
      * to rapidly home in on a suitable name.
      * </p>
@@ -254,6 +255,9 @@ public class NameSearch {
      * @return The hint stream
      */
     public Stream<NameSearch> hintStream() {
+        if (this.hints == null || this.hints.isEmpty()) {
+            return this.bareStream();
+        }
         try {
             return this.hinted(0);
         } catch (Exception ex) {
@@ -274,17 +278,31 @@ public class NameSearch {
             return Stream.of(inferred, this);
     }
 
+    /**
+     * Generate the hinted stream.
+     * <p>
+     * Hints are applied to the current search, from the rank in the index onwards.
+     * The {@link #hints} field is assumed to be non-null and non-empty.
+     * </p>
+     *
+     * @param index The index into the rank list
+     *
+     * @return A stream of hinted elements
+     *
+     * @throws IllegalAccessException Impossible! Occurs if a field isn't found
+     * @throws InvocationTargetException Inconceivable! Occurs if a method isn't found
+     */
     protected Stream<NameSearch> hinted(int index) throws IllegalAccessException, InvocationTargetException {
-        if (this.hints == null || index >= HINT_ORDER.length) {
+        if (index >= HINT_ORDER.length) {
             return this.bareStream();
         }
         Stream<NameSearch> output = null;
-        String fieldName = HINT_ORDER[index];
+        String rank = HINT_ORDER[index];
         Field field = HINT_FIELDS[index];
         Method with = WITH_METHODS[index];
         String value = (String) field.get(this);
         if (value == null) {
-            List<String> hs = this.hints.get(fieldName);
+            List<String> hs = this.hints.get(rank);
             if (hs != null) {
                 for (String h : hs) {
                     NameSearch template = (NameSearch) with.invoke(this, h);

@@ -162,7 +162,7 @@ public class NameSearchResourceTest {
         NameUsageMatch match = this.resource.match(search);
         assertTrue(match.isSuccess());
         assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:a4109d9e-723c-491a-9363-95df428fe230", match.getTaxonConceptID());
-        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+        assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
     }
 
     @Test
@@ -174,6 +174,18 @@ public class NameSearchResourceTest {
         NameUsageMatch match = this.resource.match(search);
         assertTrue(match.isSuccess());
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51299766", match.getTaxonConceptID()); // Uses Plantae hint first
+        assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
+    }
+
+    @Test
+    public void testHints5() throws Exception {
+        Map<String, List<String>> hints = new HashMap<>();
+        hints.put("kingdom", Arrays.asList("Plantae", "Fungi"));
+        hints.put("phylum", Arrays.asList("Charophyta", "Basidiomycota"));
+        NameSearch search = NameSearch.builder().scientificName("Entorrhiza casparyana").hints(hints).build();
+        NameUsageMatch match = this.resource.match(search);
+        assertTrue(match.isSuccess());
+        assertEquals("65dc3de3-fca6-42d8-895c-d5b161cb4a6c", match.getTaxonConceptID()); // Uses Plantae hint first
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 

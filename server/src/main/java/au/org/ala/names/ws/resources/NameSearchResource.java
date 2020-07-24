@@ -209,7 +209,7 @@ public class NameSearchResource implements NameMatchService {
      * @throws Exception if something goes horribly wrong
      */
     private NameUsageMatch search(NameSearch search) throws Exception {
-
+        NameUsageMatch match = null;
         //attempt 1: search via taxonConceptID or taxonID if provided
         NameSearchResult idnsr = null;
 
@@ -266,10 +266,15 @@ public class NameSearchResource implements NameMatchService {
                     metrics.setResult(result);
             }
             Set<String> vernacularNames = searcher.getCommonNamesForLSID(metrics.getResult().getLsid(), 1);
-            return create(metrics.getResult(), vernacularNames, matchType, metrics.getNameType(), synonymType, metrics.getErrors());
+            match = create(metrics.getResult(), vernacularNames, matchType, metrics.getNameType(), synonymType, metrics.getErrors());
         } else {
-            return create(metrics.getResult(), null, null, metrics.getNameType(), null, metrics.getErrors());
+            match = create(metrics.getResult(), null, null, metrics.getNameType(), null, metrics.getErrors());
         }
+        if (this.checkHints && !match.check(nsearch)) {
+            match.getIssues().remove("noIssue");
+            match.getIssues().add("hintMismatch" );
+        }
+        return match;
     }
 
     private MetricsResultDTO findMetrics(NameSearch search, boolean approximate) {
