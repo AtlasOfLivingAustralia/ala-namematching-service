@@ -1,5 +1,6 @@
 package au.org.ala.names.ws.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.swagger.annotations.ApiModel;
@@ -12,6 +13,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(builder = NameUsageMatch.NameUsageMatchBuilder.class)
 @Value
 @Builder

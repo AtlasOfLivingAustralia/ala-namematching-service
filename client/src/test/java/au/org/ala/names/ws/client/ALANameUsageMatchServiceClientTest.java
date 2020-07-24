@@ -15,6 +15,7 @@ import org.junit.Test;
 import retrofit2.HttpException;
 
 import java.net.URL;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -52,6 +53,8 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals("Acacia dealbata", match.getScientificName());
         assertEquals("species", match.getRank());
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        assertEquals("Plantae", match.getKingdom());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
         assertEquals("/api/searchByClassification", req.getPath());
@@ -69,6 +72,29 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         NameUsageMatch match = client.match(search);
 
         assertFalse(match.isSuccess());
+        assertNull(match.getKingdom());
+        assertEquals(Collections.singletonList("homonym"), match.getIssues());
+        assertEquals(1, server.getRequestCount());
+        RecordedRequest req = server.takeRequest();
+        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals(request, req.getBody().readUtf8());
+    }
+
+    /** Supply hints */
+    @Test
+    public void testMatchNameSearch3() throws Exception {
+        String request = this.getResource("request-3.json");
+        String response = this.getResource("response-3.json");
+
+        server.enqueue(new MockResponse().setBody(response));
+        Map<String, List<String>> hints = new HashMap<>();
+        hints.put("kingdom", Arrays.asList("Animalia"));
+        NameSearch search = NameSearch.builder().scientificName("Acacia dealbata").hints(hints).build();
+        NameUsageMatch match = client.match(search);
+
+        assertTrue(match.isSuccess());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
         assertEquals("/api/searchByClassification", req.getPath());

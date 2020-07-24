@@ -2,6 +2,7 @@ package au.org.ala.names.ws.api;
 
 import au.org.ala.util.BasicNormaliser;
 import au.org.ala.util.Normaliser;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.swagger.annotations.ApiModel;
@@ -18,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(builder = NameSearch.NameSearchBuilder.class)
 @Value
 @Builder
