@@ -1,5 +1,6 @@
 package au.org.ala.names.ws.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import io.swagger.annotations.ApiModel;
@@ -8,9 +9,11 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(builder = NameUsageMatch.NameUsageMatchBuilder.class)
 @Value
 @Builder
@@ -20,6 +23,19 @@ import java.util.List;
         description = "A matching taxon (or not) from a search."
 )
 public class NameUsageMatch {
+    /** Field lookup based on ranks, corresponding to {@link NameSearch#HINT_ORDER} */
+    private static final String[] RANK_FIELD_NAMES = {"phylum", "genus", "order", "classs", "family", "kingdom"};
+    private static final Field[] RANK_FIELDS = new Field[RANK_FIELD_NAMES.length];
+
+    {
+        try {
+            for (int i = 0; i < RANK_FIELD_NAMES.length; i++)
+                RANK_FIELDS[i] = NameUsageMatch.class.getDeclaredField(RANK_FIELD_NAMES[i]);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Also seriously, this is impossible!" , ex);
+        }
+    }
+
     @ApiModelProperty(
             value = "Found/not found flag. A not-found result may be because the query is ambigious",
             allowEmptyValue = false
@@ -217,6 +233,40 @@ public class NameUsageMatch {
             notes = "au.org.ala.names.model.ErrorType"
     )
     List<String> issues;
+
+
+    /**
+     * Check this result against a name search.
+     * <p>
+     * Only hints are checked, since matches can result in a very different taxonomy
+     * to the supplied values.
+     * Null values for fields mean that hints are not checked.
+     * </p>
+     *
+     * @param search The source search
+     *
+     * @return True if the search matches the supplied hints.
+     */
+    public boolean check(NameSearch search) {
+        Map<String, List<String>> hints = search.getHints();
+        if (hints == null || hints.isEmpty())
+            return true;
+        for (int i = 0; i < NameSearch.HINT_ORDER.length; i++) {
+            try {
+                final String value = (String) RANK_FIELDS[i].get(this);
+                if (value != null) {
+                    String rank = NameSearch.HINT_ORDER[i];
+                    List<String> hl = hints.get(rank);
+                    if (hl != null && !hl.stream().anyMatch(h -> value.equalsIgnoreCase(h)))
+                        return false;
+                }
+            } catch (IllegalAccessException ex) {
+                throw new IllegalStateException("Right now, I need to go and have a lie-down" , ex);
+            }
+        }
+        return true;
+    }
+
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class NameUsageMatchBuilder {}

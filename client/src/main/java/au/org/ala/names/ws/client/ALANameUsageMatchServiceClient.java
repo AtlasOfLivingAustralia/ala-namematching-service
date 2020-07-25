@@ -1,5 +1,6 @@
 package au.org.ala.names.ws.client;
 
+import au.org.ala.names.ws.api.NameMatchService;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
 import au.org.ala.ws.ClientConfiguration;
@@ -19,7 +20,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @Slf4j
-public class ALANameUsageMatchServiceClient implements ALANameMatchService {
+public class ALANameUsageMatchServiceClient implements NameMatchService {
 
     //Wrapped service
     private final ALANameUsageMatchRetrofitService alaNameUsageMatchService;
@@ -45,7 +46,7 @@ public class ALANameUsageMatchServiceClient implements ALANameMatchService {
      *
      * @return The matching result
      *
-     * @see ALANameMatchService#match(NameSearch)
+     * @see NameMatchService#match(NameSearch)
       */
     @Override
     public NameUsageMatch match(NameSearch search)  {

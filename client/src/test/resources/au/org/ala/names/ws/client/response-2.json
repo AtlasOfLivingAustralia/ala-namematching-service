@@ -1,28 +1,7 @@
 {
   "success": false,
-  "scientificName": null,
-  "scientificNameAuthorship": null,
-  "taxonConceptID": null,
-  "rank": null,
-  "rankID": null,
-  "lft": null,
-  "rgt": null,
-  "matchType": null,
-  "kingdom": null,
-  "kingdomID": null,
-  "phylum": null,
-  "phylumID": null,
-  "classs": null,
-  "classID": null,
-  "order": null,
-  "orderID": null,
-  "family": null,
-  "familyID": null,
-  "genus": null,
-  "genusID": null,
-  "species": null,
-  "speciesID": null,
-  "vernacularName": null,
-  "speciesGroup": null,
-  "speciesSubgroup": null
+  "nameType": "SCIENTIFIC",
+  "issues": [
+    "homonym"
+  ]
 }
