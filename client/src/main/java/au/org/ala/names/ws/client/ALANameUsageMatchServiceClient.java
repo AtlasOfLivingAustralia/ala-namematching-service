@@ -105,6 +105,21 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
     }
 
     /**
+     * Set a set of valid names for a specific rank.
+     * <p>
+     * This is really only intended for hihger ranks, such as kingdom.
+     * If an empty set is returned, then it should be assumed that any name is valid.
+     * </p>
+     *
+     * @param rank The rank
+     * @return The list of valid names, empty for any
+     */
+    @Override
+    public Boolean check(String name, String rank) {
+        return this.call(this.alaNameUsageMatchService.check(name, rank));
+    }
+
+    /**
      * Get taxon information via a specific taxon identifier.
      *
      * @param taxonID The taxon identifier
@@ -136,7 +151,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      *
      * @param <T> The type of response expected
      *
-     * @return The response
+     * @return The response, returns null if a 204 (no content) result is returned from the server
      *
      * @throws HttpException to propagate an error
      * @throws ClientException if unable to contact the service
@@ -144,7 +159,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
     private <T> T call(Call<T> call) throws HttpException, ClientException {
         try {
             Response<T> response = call.execute();
-            if (response.isSuccessful() && response.body() != null) {
+            if (response.isSuccessful()) {
                 return response.body();
             }
             log.debug("Response returned error - {}", response);
