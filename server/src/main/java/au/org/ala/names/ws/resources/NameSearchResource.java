@@ -9,9 +9,7 @@ import au.org.ala.names.ws.api.NameUsageMatch;
 import au.org.ala.names.ws.core.NameSearchConfiguration;
 import au.org.ala.names.ws.core.SpeciesGroupsUtil;
 import com.codahale.metrics.annotation.Timed;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.Cache;
 import org.cache2k.integration.CacheLoader;
@@ -198,7 +196,13 @@ public class NameSearchResource implements NameMatchService {
     }
 
     @ApiOperation(
-        value = "Check a name/rank combination and see if it is valid"
+        value = "Check a name/rank combination and see if it is valid.",
+        notes = "Returns true if the result is valuid, false if not and null (empty) if unable to check because of an error (usually something like a homonym)"
+    )
+    @ApiResponses(
+        value = {
+            @ApiResponse(code = 204, message = "Unable to check due to search error")
+        }
     )
     @GET
     @Timed
