@@ -244,4 +244,31 @@ public class NameSearchResourceTest {
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 
+
+    @Test
+    public void testCheck1() throws Exception {
+        Boolean result = this.resource.check("Animalia", "kingdom");
+        assertNotNull(result);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testCheck2() throws Exception {
+        Boolean result = this.resource.check("Totally wired", "kingdom");
+        assertNotNull(result);
+        assertFalse(result);
+    }
+
+    @Test
+    public void testCheck3() throws Exception {
+        Boolean result = this.resource.check("Macropus", "genus");
+        assertNull(result);
+    }
+
+    @Test
+    public void testCheck4() throws Exception {
+        Boolean result = this.resource.check("Aves", "class");
+        assertNotNull(result);
+        assertTrue(result);
+    }
 }

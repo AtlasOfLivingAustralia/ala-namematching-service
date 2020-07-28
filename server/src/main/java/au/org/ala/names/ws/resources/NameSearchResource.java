@@ -21,7 +21,6 @@ import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -196,6 +195,30 @@ public class NameSearchResource implements NameMatchService {
             log.warn("Problem matching name : " + e.getMessage() + " with taxonID: " + taxonID);
         }
         return NameUsageMatch.FAIL;
+    }
+
+    @ApiOperation(
+        value = "Check a name/rank combination and see if it is valid"
+    )
+    @GET
+    @Timed
+    @Path("/check")
+    public Boolean check(
+        @ApiParam(value = "The scientific name", required = true, example = "Animalia") @QueryParam("name") String name,
+        @ApiParam(value = "The Linnaean rank", required = true, example = "kingdom") @QueryParam("rank") String rank
+    ) {
+        if (name == null || rank == null)
+            return false;
+        RankType rk = RankType.getForName(rank);
+        if (rk == null)
+            throw new IllegalArgumentException("No matching rank for " + rank);
+        try {
+            NameSearchResult result = this.searcher.searchForRecord(name, rk);
+            return result != null;
+        } catch (SearchResultException ex) {
+            log.debug("Error searching for " + name + " and rank " + rk + " " + ex.getMessage());
+            return null;
+        }
     }
 
 

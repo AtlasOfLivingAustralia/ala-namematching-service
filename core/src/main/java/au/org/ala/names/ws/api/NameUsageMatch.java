@@ -10,8 +10,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 import java.lang.reflect.Field;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(builder = NameUsageMatch.NameUsageMatchBuilder.class)

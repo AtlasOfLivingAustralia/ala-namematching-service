@@ -87,4 +87,14 @@ public interface NameMatchService extends Closeable {
      */
     NameUsageMatch get(String taxonID);
 
+    /**
+     * Check to see if a given name is in the index for this rank.
+     *
+     * @param name The name The name
+     * @param rank The rank The expected rank
+     *
+     * @return True if this name appears to be in the index, false otherwise and null if not checked
+     */
+    Boolean check(String name, String rank);
+
 }

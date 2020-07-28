@@ -43,4 +43,9 @@ interface ALANameUsageMatchRetrofitService {
     @GET("/api/getByTaxonID")
     @Headers({"Content-Type: application/json"})
     Call<NameUsageMatch> get(@Query("taxonID") String taxonID);
+
+    @GET("/api/check")
+    @Headers({"Content-Type: application/json"})
+    Call<Boolean> check(@Query("name") String name, @Query("rank") String rank);
+
 }

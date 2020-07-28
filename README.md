@@ -110,6 +110,9 @@ Most of these entries have suitable defaults.
 | | index | | The path of the index directory | | `/data/lucene/namematching` |
 | | groups | | URL of the groups configuration |  | `file:///data/ala-namematching-service/config/groups.json` | 
 | | subgroups | | URL of the subgroups configuration |  | `file:///data/ala-namematching-service/config/subgroups.json` | 
+| | validNames | | Lists of valid names by rank | | |
+| | | *rank* | The rank for the valid names | kingdom | |
+| | | - *name* | The name list | - Animalia | |
 | | useHints | | Use hints supplied by the request to aid matching | | true |
 | | checkHints | | Check the resulting match against the supplied hints as a sanity check | | true |
 
@@ -175,3 +178,10 @@ for use ALA namematching and for use the GBIF backbone:
 ```shell script
 docker build -f docker/Dockerfile . -t  ala-namematching-service:v20200722-1 --build-arg ENV=gbif-backbone
 ```
+
+## TODO
+
+* The valid names are currently stored in the configuration file.
+  This is fine for its intended purpose, which is to supply a list of acceptable kingdoms to the taxonomy transform
+  for validation.
+  However, one can't help feeling that the information should be dragged out of the name index on demand.

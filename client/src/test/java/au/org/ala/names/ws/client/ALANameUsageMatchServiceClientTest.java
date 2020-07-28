@@ -214,6 +214,19 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals("/api/searchByVernacularName?vernacularName=Silver%20Wattle", req.getPath());
     }
 
+    @Test
+    public void testCheck1() throws Exception {
+        String response = this.getResource("response-4.json");
+
+        server.enqueue(new MockResponse().setBody(response));
+        Boolean valid = client.check("Animalia", "kingdom");
+        assertNotNull(valid);
+        assertEquals(true, valid);
+        RecordedRequest req = server.takeRequest();
+        assertEquals("/api/check?name=Animalia&rank=kingdom", req.getPath());
+
+    }
+
     /** Respond to error */
     @Test
     public void testError1() throws Exception {
