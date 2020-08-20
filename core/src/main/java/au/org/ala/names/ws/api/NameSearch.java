@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(builder = NameSearch.NameSearchBuilder.class)
 @Value
