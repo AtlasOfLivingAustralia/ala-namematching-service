@@ -168,10 +168,10 @@ As with the groups list, the subgroups are matched using the current name index.
 Change directory to the `server` module.
 
 ```shell script
-docker build -f docker/Dockerfile . -t ala-namematching-service:v20200722-1
+docker build -f docker/Dockerfile . -t ala-namematching-service:v20200214-5
 ```
 for use ALA namematching and for use the GBIF backbone:
 
 ```shell script
-docker build -f docker/Dockerfile . -t  ala-namematching-service:v20200722-1 --build-arg ENV=gbif-backbone
+docker build -f docker/Dockerfile . -t  ala-namematching-service:v20200214-5 --build-arg ENV=gbif-backbone
 ```

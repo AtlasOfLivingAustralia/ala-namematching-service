@@ -15,6 +15,7 @@
         <module>client</module>
         <module>server</module>
         <module>core</module>
+        <module>ala-ws-client-common</module>
     </modules>
 
     <groupId>au.org.ala.names</groupId>
