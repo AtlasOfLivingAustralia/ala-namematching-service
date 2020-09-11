@@ -15,7 +15,7 @@ RUN echo "deb [arch=amd64] https://apt.gbif.es/ bionic main" > /etc/apt/sources.
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F697D8D2ADB9E24A
 
 # Install main dependencies
-RUN apt-get install -y -q openjdk-8-jdk rsync tar
+RUN apt-get install -y -q openjdk-8-jdk rsync tar curl
 
 # If we want to change the default URL over time
 RUN echo "ala-namematching-service ala-namematching-service/source string https://archives.ala.org.au/archives/nameindexes/latest/namematching-20200214.tgz" | debconf-set-selections
