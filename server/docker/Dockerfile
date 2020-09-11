@@ -22,7 +22,7 @@ RUN echo "ala-namematching-service ala-namematching-service/source string https:
 
 # Update the next commented date to force a new docker hub build with an updated la-pipelines version
 RUN apt-get -y update && \
-        apt-get install -y -q ala-namematching-service  # 20200911
+        apt-get install -y -q ala-namematching-service  # 2020091102
 
 EXPOSE 9179
 EXPOSE 9180
