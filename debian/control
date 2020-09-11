@@ -13,7 +13,7 @@ Vcs-Git: https://github.com/AtlasOfLivingAustralia/ala-namematching-service.git
 
 Package: ala-namematching-service
 Architecture: all
-Depends: ${misc:Depends}, openjdk-8-jdk, ca-certificates, tar (>= 1.0), rsync
+Depends: ${misc:Depends}, openjdk-8-jdk, ca-certificates, tar (>= 1.0), rsync, curl
 Suggests:
 Description: The ALA Name Matching Service application
  This package contains the ala-namematching-service package from
