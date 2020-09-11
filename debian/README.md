@@ -1,4 +1,4 @@
-ç## Intro
+## Intro
 
 ## Prerequisites
 
@@ -49,4 +49,4 @@ echo "ala-namematching-service ala-namematching-service/source string https://so
 export DEBCONF_FRONTEND=noninteractive
 apt-get install -yq --force-yes ala-namematching-service
 ```
-useful for Dockerfiles
+useful for Dockerfiles.
