@@ -1,0 +1,56 @@
+#!/bin/bash
+
+#######################################################
+#
+# Add here the commands to be excuted after the package
+# has been installed
+#
+
+#Example: create some symbolic links
+#
+#chown -R ${user}:${group} /opt/${appName}-${appVersion}
+#ln -s /opt/${appName}-${appVersion} /opt/${appName}
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+#DEBHELPER#
+
+case "$1" in
+    configure)
+        # We read the URL of the nameindex asked to the user in a interactive mode
+        db_get ala-namematching-service/source
+
+        # To prevent /data/lucene installed nameindexes to fill our disk:
+        #
+        # 1) we try to not download the same nameindex again and again (this is why we use wget -nc)
+        # 2) we rsync the tar over /data/lucene/namematching overwritting the previous nameindex
+        #
+
+        echo "Downloading nameindex $RET ..."
+        curl -sLC - -o "/data/lucene/namematching.tgz" "$RET"
+
+        # Some tars are crated with ./somerootdir/vernacular etc and others with ./vernacular directly
+        ROOTDIR1=$(tar tf /data/lucene/namematching.tgz | head -1 | cut -d "/" -f 1)
+        ROOTDIR2=$(tar tf /data/lucene/namematching.tgz | head -1 | cut -d "/" -f 2)
+
+        echo "Untar nameindex source ..."
+        tar zxf /data/lucene/namematching.tgz -C /tmp/
+
+        if [[ -n "$ROOTDIR1" && ${#ROOTDIR1} -gt 1 ]]; then
+            echo "Provided nameindex tar uses $ROOTDIR1 as root directory"
+            rsync -a --delete "/tmp/$ROOTDIR1/" /data/lucene/namematching/;
+        else
+            if [[ -n "$ROOTDIR2" && ${#ROOTDIR2} -gt 1 ]]; then
+                echo "Provided nameindex tar uses $ROOTDIR2 as root directory"
+                rsync -a --delete "/tmp/$ROOTDIR2/" /data/lucene/namematching/;
+            else
+                echo "ERROR: Incorrect nameindex tar"
+            fi
+        fi
+        chown -R namematching:namematching /data/lucene/namematching/
+    ;;
+esac
+
+echo ala-namematching-service installed

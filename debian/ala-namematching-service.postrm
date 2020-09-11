@@ -1,0 +1,69 @@
+#!/bin/sh
+
+#######################################################
+#
+# Add here the commands to be excuted after the package
+# has been removed
+#
+
+if [ -f /usr/share/debconf/confmodule ]; then
+    . /usr/share/debconf/confmodule
+fi
+
+#DEBHELPER#
+
+# Example: del user and group for the service
+
+#
+# POSIX-compliant shell function
+# to check for the existence of a command
+# Return 0 if found
+#
+pathfind() {
+    OLDIFS="$IFS"
+    IFS=:
+    for p in $PATH; do
+        if [ -x "$p/$*" ]; then
+            IFS="$OLDIFS"
+            return 0
+        fi
+    done
+    IFS="$OLDIFS"
+    return 1
+}
+
+
+case "${1}" in
+    remove)
+        _USERNAME=namematching
+        _GROUPNAME="${_USERNAME}"
+
+        pathfind deluser
+        if [ $? = 0 ] ;
+        then
+            deluser --quiet ${_USERNAME}
+        fi
+
+        pathfind delgroup
+        if [ $? = 0 ] ;
+        then
+            delgroup --quiet --only-if-empty ${_GROUPNAME} || true
+        fi
+        ;;
+
+    purge);;upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        db_purge
+        rm -f /etc/systemd/system/ala-namematching-service.service
+        rm -f /etc/systemd/system/multi-user.target.wants/ala-namematching-service.service
+        rm -f /var/lib/systemd/deb-systemd-helper-enabled/multi-user.target.wants/ala-namematching-service.service
+        rm -f /var/lib/systemd/deb-systemd-helper-enabled/ala-namematching-service.service.dsh-also
+        rm -f /var/lib/systemd/deb-systemd-helper-masked/ala-namematching-service.service
+        ;;
+
+    *)
+        echo "postrm called with unknown argument \`${1}'" >&2
+        exit 1
+        ;;
+esac
+
+echo ala-namematching-service removed.

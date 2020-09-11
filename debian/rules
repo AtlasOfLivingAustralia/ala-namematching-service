@@ -1,0 +1,32 @@
+#!/usr/bin/make -f
+
+# https://www.debian.org/doc/manuals/maint-guide/dreq.en.html#rules
+# See also:
+#
+# man debhelper
+# man dh
+
+# Uncomment this to turn on verbose mode.
+# export DH_VERBOSE=1
+
+%:
+	dh $@ --with-systemd
+
+build:
+#	install don't allow to rename files (like wars), so we copy here the file we want to install with the package
+# $(CURDIR) is the repo directory
+	cp $(CURDIR)/server/target/ala-namematching-server-1.0-SNAPSHOT.jar $(CURDIR)/server/target/ala-namematching-server.jar
+
+override_dh_fixperms:
+	dh_fixperms
+#	If we need to set some special perms to a file
+#	chmod 4755 debian/ala-foo/opt/atlas/ala-foo/foo.jar
+#	Also we use postinstall for this
+
+override_dh_install:
+	dh_install # calls default *.install and *.dirs installation
+#	man install
+
+override_dh_strip_nondeterminism:
+# this takes to much time so skip it for now
+# dh_strip_nondeterminism --verbose
