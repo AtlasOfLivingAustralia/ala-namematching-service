@@ -19,10 +19,12 @@ RUN apt-get install -y -q openjdk-8-jdk rsync tar curl
 
 # If we want to change the default URL over time
 RUN echo "ala-namematching-service ala-namematching-service/source string https://archives.ala.org.au/archives/nameindexes/latest/namematching-20200214.tgz" | debconf-set-selections
+# SHA1 of the previous file
+RUN echo "ala-namematching-service ala-namematching-service/sha1 string f9e42325db8d41ca0c8afeb6aeadf670978a13ac" | debconf-set-selections
 
 # Update the next commented date to force a new docker hub build with an updated la-pipelines version
 RUN apt-get -y update && \
-        apt-get install -y -q ala-namematching-service  # 2020091102
+        apt-get install -y -q ala-namematching-service  # 2020091401
 
 EXPOSE 9179
 EXPOSE 9180
