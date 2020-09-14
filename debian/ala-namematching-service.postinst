@@ -42,7 +42,7 @@ case "$1" in
 
         # Downloaded file sha1 does not match provided sha1, so retry full download
         if [[ "$SHA1" != "$SHA1_DOWNLOADED" ]]; then
-            echo "SHA1 does not match, try to download again $URL ..."
+            echo "SHA1 does not match, trying to download again $URL ..."
             curl -sL -o "$DEST" "$URL"
         fi
 
