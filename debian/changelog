@@ -1,0 +1,17 @@
+ala-namematching-service (1.0-SNAPSHOT-3) unstable; urgency=medium
+
+  * Added SHA1 checksum
+
+ -- ALA Development Team <support@ala.org.au>  Mon, 14 Sep 2020 09:16:38 +0200
+
+ala-namematching-service (1.0-SNAPSHOT-2) unstable; urgency=medium
+
+  * Dependencies improved
+
+ -- ALA Development Team <support@ala.org.au>  Fri, 11 Sep 2020 17:07:11 +0200
+
+ala-namematching-service (1.0-SNAPSHOT-1) unstable; urgency=low
+
+  * Initial release
+
+ -- ALA Development Team <support@ala.org.au>  Fri, 11 Sep 2020 11:16:45 +0200

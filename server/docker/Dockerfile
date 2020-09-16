@@ -1,25 +1,30 @@
-FROM java:openjdk-8-jre-alpine
+FROM ubuntu:focal
 
 ARG ENV
 
-RUN apk --no-cache add curl
+ARG DEBIAN_FRONTEND=noninteractive
 
-RUN mkdir -p /data/lucene
-RUN mkdir -p /data/ala-namematching-service/config
+# Install initial dependencies
+RUN apt-get -y update && \
+        apt-get install -y -q add-apt-key software-properties-common
 
-COPY ./src/main/resources/subgroups.json /data/ala-namematching-service/config/subgroups.json
-COPY ./src/main/resources/groups.json /data/ala-namematching-service/config/groups.json
-COPY ./target/ala-namematching-server-1.0-SNAPSHOT.jar /data/ala-namematching-server.jar
-COPY ./config.yml /data/config.yml
+ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 
-RUN if [ "$ENV" = "gbif-backbone" ]; then \
-    curl -sf  -o /data/lucene/namematching.tgz -L https://datos.gbif.es/others/namematching-gbif-backbone-2020-06-18.tgz; else \
-    curl -sf  -o /data/lucene/namematching.tgz -L https://archives.ala.org.au/archives/nameindexes/latest/namematching-20200214.tgz; fi
-#COPY namematching.tgz /data/lucene/namematching.tgz
+# Add the apt.gbif.es repo and gpg key
+RUN echo "deb [arch=amd64] https://apt.gbif.es/ bionic main" > /etc/apt/sources.list.d/ala.list && \
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F697D8D2ADB9E24A
 
-RUN tar zxf /data/lucene/namematching.tgz -C /data/lucene
-RUN if [ "$ENV" != "gbif-backbone" ]; then \
-    mv /data/lucene/namematching-20200214 /data/lucene/namematching; fi
+# Install main dependencies
+RUN apt-get install -y -q openjdk-8-jdk rsync tar curl
+
+# If we want to change the default URL over time
+RUN echo "ala-namematching-service ala-namematching-service/source string https://archives.ala.org.au/archives/nameindexes/latest/namematching-20200214.tgz" | debconf-set-selections
+# SHA1 of the previous file
+RUN echo "ala-namematching-service ala-namematching-service/sha1 string f9e42325db8d41ca0c8afeb6aeadf670978a13ac" | debconf-set-selections
+
+# Update the next commented date to force a new docker hub build with an updated la-pipelines version
+RUN apt-get -y update && \
+        apt-get install -y -q ala-namematching-service  # 2020091401
 
 EXPOSE 9179
 EXPOSE 9180

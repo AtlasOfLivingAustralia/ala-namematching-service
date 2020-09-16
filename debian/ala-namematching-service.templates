@@ -1,0 +1,9 @@
+Template: ala-namematching-service/source
+Type: string
+Default: https://archives.ala.org.au/archives/nameindexes/latest/namematching-20200214.tgz
+Description: Pre-built name matching index tar
+
+Template: ala-namematching-service/sha1
+Type: string
+Default: f9e42325db8d41ca0c8afeb6aeadf670978a13ac
+Description: SHA1 of the previous tar
