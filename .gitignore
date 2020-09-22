@@ -10,3 +10,4 @@ dependency-reduced-pom.xml
 *.substvars
 debian/files
 debian/ala-namematching-service
+debian/debhelper-build-stamp
