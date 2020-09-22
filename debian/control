@@ -4,7 +4,6 @@ Priority: optional
 Maintainer: ALA Development Team <support@ala.org.au>
 Uploaders: ALA Development Team <support@ala.org.au>
 Build-Depends:
-Build-Depends:
  debhelper (>= 11),
  openjdk-8-jdk,
  maven
