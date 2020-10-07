@@ -1,0 +1,71 @@
+#!/bin/bash
+
+#######################################################
+#
+# Add here the commands to be excuted after the package
+# has been installed
+#
+
+#Example: create some symbolic links
+#
+#chown -R ${user}:${group} /opt/${appName}-${appVersion}
+#ln -s /opt/${appName}-${appVersion} /opt/${appName}
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+#DEBHELPER#
+
+case "$1" in
+    configure)
+        # We read the URL of the nameindex asked to the user in a interactive mode
+        db_get ala-namematching-service/source
+        URL=$RET
+        db_get ala-namematching-service/sha1
+        SHA1=$RET
+
+        DEST=/data/lucene/namematching.tgz
+
+        # To prevent /data/lucene installed nameindexes to fill our disk:
+        #
+        # 1) we try to not download the same nameindex again and again (this is why we use curl -C)
+        # 2) we rsync the tar over /data/lucene/namematching overwritting the previous nameindex
+        #
+
+        echo "Downloading nameindex $URL ..."
+
+        # Try to resume previous download
+        curl -sLC - -o "$DEST" "$URL"
+
+        SHA1_DOWNLOADED=$(sha1sum $DEST | awk '{ print $1 }')
+
+        # Downloaded file sha1 does not match provided sha1, so retry full download
+        if [[ "$SHA1" != "$SHA1_DOWNLOADED" ]]; then
+            echo "SHA1 does not match, trying to download again $URL ..."
+            curl -sL -o "$DEST" "$URL"
+        fi
+
+        # Some tars are crated with ./somerootdir/vernacular etc and others with ./vernacular directly
+        ROOTDIR1=$(tar tf $DEST | head -1 | cut -d "/" -f 1)
+        ROOTDIR2=$(tar tf $DEST | head -1 | cut -d "/" -f 2)
+
+        echo "Untar nameindex source ..."
+        tar zxf $DEST -C /tmp/
+
+        if [[ -n "$ROOTDIR1" && ${#ROOTDIR1} -gt 1 ]]; then
+            echo "Provided nameindex tar uses $ROOTDIR1 as root directory"
+            rsync -a --delete "/tmp/$ROOTDIR1/" /data/lucene/namematching/;
+        else
+            if [[ -n "$ROOTDIR2" && ${#ROOTDIR2} -gt 1 ]]; then
+                echo "Provided nameindex tar uses $ROOTDIR2 as root directory"
+                rsync -a --delete "/tmp/$ROOTDIR2/" /data/lucene/namematching/;
+            else
+                echo "ERROR: Incorrect nameindex tar"
+            fi
+        fi
+        chown -R namematching:namematching /data/lucene/namematching/
+    ;;
+esac
+
+echo ala-namematching-service installed

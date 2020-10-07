@@ -1,0 +1,14 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: ala-namematching-service
+Upstream-Contact: ALA Development Team <support@ala.org.au>
+Source: https://github.com/AtlasOfLivingAustralia/ala-namematching-service
+
+Files: *
+Copyright: 2020, ALA Development Team <support@ala.org.au>
+License: MPL
+
+Files: debian/*
+Copyright: 2020, ALA Development Team <support@ala.org.au>
+License: MPL
+
+License: MPL

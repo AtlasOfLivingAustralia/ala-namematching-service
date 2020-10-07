@@ -3,3 +3,11 @@
 target
 *.iml
 dependency-reduced-pom.xml
+
+*/*.debhelper
+*/*.debhelper.log
+*.buildinfo
+*.substvars
+debian/files
+debian/ala-namematching-service
+debian/debhelper-build-stamp

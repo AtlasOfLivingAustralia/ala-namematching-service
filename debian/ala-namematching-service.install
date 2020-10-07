@@ -1,0 +1,6 @@
+# https://www.debian.org/doc/manuals/maint-guide/dother.en.html#install
+server/src/main/resources/subgroups.json data/ala-namematching-service/config/
+server/src/main/resources/groups.json data/ala-namematching-service/config/
+server/target/ala-namematching-server.jar data/
+# TODO: we should move this to other location and with other name referencing to this service
+server/config.yml data/
