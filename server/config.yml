@@ -2,6 +2,7 @@ logging:
   level: INFO
   loggers:
     au.org.ala: WARN
+    org.reflections: ERROR
 server:
   applicationConnectors:
     - type: http
