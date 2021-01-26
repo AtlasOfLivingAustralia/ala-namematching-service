@@ -40,7 +40,7 @@ public class ALANameMatchingServiceConfiguration extends Configuration {
         this.swagger.setContactEmail("support@ala.org.au");
         this.swagger.setResourcePackage("au.org.ala.names.ws.api,au.org.ala.names.ws.client,au.org.ala.names.ws.resources");
         this.swagger.setLicense("Mozilla Public Licence 1.1");
-        this.swagger.setVersion("1.0-SNAPSHOT");
+        this.swagger.setVersion("1.0");
         this.swagger.getSwaggerViewConfiguration().setPageTitle("ALA Namematching API");
     }
 }
