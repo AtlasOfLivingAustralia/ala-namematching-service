@@ -17,7 +17,7 @@ before_install:
 - cd $TRAVIS_BUILD_DIR
 - echo TRAVIS_PULL_REQUEST = ${TRAVIS_PULL_REQUEST}
 script:
-- '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && mvn -P travis clean install deploy || mvn -P travis clean install'
+- 'if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then mvn -P travis clean install deploy; else mvn -P travis clean install; fi'
 env:
   global:
   - secure: DHhZau8rR7tbHByl4I1A9ESVq+GjmyshEJzlfn573zlS5bTz94X/Xwn/8s7L4ZkT9HqTG/D/Hm9a7RaRJ6OqyFlTjw4q62JiKwHCDQp4GsLQ57JXhe5E2UWj8h8tObyv+mbeiWt/x0froG4xKkNaTBoPTcqbdVULF7xprbFRIwvy9E6IRlZT5zF+qNMpsxnmDJu9a+g1U6pwhXwn4+CIGi6G2dEkX6/DNPe1xKKA7ZmZ9wlR2o97PREZkXz/emuKy4V1RIMt4F28e2UHtyFbokjMnklmwQxvBF2e95vu2XGVWvjQoWg+1vVSyx09P/XiPeuYjZwJq9i4FuRAmo831p2KAK9NL+e/nR+TsqHWNE4wYbOYTxvYkcrCyyXm9sqUKEpKdqXmKTGjuL48ba4kVNADQvN4vapY5MUAh8hpAnI45fW2SqEj8xl5vBdMX1eE9jrR1JugWPZ7TGYMo/xsrztF8JpqEqV/oLUxad3F2idezZ9Ua26Huh2V0sUnhdhWyUoHpZsFYDTRfKTsQbcKjJtY49y+Ghu8yxsremJYdC94GKDKYsmPED5CQmPvHyG4C0NLOToZ8xbMKfIJXco6qZ0VzIvvlWEpUQ4kEP0RekG1clN7Ll32fOCI7rqhOYO94JvhJuzCR3nEgY8pEM16Ji4Tz/Q7+CQrIDSo7L4brzQ=
