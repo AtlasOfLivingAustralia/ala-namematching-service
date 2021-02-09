@@ -1,4 +1,4 @@
-# ALA Name Matching Service [![Build Status](https://travis-ci.org/AtlasOfLivingAustralia/ala-namematching-service.svg?branch=master)](https://travis-ci.org/AtlasOfLivingAustralia/ala-namematching-service)
+# ALA Name Matching Service [![Build Status](https://travis-ci.com/AtlasOfLivingAustralia/ala-namematching-service.svg?branch=master)](https://travis-ci.com/AtlasOfLivingAustralia/ala-namematching-service)
 
 This priovides a set of web services for name matching, using the `ala-name-matching` library.
 It consists of three components. all with maven groupId `au.org.ala.names`:
