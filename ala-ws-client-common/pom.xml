@@ -5,12 +5,13 @@
     <parent>
         <artifactId>ala-namematching-service</artifactId>
         <groupId>au.org.ala.names</groupId>
-        <version>1.0</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>au.org.ala.ws</groupId>
     <artifactId>ala-ws-client-common</artifactId>
+    <version>${project.parent.version}</version>
     <name>Common Retrofit Web Service Client Classes</name>
     <description>Common classes and libraries for implementing a retrofit web services client</description>
 
@@ -45,6 +46,17 @@
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
             <artifactId>converter-jackson</artifactId>
+            <version>${retrofit.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-scalars</artifactId>
             <version>${retrofit.version}</version>
             <exclusions>
                 <exclusion>

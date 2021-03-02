@@ -15,8 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -117,6 +116,64 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
     @Override
     public Boolean check(String name, String rank) {
         return this.call(this.alaNameUsageMatchService.check(name, rank));
+    }
+
+    /**
+     * Autocomplete search
+     *
+     * @param query             The beginning of the names to match (scientific or vernacular)
+     * @param max               The maximum number of matches to return
+     * @param includeSynonyms   Include synonym matches
+     * @return  The list of autocomplete matches.
+     */
+    @Override
+    public List<Map> autocomplete(String query, Integer max, Boolean includeSynonyms) {
+        return this.call(this.alaNameUsageMatchService.autocomplete(query, max, includeSynonyms));
+    }
+
+    /**
+     * Search for a record with a specific LSID.
+     *
+     * @param lsid      The taxon identifier
+     * @return The matching LSID or null.
+     */
+    @Override
+    public String searchForLsidById(String id) {
+        return this.call(this.alaNameUsageMatchService.searchForLsidById(id));
+    }
+
+    /**
+     * Search for an LSID with a scientific name.
+     *
+     * @param name      The scientific name.
+     * @return The matching LSID or null.
+     */
+    @Override
+    public String searchForLSID(String name) {
+        return this.call(this.alaNameUsageMatchService.searchForLSID(name));
+    }
+
+    /**
+     * Search for a list of LSIDs with a list of scientificName or scientificName(kingdom).
+     *
+     * @param taxaQueries      The scientificName or scientificName(kingdom).
+     * @return The list of matches. Each match is the LSID or null.
+     */
+    @Override
+    public List<String> getGuidsForTaxa(List<String> taxaQueries) {
+        return this.call(this.alaNameUsageMatchService.getGuidsForTaxa(taxaQueries));
+    }
+
+    /**
+     * Search for a list of vernacular names for an LSID.
+     *
+     * @param lsid      The taxon identifier
+     * @param max       The maximum number of vernaculars to return
+     * @return The list of matches. Each match is the LSID or null.
+     */
+    @Override
+    public Set<String> getCommonNamesForLSID(String lsid, Integer max) {
+        return this.call(this.alaNameUsageMatchService.getCommonNamesForLSID(lsid, max));
     }
 
     /**
