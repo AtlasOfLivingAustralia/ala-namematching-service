@@ -11,6 +11,7 @@ import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -93,6 +94,7 @@ public class ClientConfiguration {
         return new Retrofit.Builder()
         .client(client)
         .baseUrl(this.baseUrl)
+        .addConverterFactory(ScalarsConverterFactory.create())  // support plain/text responses
         .addConverterFactory(JacksonConverterFactory.create())
         .validateEagerly(true)
         .build().create(service);

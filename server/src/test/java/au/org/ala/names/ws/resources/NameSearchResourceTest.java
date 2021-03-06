@@ -271,4 +271,94 @@ public class NameSearchResourceTest {
         assertNotNull(result);
         assertTrue(result);
     }
+
+    @Test
+    public void testAutocomplete1() throws Exception {
+        // incomplete scientific name match
+        List<Map> result = this.resource.autocomplete("eucaly", 10, false);
+        assertNotNull(result);
+        assertTrue(result.size() > 0 && result.size() <= 20);
+    }
+
+    @Test
+    public void testAutocomplete2() throws Exception {
+        // incomplete vernacular name match
+        List<Map> result = this.resource.autocomplete("common w", 10, false);
+        assertNotNull(result);
+        assertTrue(result.size() > 0 && result.size() <= 20);
+    }
+
+    @Test
+    public void testAutocomplete3() throws Exception {
+        // failed match
+        List<Map> result = this.resource.autocomplete("abcdefg123", 10, false);
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testSearchForLsidById1() throws Exception {
+        // taxonID -> acceptedID
+        String result = this.resource.searchForLsidById("urn:lsid:biodiversity.org.au:afd.name:05691642-5191-426a-b469-f1514b880481");
+        assertNotNull(result);
+        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:462548c3-6464-4e35-b71f-f4ad3fff3ebb", result);
+    }
+
+    @Test
+    public void testSearchForLsidById2() throws Exception {
+        // invalid LSID
+        String result = this.resource.searchForLsidById("invalid LSID");
+        assertNull(result);
+    }
+
+    @Test
+    public void testSearchForLSID1() throws Exception {
+        // Genus
+        String result = this.resource.searchForLSID("Eucalyptus");
+        assertNotNull(result);
+        assertEquals(result, "https://id.biodiversity.org.au/taxon/apni/51302291");
+    }
+
+    @Test
+    public void testSearchForLSID2() throws Exception {
+        // Invalid match
+        String result = this.resource.searchForLSID("invalid match");
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetGuidsForTaxa1() throws Exception {
+        // 1 genus match
+        List<String> result = this.resource.getGuidsForTaxa(Collections.singletonList("Eucalyptus"));
+        assertNotNull(result);
+        assertEquals(result.size(), 1);
+        assertEquals(result.get(0), "https://id.biodiversity.org.au/taxon/apni/51302291");
+    }
+
+    @Test
+    public void testGetGuidsForTaxa2() throws Exception {
+        // 1 match to fail, 1 species match
+        List<String> result = this.resource.getGuidsForTaxa(Arrays.asList("no match", "Macropus agilis"));
+        assertNotNull(result);
+        assertEquals(result.size(), 2);
+        assertNull(result.get(0));
+        assertEquals(result.get(1), "urn:lsid:biodiversity.org.au:afd.taxon:462548c3-6464-4e35-b71f-f4ad3fff3ebb");
+    }
+
+    @Test
+    public void testGetCommonNamesForLSID1() throws Exception {
+        // LSID with >1 common names
+        Set<String> result = this.resource.getCommonNamesForLSID("urn:lsid:biodiversity.org.au:afd.taxon:e079f94d-3d7f-4deb-ae29-053fec4d1b53", 10);
+        assertNotNull(result);
+        assertEquals(result.size(), 2);
+        assertTrue(result.contains("Common Wombat"));
+    }
+
+    @Test
+    public void testGetCommonNamesForLSID2() throws Exception {
+        // invalid LSID
+        Set<String> result = this.resource.getCommonNamesForLSID("invalid LSID", 10);
+        assertNotNull(result);
+        assertEquals(result.size(), 0);
+    }
 }
