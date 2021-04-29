@@ -49,6 +49,9 @@
     </licenses>
 
     <properties>
+        <!-- When changing the revision value, also change the version number in /server/run-local.sh -->
+        <revision>1.1-SNAPSHOT</revision>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <ala-name-matching.version>3.4</ala-name-matching.version>

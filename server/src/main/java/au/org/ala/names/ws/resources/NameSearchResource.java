@@ -18,8 +18,7 @@ import org.gbif.api.vocabulary.NameType;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -225,6 +224,94 @@ public class NameSearchResource implements NameMatchService {
         }
     }
 
+    @ApiOperation(
+            value = "Autocomplete search with the beginning of a scientific or common name.",
+            notes = "Returns a list of matches. Up to 2 * max matches are returned."
+    )
+    @GET
+    @Timed
+    @Path("/autocomplete")
+    public List<Map> autocomplete(
+            @ApiParam(value = "The query", required = true, example = "eucalypt") @QueryParam("q") String query,
+            @ApiParam(value = "Maximum results to return", required = false, defaultValue = "10") @QueryParam("max") Integer max,
+            @ApiParam(value = "Include synonyms", required = false, defaultValue = "true") @QueryParam("includeSynonyms") Boolean includeSynonyms) {
+
+        return this.searcher.autocomplete(query, max, includeSynonyms);
+    }
+
+    @ApiOperation(
+            value = "Search for an LSID by ID"
+    )
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Timed
+    @Path("/searchForLsidById")
+    public String searchForLsidById(
+            @ApiParam(value = "The ID", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("id") String id
+    ) {
+        String result = this.searcher.searchForLsidById(id);
+        if (result != null) {
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    @ApiOperation(
+            value = "Search for an LSID with a scientific name."
+    )
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Timed
+    @Path("/searchForLSID")
+    public String searchForLSID(
+            @ApiParam(value = "The name", required = true, example = "Acacia dealbata") @QueryParam("name") String name
+    ) {
+        try {
+            String lsid = this.searcher.searchForLSID(name);
+            return lsid;
+        } catch (SearchResultException e){
+            log.warn("Problem matching LSID : " + e.getMessage() + " for name: " + name);
+        }
+        return "";
+    }
+
+    @ApiOperation(
+            value = "Search for a list of LSIDs with a list of scientificName or scientificName(kingdom)."
+    )
+    @POST
+    @Timed
+    @Path("/getGuidsForTaxa")
+    public List<String> getGuidsForTaxa(List<String> taxa) {
+        try {
+            log.error("getGuisForTaxa:" + taxa.size());
+            List<String> guids = this.searcher.getGuidsForTaxa(taxa);
+            return guids;
+        } catch (Exception e){
+            log.warn("Problem matching name : " + e.getMessage() + " with name: " + taxa);
+        }
+        return new ArrayList();
+    }
+
+    @ApiOperation(
+            value = "Get taxon information by by vernacular (common) name.",
+            notes = "The same Vernacular name may be given to multiple taxa with different scientific names. The result returned is a best-effort match."
+    )
+    @GET
+    @Timed
+    @Path("/getCommonNamesForLSID")
+    public Set<String> getCommonNamesForLSID(
+            @ApiParam(value = "lsid", required = true, example = "Red Kangaroo") @QueryParam("lsid") String lsid,
+            @ApiParam(value = "max", required = true, example = "10") @QueryParam("max") Integer max
+    ) {
+        try {
+            Set<String> vernacularNames = this.searcher.getCommonNamesForLSID(lsid, max);
+            return vernacularNames;
+        } catch (Exception e){
+            log.warn("Problem matching name : " + e.getMessage() + " with name: " + lsid);
+        }
+        return new HashSet<>();
+    }
 
     /**
      * Perform a search based on a classification built from various calls.
@@ -345,7 +432,6 @@ public class NameSearchResource implements NameMatchService {
      */
     private NameUsageMatch create(NameSearchResult nsr, Set<String> vernacularNames, MatchType matchType, NameType nameType, SynonymType synonymType, Set<ErrorType> issues) throws Exception {
         if(nsr != null && nsr.getRankClassification() != null)  {
-            speciesGroupsUtil.getSpeciesGroups(Integer.parseInt(nsr.getLeft()));
             LinnaeanRankClassification lrc = nsr.getRankClassification();
             return NameUsageMatch.builder()
                     .success(true)
