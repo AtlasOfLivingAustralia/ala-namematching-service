@@ -111,6 +111,18 @@ public class NameSearchResourceTest {
 
 
     @Test
+    public void testSearchByClassification6() throws Exception {
+        NameUsageMatch match = this.resource.match(null, null, null, null, null, "Pterophoridae", null, null, null, null);
+        assertTrue(match.isSuccess());
+        assertEquals("Pterophoridae", match.getScientificName());
+        assertEquals("Animalia", match.getKingdom());
+        assertEquals("Pterophoridae", match.getFamily());
+        assertEquals("family", match.getRank());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+
+    @Test
     public void testHomonym1() throws Exception {
         NameSearch search = NameSearch.builder().scientificName("Codium sp.").genus("Codium").family("Alga").build();
         NameUsageMatch match = this.resource.match(search);
