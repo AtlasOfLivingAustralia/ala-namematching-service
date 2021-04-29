@@ -173,6 +173,7 @@ public class NameSearch {
             .phylum(NORMALISER.normalise(this.phylum))
             .clazz(NORMALISER.normalise(this.clazz))
             .order(NORMALISER.normalise(this.order))
+            .family(NORMALISER.normalise(this.family))
             .genus(NORMALISER.normalise(this.genus))
             .specificEpithet(NORMALISER.normalise(this.specificEpithet))
             .infraspecificEpithet(NORMALISER.normalise(this.infraspecificEpithet))
