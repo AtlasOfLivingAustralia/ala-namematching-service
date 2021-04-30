@@ -47,56 +47,21 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>au.org.ala.names</groupId>
       <artifactId>ala-namematching-server</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-testing</artifactId>
+      <version>${dropwizard.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
   <plugins>
-    <plugin>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>exec-maven-plugin</artifactId>
-      <version>3.0.0</version>
-      <executions>
-        <execution>
-          <id>start</id>
-          <phase>pre-integration-test</phase>
-          <goals>
-            <goal>exec</goal>
-          </goals>
-          <configuration>
-            <executable>${basedir}/../server/run-local.sh</executable>
-            <arguments>
-              <argument>start</argument>
-            </arguments>
-            <workingDirectory>${basedir}/../server/</workingDirectory>
-          </configuration>
-        </execution>
-        <execution>
-          <id>stop</id>
-          <phase>post-integration-test</phase>
-          <goals>
-            <goal>exec</goal>
-          </goals>
-          <configuration>
-            <executable>${basedir}/../server/run-local.sh</executable>
-            <arguments>
-              <argument>stop</argument>
-            </arguments>
-            <workingDirectory>${basedir}/../server/</workingDirectory>
-          </configuration>
-        </execution>
-      </executions>
-    </plugin>
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-failsafe-plugin</artifactId>

@@ -1,18 +1,14 @@
 package au.org.ala.names.ws.client;
 
+import au.org.ala.names.ws.ALANameMatchingServiceApplication;
+import au.org.ala.names.ws.ALANameMatchingServiceConfiguration;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
-import au.org.ala.ws.ClientException;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import retrofit2.HttpException;
+import io.dropwizard.testing.DropwizardTestSupport;
+import io.dropwizard.testing.ResourceHelpers;
+import org.junit.*;
 
 import java.net.URL;
 import java.util.*;
@@ -20,20 +16,31 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class ALANameUsageMatchServiceClientIT extends TestUtils {
+
     private ClientConfiguration configuration;
     private ALANameUsageMatchServiceClient client;
-
     private String NAMEMATCHING_SERVER_URL = "http://localhost:9179";
+
+        public static final DropwizardTestSupport<ALANameMatchingServiceConfiguration> SUPPORT =
+            new DropwizardTestSupport<ALANameMatchingServiceConfiguration>(ALANameMatchingServiceApplication.class,
+                    ResourceHelpers.resourceFilePath("config.yml")
+            );
 
     @Before
     public void setUp() throws Exception {
+        SUPPORT.before();
         this.configuration = ClientConfiguration.builder().baseUrl(new URL(NAMEMATCHING_SERVER_URL)).build();
         this.client = new ALANameUsageMatchServiceClient(configuration);
     }
 
     @After
     public void tearDown() throws Exception {
-        this.client.close();
+        if (SUPPORT != null) {
+            SUPPORT.after();
+        }
+        if (this.client != null) {
+            this.client.close();
+        }
     }
 
     /** Simple request/response */
@@ -203,4 +210,6 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertNotNull(result);
         assertEquals(result.size(), 0);
     }
+
+
 }

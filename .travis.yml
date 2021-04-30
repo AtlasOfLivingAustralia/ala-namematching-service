@@ -18,6 +18,9 @@ before_install:
 - ls -laF
 - cd $TRAVIS_BUILD_DIR
 - echo TRAVIS_PULL_REQUEST = ${TRAVIS_PULL_REQUEST}
+- sudo mkdir -p /data/ala-namematching-service/config/
+- sudo cp $TRAVIS_BUILD_DIR/server/src/main/resources/groups.json /data/ala-namematching-service/config/
+- sudo cp $TRAVIS_BUILD_DIR/server/src/main/resources/subgroups.json /data/ala-namematching-service/config/
 script:
 - 'if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then mvn -P travis clean install deploy; else mvn -P travis clean install; fi'
 env:
