@@ -16,6 +16,7 @@
         <module>server</module>
         <module>core</module>
         <module>ala-ws-client-common</module>
+        <module>ala-ws-client-testing</module>
     </modules>
 
     <groupId>au.org.ala.names</groupId>

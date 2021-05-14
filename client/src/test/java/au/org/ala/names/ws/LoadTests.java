@@ -8,17 +8,14 @@ import au.org.ala.ws.load.LoadSource;
 import au.org.ala.ws.load.LoadTester;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.opencsv.exceptions.CsvValidationException;
+import com.google.common.base.Charsets;
 import lombok.SneakyThrows;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.net.URL;
 
 /**
@@ -27,7 +24,7 @@ import java.net.URL;
 public class LoadTests {
     private static final Logger logger = LoggerFactory.getLogger(LoadTests.class);
 
-    @Parameter(names = {"--service", "-s"}, description="")
+    @Parameter(names = {"--service", "-s"}, description="URL of namematching service")
     private URL service;
     @Parameter(names = {"--requests", "-n"}, description="Number of reuests to make")
     private int requests = 10000;
@@ -47,11 +44,11 @@ public class LoadTests {
         try {
             ClientConfiguration configuration = ClientConfiguration.builder().baseUrl(this.service).build();
             ALANameUsageMatchServiceClient client = new ALANameUsageMatchServiceClient(configuration);
-            Reader reader = new InputStreamReader(this.args.openStream(), "UTF-8");
+            Reader reader = new InputStreamReader(this.args.openStream(), Charsets.UTF_8);
             Method method1 = client.getClass().getMethod("match", String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class);
             LoadSource<Object> source = ListSource.fromCsv(reader, client, method1);
             reader.close();
-            LoadTester tester = new LoadTester<Object>(source, this.requests, this.rps == 0 ? 0 : 1000 / rps, this.clients);
+            LoadTester<Object> tester = new LoadTester<>(source, this.requests, this.rps == 0 ? 0 : 1000 / rps, this.clients);
             tester.run();
             client.close();
         } catch (Exception ex) {
@@ -61,7 +58,9 @@ public class LoadTests {
 
     public static void main(String... args) {
         LoadTests tests = new LoadTests();
-        JCommander.newBuilder().addObject(tests).build().parse(args);
+        JCommander jc = new JCommander();
+        jc.addObject(tests);
+        jc.parse(args);
         tests.run();
     }
 }

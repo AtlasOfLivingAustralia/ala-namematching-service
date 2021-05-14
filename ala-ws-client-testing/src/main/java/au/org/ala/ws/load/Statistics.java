@@ -1,7 +1,6 @@
 package au.org.ala.ws.load;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
