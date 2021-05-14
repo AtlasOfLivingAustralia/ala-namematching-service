@@ -1,6 +1,14 @@
 package au.org.ala.names.ws.api;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import java.io.Closeable;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Name matching interface.
@@ -97,4 +105,13 @@ public interface NameMatchService extends Closeable {
      */
     Boolean check(String name, String rank);
 
+    List<Map> autocomplete(String query, Integer max, Boolean includeSynonyms);
+
+    String searchForLsidById(String id);
+
+    String searchForLSID(String name);
+
+    List<String> getGuidsForTaxa(List<String> taxaQueries);
+
+    Set<String> getCommonNamesForLSID(String lsid, Integer max);
 }

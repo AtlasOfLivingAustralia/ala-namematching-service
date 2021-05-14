@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-mvn package && java -jar target/ala-namematching-server-1.1-SNAPSHOT.jar server config.yml
+mvn package && java -jar target/ala-namematching-server-1.1.jar server config.yml
 
