@@ -151,8 +151,6 @@ public class SpeciesGroupsUtil {
                     }
                 }
             }
-        } else {
-            System.out.println(" title: " + title +", excluded is null" );
         }
 
         for (String v: values) {
