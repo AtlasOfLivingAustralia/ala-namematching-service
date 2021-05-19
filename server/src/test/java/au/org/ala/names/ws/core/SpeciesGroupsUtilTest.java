@@ -38,6 +38,13 @@ public class SpeciesGroupsUtilTest extends TestUtils {
     }
 
     @Test
+    public void testGetGroup3() throws Exception {
+        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(674565);
+        assertNotNull(groups);
+        assertEquals(Arrays.asList("Plants", "Angiosperms", "Monocots"), groups);
+    }
+
+    @Test
     public void testGetSubgroup1() throws Exception {
         List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(202407);
         assertNotNull(groups);

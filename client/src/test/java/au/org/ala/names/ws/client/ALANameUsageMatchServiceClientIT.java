@@ -8,7 +8,9 @@ import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.net.URL;
 import java.util.*;

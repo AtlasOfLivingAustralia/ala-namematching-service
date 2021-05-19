@@ -1,7 +1,6 @@
 package au.org.ala.names.ws;
 
 import au.org.ala.names.ws.core.NameSearchConfiguration;
-import au.org.ala.names.ws.resources.NameSearchResource;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;

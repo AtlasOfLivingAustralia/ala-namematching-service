@@ -18,10 +18,10 @@ public class NameSearchConfiguration {
     /** The path to the name matching index. Defaults to <code>/data/lucene/namematching</code> */
     @JsonProperty
     private String index = "/data/lucene/namematching";
-    /** The locatioon of the species groups. Defaults to <code>file:///data/ala-namematching-service/config/groups.json</code> */
+    /** The location of the species groups. Defaults to <code>file:///data/ala-namematching-service/config/groups.json</code> */
     @JsonProperty
     private URL groups;
-    /** The location of the species subgroups. Defaults to <code>file:///data/ala-namematching-service/config/groups.json</code> */
+    /** The location of the species subgroups. Defaults to <code>file:///data/ala-namematching-service/config/subgroups.json</code> */
     @JsonProperty
     private URL subgroups;
     /** Use hints when matching (true by default) */
