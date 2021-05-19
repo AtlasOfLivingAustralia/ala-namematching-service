@@ -82,18 +82,20 @@ public class SpeciesGroupsUtil {
 
             if (map.containsKey("taxonRank")) {
                 String rank = (String) map.getOrDefault("taxonRank", "class");
-                List<Map<String, String>> taxaList = (List<Map<String, String>>) map.getOrDefault("taxa", new ArrayList<Map<String, String>>());
-                for (Map<String,String> taxaMap : taxaList){
 
-                    String name = taxaMap.getOrDefault("name", "").trim();
+                List<Map<String, Object>> taxaList = (List<Map<String, Object>>) map.getOrDefault("taxa", new ArrayList<Map<String, String>>());
+                for (Map<String, Object> taxaMap : taxaList){
+
+                    String name = ((String) taxaMap.getOrDefault("name", "")).trim();
+                    List<String> excluded = (List<String>) taxaMap.getOrDefault("excluded", new ArrayList<String>());
                     List<String> taxa = new ArrayList<String>();
                     taxa.add(name);
 
                     subgroups.add(createSpeciesGroup(
-                            taxaMap.getOrDefault("common", "").trim(),
+                            ((String) taxaMap.getOrDefault("common", "")).trim(),
                             rank,
                             taxa,
-                            new ArrayList<String>(),
+                            excluded,
                             parentGroup
                     ));
                 }
@@ -130,7 +132,28 @@ public class SpeciesGroupsUtil {
 
         List<LftRgtValues> lftRgts = new ArrayList<LftRgtValues>();
 
-        List<String> namesToLookup = new ArrayList<String>();
+        if (excludedValues != null && !excludedValues.isEmpty()) {
+            for (String excludedValue : excludedValues) {
+
+                NameSearchResult snr = nameIndex.searchForRecord(excludedValue);
+
+                if (snr != null) {
+                    if (snr.isSynonym())
+                        snr = nameIndex.searchForRecordByLsid(snr.getAcceptedLsid());
+                    if (snr != null && snr.getLeft() != null && snr.getRight() != null) {
+                        lftRgts.add(
+                                LftRgtValues.builder()
+                                        .lft(Integer.parseInt(snr.getLeft()))
+                                        .rgt(Integer.parseInt(snr.getRight()))
+                                        .tobeIncluded(false)
+                                        .build()
+                        );
+                    }
+                }
+            }
+        } else {
+            System.out.println(" title: " + title +", excluded is null" );
+        }
 
         for (String v: values) {
 
@@ -146,53 +169,7 @@ public class SpeciesGroupsUtil {
                                     .rgt(Integer.parseInt(snr.getRight()))
                                     .tobeIncluded(true).build()
                     );
-                } else {
-                    lftRgts.add(
-                            LftRgtValues.builder()
-                                    .lft(-1)
-                                    .rgt(-1)
-                                    .tobeIncluded(false).build()
-                    );
                 }
-            } else {
-                lftRgts.add(
-                        LftRgtValues.builder()
-                                .lft(-1)
-                                .rgt(-1)
-                                .tobeIncluded(false).build()
-                );
-            }
-        }
-
-        for (String v: excludedValues) {
-
-            NameSearchResult snr = nameIndex.searchForRecord(v, au.org.ala.names.model.RankType.getForName(rank));
-
-            if (snr != null) {
-                if (snr.isSynonym())
-                    snr = nameIndex.searchForRecordByLsid(snr.getAcceptedLsid());
-                if (snr != null && snr.getLeft() != null && snr.getRight() != null) {
-                    lftRgts.add(
-                            LftRgtValues.builder()
-                                    .lft(Integer.parseInt(snr.getLeft()))
-                                    .rgt(Integer.parseInt(snr.getRight()))
-                                    .tobeIncluded(false).build()
-                    );
-                } else {
-                    lftRgts.add(
-                            LftRgtValues.builder()
-                                    .lft(-1)
-                                    .rgt(-1)
-                                    .tobeIncluded(false).build()
-                    );
-                }
-            } else {
-                lftRgts.add(
-                        LftRgtValues.builder()
-                                .lft(-1)
-                                .rgt(-1)
-                                .tobeIncluded(false).build()
-                );
             }
         }
 
@@ -200,7 +177,6 @@ public class SpeciesGroupsUtil {
                 .name(title)
                 .rank(rank)
                 .values(values)
-                .excludedValues(excludedValues)
                 .lftRgtValues(lftRgts)
                 .parent(parent)
                 .build();

@@ -25,8 +25,8 @@ public class SpeciesGroup {
     Boolean isPartOfGroup(Integer lft){
 
         for (LftRgtValues lftRgtValue : lftRgtValues){
-            if(lft >= lftRgtValue.lft && lft < lftRgtValue.rgt)
-                return true;
+            if (lft >= lftRgtValue.lft && lft < lftRgtValue.rgt)
+                return lftRgtValue.tobeIncluded;
         }
         return false;
     }
