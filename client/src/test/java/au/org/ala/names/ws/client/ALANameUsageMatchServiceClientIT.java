@@ -117,6 +117,131 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     }
 
     @Test
+    public void testGet1() throws Exception {
+        NameUsageMatch match = client.get("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706");
+        assertNotNull(match);
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("Chelonia mydas", match.getScientificName());
+    }
+
+    @Test
+    public void testGet2() throws Exception {
+        NameUsageMatch match = client.get("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f");
+        assertNotNull(match);
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", match.getTaxonConceptID());
+        assertEquals("Caretta esculenta", match.getScientificName());
+    }
+
+    @Test
+    public void testGet3() throws Exception {
+        NameUsageMatch match = client.get("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", false);
+        assertNotNull(match);
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", match.getTaxonConceptID());
+        assertEquals("Caretta esculenta", match.getScientificName());
+    }
+
+    @Test
+    public void testGet4() throws Exception {
+        NameUsageMatch match = client.get("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", true);
+        assertNotNull(match);
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("Chelonia mydas", match.getScientificName());
+    }
+
+    @Test
+    public void testGet5() throws Exception {
+        NameUsageMatch match = client.get("Well, this is silly", true);
+        assertNotNull(match);
+        assertFalse(match.isSuccess());
+    }
+
+    @Test
+    public void testGetAll1() throws Exception {
+        List<String> ids = Arrays.asList(
+                "https://id.biodiversity.org.au/taxon/apni/51286863",
+                "urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706",
+                "urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f",
+                "A random unknown id"
+        );
+        List<NameUsageMatch> matches = client.getAll(ids, false);
+        assertNotNull(matches);
+        assertEquals(ids.size(), matches.size());
+        NameUsageMatch match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        match = matches.get(1);
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("Chelonia mydas", match.getScientificName());
+        match = matches.get(2);
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", match.getTaxonConceptID());
+        assertEquals("Caretta esculenta", match.getScientificName());
+        match = matches.get(3);
+        assertFalse(match.isSuccess());
+    }
+
+    @Test
+    public void testGetAll2() throws Exception {
+        List<String> ids = Arrays.asList(
+                "https://id.biodiversity.org.au/taxon/apni/51286863",
+                "urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706",
+                "urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f"
+        );
+        List<NameUsageMatch> matches = client.getAll(ids, true);
+        assertNotNull(matches);
+        assertEquals(ids.size(), matches.size());
+        NameUsageMatch match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        match = matches.get(1);
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("Chelonia mydas", match.getScientificName());
+        match = matches.get(2);
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("Chelonia mydas", match.getScientificName());
+        assertEquals("SYNONYM", match.getSynonymType());
+    }
+
+
+    @Test
+    public void testGetName1() throws Exception {
+        String name = client.getName("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", false);
+        assertNotNull(name);
+        assertEquals("Caretta esculenta", name);
+    }
+
+    @Test
+    public void testGetName2() throws Exception {
+        String name = client.getName("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", true);
+        assertNotNull(name);
+         assertEquals("Chelonia mydas", name);
+    }
+
+    @Test
+    public void testGetAllNames1() throws Exception {
+        List<String> ids = Arrays.asList(
+                "https://id.biodiversity.org.au/taxon/apni/51286863",
+                "urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706",
+                "urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f"
+        );
+        List<String> names = client.getAllNames(ids, true);
+        assertNotNull(names);
+        assertEquals(ids.size(), names.size());
+        assertEquals("Acacia dealbata", names.get(0));
+        assertEquals("Chelonia mydas", names.get(1));
+        assertEquals("Chelonia mydas", names.get(2));
+    }
+
+    @Test
     public void testCheck1() throws Exception {
         Boolean valid = client.check("Animalia", "kingdom");
         assertNotNull(valid);

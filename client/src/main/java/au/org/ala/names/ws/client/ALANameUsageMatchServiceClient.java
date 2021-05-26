@@ -183,8 +183,45 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * @return A matching taxon, with success=false if not found
      */
     @Override
-    public NameUsageMatch get(String taxonID) {
-        return this.call(this.alaNameUsageMatchService.get(taxonID));
+    public NameUsageMatch get(String taxonID, boolean follow) {
+        return this.call(this.alaNameUsageMatchService.get(taxonID, follow));
+    }
+
+    /**
+     * Bulk lookup of taxon information for a list of taxon identifiers.
+     *
+     * @param taxonIDs The list of taxon identifiers
+     * @param follow Follow synonyms to the accepted taxon
+     *
+     * @return The list of matches, will fail results for no match.
+     */
+    @Override
+    public List<NameUsageMatch> getAll(List<String> taxonIDs, boolean follow) {
+        return this.call(this.alaNameUsageMatchService.getAll(taxonIDs, follow));
+    }
+
+    /**
+     * Get the scientific name for a specific taxon identifier.
+     *
+     * @param taxonID The taxon identifier
+     * @param follow  Follow syonynms to return the accepted taxon
+     * @return The matching name, or null for not found
+     */
+    @Override
+    public String getName(String taxonID, boolean follow) {
+        return this.call(this.alaNameUsageMatchService.getName(taxonID, follow));
+    }
+
+    /**
+     * Bulk lookup of scientific names for taxon identifiers.
+     *
+     * @param taxonIDs The taxon identifiers
+     * @param follow   Follow syonynms to return the accepted taxon
+     * @return A list containing the matching name The matching taxon, or null for not found
+     */
+    @Override
+    public List<String> getAllNames(List<String> taxonIDs, boolean follow) {
+        return this.call(this.alaNameUsageMatchService.getAllNames(taxonIDs, follow));
     }
 
     @Override
