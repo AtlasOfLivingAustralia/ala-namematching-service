@@ -193,9 +193,11 @@ public class SpeciesGroupsUtil {
 
     private List<String> getGenericGroups(Integer lft, List<SpeciesGroup> groupingList) {
         List<String> matchedGroups = new ArrayList<String>();
-        for(SpeciesGroup sg : groupingList) {
-            if (sg.isPartOfGroup(lft)) {
-                matchedGroups.add(sg.name);
+        if (lft != null) {
+            for (SpeciesGroup sg : groupingList) {
+                if (sg.isPartOfGroup(lft)) {
+                    matchedGroups.add(sg.name);
+                }
             }
         }
         return matchedGroups;

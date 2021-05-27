@@ -221,7 +221,6 @@ public class NameSearchResourceTest {
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 
-
     @Test
     public void testGetByTaxonID1() throws Exception {
         NameUsageMatch match = this.resource.get("https://id.biodiversity.org.au/taxon/apni/51286863");
@@ -233,6 +232,115 @@ public class NameSearchResourceTest {
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 
+    @Test
+    public void testGetByTaxonID2() throws Exception {
+        // Search by synonym ID
+        NameUsageMatch match = this.resource.get("NZOR-6-99065", false);
+        assertTrue(match.isSuccess());
+        assertEquals("NZOR-6-99065", match.getTaxonConceptID());
+        assertEquals("Lens esculenta", match.getScientificName());
+        assertNull(match.getNameType());
+        assertEquals("taxonIdMatch", match.getMatchType());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+    @Test
+    public void testGetByTaxonID3() throws Exception {
+        NameUsageMatch match = this.resource.get("NZOR-6-99065", true);
+        assertTrue(match.isSuccess());
+        assertEquals("NZOR-6-131797", match.getTaxonConceptID());
+        assertEquals("Lens culinaris", match.getScientificName());
+        assertNull(match.getNameType());
+        assertEquals("taxonIdMatch", match.getMatchType());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+
+    @Test
+    public void testGetNameTaxonID1() throws Exception {
+        String name = this.resource.getName("https://id.biodiversity.org.au/taxon/apni/51286863", false);
+        assertEquals("Acacia dealbata", name);
+    }
+
+    @Test
+    public void testGetNameByTaxonID2() throws Exception {
+        String name = this.resource.getName("NZOR-6-99065", false);
+        assertEquals("Lens esculenta", name);
+    }
+
+    @Test
+    public void testGetNameByTaxonID3() throws Exception {
+        String name = this.resource.getName("NZOR-6-99065", true);
+        assertEquals("Lens culinaris", name);
+    }
+
+
+    @Test
+    public void testGetAllByTaxonID1() throws Exception {
+        List<String> ids = Arrays.asList(
+                "https://id.biodiversity.org.au/taxon/apni/51286863",
+                "urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706"
+        );
+        List<NameUsageMatch> matches = this.resource.getAll(ids, false);
+        assertEquals(ids.size(), matches.size());
+        NameUsageMatch match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        match = matches.get(1);
+        assertTrue(match.isSuccess());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("Chelonia mydas", match.getScientificName());
+    }
+
+    @Test
+    public void testGetAllByTaxonID2() throws Exception {
+        List<String> ids = Arrays.asList(
+                "https://id.biodiversity.org.au/taxon/apni/51286863",
+                "NothingToSeeHere"
+        );
+        List<NameUsageMatch> matches = this.resource.getAll(ids, false);
+        assertEquals(ids.size(), matches.size());
+        NameUsageMatch match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        match = matches.get(1);
+        assertFalse(match.isSuccess());
+    }
+
+    @Test
+    public void testGetAllByTaxonID3() throws Exception {
+        List<String> ids = Arrays.asList(
+                "https://id.biodiversity.org.au/taxon/apni/51286863",
+                "NZOR-6-99065"
+        );
+        List<NameUsageMatch> matches = this.resource.getAll(ids, true);
+        assertEquals(ids.size(), matches.size());
+        NameUsageMatch match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        match = matches.get(1);
+        assertTrue(match.isSuccess());
+        assertEquals("NZOR-6-131797", match.getTaxonConceptID());
+        assertEquals("Lens culinaris", match.getScientificName());
+    }
+
+
+    @Test
+    public void testGetAllNamesByTaxonID1() throws Exception {
+        List<String> ids = Arrays.asList(
+                "https://id.biodiversity.org.au/taxon/apni/51286863",
+                "NZOR-6-99065",
+                "Nothing to be ashamed of"
+        );
+        List<String> matches = this.resource.getAllNames(ids, true);
+        assertEquals(ids.size(), matches.size());
+        assertEquals("Acacia dealbata", matches.get(0));
+        assertEquals("Lens culinaris", matches.get(1));
+        assertNull(matches.get(2));
+    }
 
     @Test
     public void testSearchByVerncaularName1() throws Exception {
