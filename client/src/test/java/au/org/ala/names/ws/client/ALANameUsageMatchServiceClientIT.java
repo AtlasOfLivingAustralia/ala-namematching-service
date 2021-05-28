@@ -226,6 +226,13 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
          assertEquals("Chelonia mydas", name);
     }
 
+
+    @Test
+    public void testGetName3() throws Exception {
+        String name = client.getName("Moudly old dough", true);
+        assertNull(name);
+     }
+
     @Test
     public void testGetAllNames1() throws Exception {
         List<String> ids = Arrays.asList(

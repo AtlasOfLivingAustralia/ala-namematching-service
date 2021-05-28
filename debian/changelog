@@ -1,3 +1,9 @@
+ala-namematching-service (1.4) unstable; urgency=medium
+
+  * Include batch lookup for guids
+
+ -- ALA Development Team <support@ala.org.au>  Fri, 28 May 2021 05:04:46 +0000
+
 ala-namematching-service (1.0-SNAPSHOT+0~20200914091638.1) unstable; urgency=medium
 
   * Added SHA1 checksum
