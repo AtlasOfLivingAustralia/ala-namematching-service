@@ -26,6 +26,10 @@ RUN echo "ala-namematching-service ala-namematching-service/sha1 string f9e42325
 RUN apt-get -y update && \
         apt-get install -y -q ala-namematching-service  # 2020091401
 
+# Uncomment and edit to use locally built debian package See debian/README.md for how to build these
+#COPY "./ala-namematching-service_1.1.3-SNAPSHOT+0~2020528050446.1_all.deb" /tmp
+#RUN dpkg -i /tmp/ala-namematching-service_1.1.3-SNAPSHOT+0~2020528050446.1_all.deb
+
 EXPOSE 9179
 EXPOSE 9180
 

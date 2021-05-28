@@ -39,8 +39,12 @@ public class NameSearchResource implements NameMatchService {
     /** Use hints to check search */
     private final boolean checkHints;
 
-    //Cache2k instance
-    private final Cache<NameSearch, NameUsageMatch> cache;
+    //Cache2k instance for searches
+    private final Cache<NameSearch, NameUsageMatch> searchCache;
+    // Cache2k instance for lookups
+    private final Cache<String, NameUsageMatch> idCache;
+    // Cache2k instance for derefereced lookups
+    private final Cache<String, NameUsageMatch> idAcceptedCache;
 
     public NameSearchResource(NameSearchConfiguration configuration){
         try {
@@ -49,13 +53,14 @@ public class NameSearchResource implements NameMatchService {
             this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);
             this.useHints = configuration.isUseHints();
             this.checkHints = configuration.isCheckHints();
-            this.cache = configuration.getCache().builder(NameSearch.class, NameUsageMatch.class)
-                    .loader(new CacheLoader<NameSearch, NameUsageMatch>() {
-                        @Override
-                        public NameUsageMatch load(NameSearch nameSearch) throws Exception {
-                            return search(nameSearch);
-                        }
-                    }) //auto populating function
+            this.searchCache = configuration.getCache().builder(NameSearch.class, NameUsageMatch.class)
+                    .loader(nameSearch -> this.search(nameSearch)) //auto populating function
+                    .build();
+            this.idCache = configuration.getCache().builder(String.class, NameUsageMatch.class)
+                    .loader(id -> this.lookup(id, false)) //auto populating function
+                    .build();
+            this.idAcceptedCache = configuration.getCache().builder(String.class, NameUsageMatch.class)
+                    .loader(id -> this.lookup(id, true)) //auto populating function
                     .build();
         } catch (Exception e){
             log.error(e.getMessage(), e);
@@ -85,11 +90,12 @@ public class NameSearchResource implements NameMatchService {
                     "The search will use the parameters contained in the body to perform as precise a search as is possible."
     )
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Timed
     @Path("/searchByClassification")
     public NameUsageMatch match(NameSearch search) {
         try {
-            return this.cache.get(search);
+            return this.searchCache.get(search);
         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with nameSearch: " + search);
         }
@@ -102,6 +108,7 @@ public class NameSearchResource implements NameMatchService {
                     "The search will use the parameters supplied to perform as precise a search as is possible."
     )
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Timed
     @Path("/searchByClassification")
     public NameUsageMatch match(
@@ -129,7 +136,7 @@ public class NameSearchResource implements NameMatchService {
                 .rank(rank)
                 .build();
         try {
-            return this.cache.get(search);
+            return this.searchCache.get(search);
         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with nameSearch: " + search);
         }
@@ -142,6 +149,7 @@ public class NameSearchResource implements NameMatchService {
                     "The search will not be able to resolve complications, such as homonyms."
     )
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Timed
     @Path("/search")
     public NameUsageMatch match(
@@ -149,7 +157,7 @@ public class NameSearchResource implements NameMatchService {
     ) {
         try {
             NameSearch cl = NameSearch.builder().scientificName(name).build();
-            return this.cache.get(cl);
+            return this.searchCache.get(cl);
         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with query: " + name);
         }
@@ -162,6 +170,7 @@ public class NameSearchResource implements NameMatchService {
             notes = "The same Vernacular name may be given to multiple taxa with different scientific names. The result returned is a best-effort match."
     )
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Timed
     @Path("/searchByVernacularName")
     public NameUsageMatch matchVernacular(
@@ -169,7 +178,7 @@ public class NameSearchResource implements NameMatchService {
     ) {
         try {
             NameSearch cl = NameSearch.builder().vernacularName(vernacularName).build();
-            return this.cache.get(cl);
+            return this.searchCache.get(cl);
         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with vernacularName: " + vernacularName);
         }
@@ -177,21 +186,83 @@ public class NameSearchResource implements NameMatchService {
     }
 
     @ApiOperation(
-            value = "Get taxon information by by taxon identifier."
+            value = "Get taxon information by taxon identifier."
     )
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Timed
     @Path("/getByTaxonID")
     public NameUsageMatch get(
-            @ApiParam(value = "The unique taxon identifier", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonID") String taxonID
+            @ApiParam(value = "The unique taxon identifier", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonID") String taxonID,
+            @ApiParam(value = "Follow synonyms to the accepted taxon", required = false) @QueryParam("follow") @DefaultValue("false") boolean follow
     ) {
         try {
-            NameSearch cl = NameSearch.builder().taxonID(taxonID).build();
-            return this.cache.get(cl);
-        } catch (Exception e){
+            Cache<String, NameUsageMatch> cache = follow ? this.idAcceptedCache : this.idCache;
+            return cache.get(taxonID);
+         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with taxonID: " + taxonID);
         }
         return NameUsageMatch.FAIL;
+    }
+
+    @ApiOperation(
+            value = "Get bulk taxon information by a list of taxon identifiers."
+    )
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Timed
+    @Path("/getAllByTaxonID")
+    public List<NameUsageMatch> getAll(
+            @ApiParam(value = "The list of unique taxon identifiers", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonIDs") List<String> taxonIDs,
+            @ApiParam(value = "Follow synonyms to the accepted taxon", required = false) @QueryParam("follow") @DefaultValue("false") boolean follow
+    ) {
+        List<NameUsageMatch> matches = new ArrayList<>(taxonIDs.size());
+        Cache<String, NameUsageMatch> cache = follow ? this.idAcceptedCache : this.idCache;
+        for (String taxonID: taxonIDs) {
+            NameUsageMatch match = NameUsageMatch.FAIL;
+            try {
+                match = cache.get(taxonID);
+            } catch (Exception e) {
+                log.warn("Problem matching name : " + e.getMessage() + " with taxonID: " + taxonID);
+            }
+            matches.add(match);
+        }
+        return matches;
+    }
+
+    @ApiOperation(
+            value = "Get the taxon scientific name by taxon identifier."
+    )
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Timed
+    @Path("/getNameByTaxonID")
+    public String getName(
+            @ApiParam(value = "The unique taxon identifier", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonID") String taxonID,
+            @ApiParam(value = "Follow synonyms to the accepted taxon", required = false) @QueryParam("follow") @DefaultValue("false") boolean follow
+    ) {
+        try {
+            Cache<String, NameUsageMatch> cache = follow ? this.idAcceptedCache : this.idCache;
+            NameUsageMatch match = cache.get(taxonID);
+            return match != null && match.isSuccess() ? match.getScientificName() : null;
+        } catch (Exception e){
+            log.warn("Problem matching name : " + e.getMessage() + " with taxonID: " + taxonID);
+        }
+        return null;
+    }
+
+    @ApiOperation(
+            value = "Get bulk taxon scientific names from a list of taxon identifiers."
+    )
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Timed
+    @Path("/getAllNamesByTaxonID")
+    public List<String> getAllNames(
+            @ApiParam(value = "The list of unique taxon identifiers", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonIDs") List<String> taxonIDs,
+            @ApiParam(value = "Follow synonyms to the accepted taxon", required = false) @QueryParam("follow") @DefaultValue("false") boolean follow
+    ) {
+        return taxonIDs.stream().map(id -> this.getName(id, follow)).collect(Collectors.toList());
     }
 
     @ApiOperation(
@@ -204,6 +275,7 @@ public class NameSearchResource implements NameMatchService {
         }
     )
     @GET
+    @Produces(MediaType.TEXT_PLAIN)
     @Timed
     @Path("/check")
     public Boolean check(
@@ -229,6 +301,7 @@ public class NameSearchResource implements NameMatchService {
             notes = "Returns a list of matches. Up to 2 * max matches are returned."
     )
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Timed
     @Path("/autocomplete")
     public List<Map> autocomplete(
@@ -249,12 +322,7 @@ public class NameSearchResource implements NameMatchService {
     public String searchForLsidById(
             @ApiParam(value = "The ID", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("id") String id
     ) {
-        String result = this.searcher.searchForLsidById(id);
-        if (result != null) {
-            return result;
-        } else {
-            return null;
-        }
+        return this.searcher.searchForLsidById(id);
     }
 
     @ApiOperation(
@@ -268,8 +336,7 @@ public class NameSearchResource implements NameMatchService {
             @ApiParam(value = "The name", required = true, example = "Acacia dealbata") @QueryParam("name") String name
     ) {
         try {
-            String lsid = this.searcher.searchForLSID(name);
-            return lsid;
+            return this.searcher.searchForLSID(name);
         } catch (SearchResultException e){
             log.warn("Problem matching LSID : " + e.getMessage() + " for name: " + name);
         }
@@ -280,6 +347,7 @@ public class NameSearchResource implements NameMatchService {
             value = "Search for a list of LSIDs with a list of scientificName or scientificName(kingdom)."
     )
     @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Timed
     @Path("/getGuidsForTaxa")
     public List<String> getGuidsForTaxa(List<String> taxa) {
@@ -299,6 +367,7 @@ public class NameSearchResource implements NameMatchService {
     )
     @GET
     @Timed
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/getCommonNamesForLSID")
     public Set<String> getCommonNamesForLSID(
             @ApiParam(value = "lsid", required = true, example = "Red Kangaroo") @QueryParam("lsid") String lsid,
@@ -416,6 +485,34 @@ public class NameSearchResource implements NameMatchService {
         return metrics;
     }
 
+
+    /**
+     * Find a record based on taxon id
+     *
+     * @param taxonID The taxon guid/lsid
+     *
+     * @return A match object, with success=false if there was no valid match
+     *
+     * @throws Exception if something goes horribly wrong
+     */
+    private NameUsageMatch lookup(String taxonID, boolean follow) throws Exception {
+        NameSearchResult result = this.searcher.searchForRecordByLsid(taxonID);
+
+        if (result == null)
+            return NameUsageMatch.FAIL;
+
+        MatchType matchType = result.getMatchType();
+        SynonymType synonymType = result.getSynonymType();
+        if (follow) {
+            if (result.getAcceptedLsid() != null && !result.getLsid().equals(result.getAcceptedLsid())) {
+                result = searcher.searchForRecordByLsid(result.getAcceptedLsid());
+            }
+        }
+        Set<String> vernacularNames = searcher.getCommonNamesForLSID(result.getLsid(), 1);
+        return create(result, vernacularNames, matchType, null, synonymType, null);
+    }
+
+
     /**
      * Build a match result out of what we have found.
      *
@@ -433,6 +530,8 @@ public class NameSearchResource implements NameMatchService {
     private NameUsageMatch create(NameSearchResult nsr, Set<String> vernacularNames, MatchType matchType, NameType nameType, SynonymType synonymType, Set<ErrorType> issues) throws Exception {
         if(nsr != null && nsr.getRankClassification() != null)  {
             LinnaeanRankClassification lrc = nsr.getRankClassification();
+            Integer lft = nsr.getLeft() != null ? Integer.parseInt(nsr.getLeft()) : null;
+            Integer rgt = nsr.getRight() != null ? Integer.parseInt(nsr.getRight()) : null;
             return NameUsageMatch.builder()
                     .success(true)
                     .scientificName(lrc.getScientificName())
@@ -443,8 +542,8 @@ public class NameSearchResource implements NameMatchService {
                     .matchType(matchType != null ? matchType.toString() : "")
                     .nameType(nameType != null ? nameType.toString() : null)
                     .synonymType(synonymType != null ? synonymType.name() : null)
-                    .lft(nsr.getLeft() != null ? Integer.parseInt(nsr.getLeft()) : null)
-                    .rgt(nsr.getRight() != null ? Integer.parseInt(nsr.getRight()) : null)
+                    .lft(lft)
+                    .rgt(rgt)
                     .kingdom(lrc.getKingdom())
                     .kingdomID(lrc.getKid())
                     .phylum(lrc.getPhylum())
@@ -460,8 +559,8 @@ public class NameSearchResource implements NameMatchService {
                     .species(lrc.getSpecies())
                     .speciesID(lrc.getSid())
                     .vernacularName(!vernacularNames.isEmpty() ? vernacularNames.iterator().next() : null)
-                    .speciesGroup(speciesGroupsUtil.getSpeciesGroups(Integer.parseInt(nsr.getLeft())))
-                    .speciesSubgroup(speciesGroupsUtil.getSpeciesSubGroups(Integer.parseInt(nsr.getLeft())))
+                    .speciesGroup(speciesGroupsUtil.getSpeciesGroups(lft))
+                    .speciesSubgroup(speciesGroupsUtil.getSpeciesSubGroups(lft))
                     .issues(issues != null ? issues.stream().map(ErrorType::toString).sorted().collect(Collectors.toList()) : Collections.singletonList("noIssue"))
                     .build();
         } else {

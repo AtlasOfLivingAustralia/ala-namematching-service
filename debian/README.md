@@ -50,3 +50,24 @@ export DEBCONF_FRONTEND=noninteractive
 apt-get install -yq --force-yes ala-namematching-service
 ```
 useful for Dockerfiles.
+
+## For those without Debian
+
+If you don't have an instance of debian lying about, you can used a suitably
+augmented debian docker image to do the build.
+To build the image, go to the `server/docker` subdirectory and use the command
+
+```shell
+docker build -f Dockerfile-deb-builder . -t deb-builder
+```
+
+This will create a version of debian with the required tools installed.
+Once you have done this, in the repository root directory, use the following command:
+
+```shell
+docker run --rm -v ~/src:/src -w /src/ala-namematching-service deb-builder:latest debuild -us -uc -b
+```
+
+Where you replace `~/src/` with the parent directory of the repository.
+This command will do a complete build from a clean image and
+put the resulting debian package in `~/src` or whereever your project resides.

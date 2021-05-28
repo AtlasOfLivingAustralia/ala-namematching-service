@@ -1,0 +1,12 @@
+FROM ubuntu:focal
+
+ARG ENV
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get -y update && \
+  apt-get install -y -q add-apt-key software-properties-common \
+  debhelper devscripts \
+  openjdk-8-jdk maven
+
