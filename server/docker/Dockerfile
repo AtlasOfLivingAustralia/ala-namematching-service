@@ -24,7 +24,10 @@ RUN echo "ala-namematching-service ala-namematching-service/sha1 string f9e42325
 
 # Update the next commented date to force a new docker hub build with an updated la-pipelines version
 RUN apt-get -y update && \
-        apt-get install -y -q ala-namematching-service  # 2020091401
+        apt-get install -y -q ala-namematching-service  # 202105191731
+
+COPY groups.json /data/ala-namematching-service/config/groups.json
+COPY subgroups.json /data/ala-namematching-service/config/subgroups.json
 
 # Uncomment and edit to use locally built debian package See debian/README.md for how to build these
 #COPY "./ala-namematching-service_1.1.3-SNAPSHOT+0~2020528050446.1_all.deb" /tmp
