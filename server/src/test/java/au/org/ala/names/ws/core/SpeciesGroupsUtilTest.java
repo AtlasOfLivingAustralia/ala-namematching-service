@@ -17,7 +17,7 @@ public class SpeciesGroupsUtilTest extends TestUtils {
     @Before
     public void setUp() throws Exception {
         this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20200214"); // Assumed to be there
+        this.configuration.setIndex("/data/lucene/namematching-20210811"); // Assumed to be there
         this.configuration.setGroups(this.getClass().getResource("test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("test-subgroups-1.json"));
         this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);
@@ -25,35 +25,35 @@ public class SpeciesGroupsUtilTest extends TestUtils {
 
     @Test
     public void testGetGroup1() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(202407);
+        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(82670);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Animals", "Mammals"), groups);
     }
 
     @Test
     public void testGetGroup2() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(178672);
+        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(54260);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Animals", "Birds"), groups);
     }
 
     @Test
     public void testGetGroup3() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(674565);
+        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(602320);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Plants", "Angiosperms", "Monocots"), groups);
     }
 
     @Test
     public void testGetSubgroup1() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(202407);
+        List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(82000);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Herbivorous Marsupials"), groups);
     }
 
     @Test
     public void testGetSubgroup2() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(178672);
+        List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(59021);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Ducks, Geese, Swans"), groups);
     }

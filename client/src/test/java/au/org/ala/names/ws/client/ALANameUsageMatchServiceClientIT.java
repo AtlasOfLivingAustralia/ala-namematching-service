@@ -113,42 +113,42 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Vombatus ursinus", match.getScientificName());
         assertEquals("species", match.getRank());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:e079f94d-3d7f-4deb-ae29-053fec4d1b53", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/e079f94d-3d7f-4deb-ae29-053fec4d1b53", match.getTaxonConceptID());
     }
 
     @Test
     public void testGet1() throws Exception {
-        NameUsageMatch match = client.get("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706");
+        NameUsageMatch match = client.get("https://biodiversity.org.au/afd/taxa/2d605472-979b-49b4-aed3-03a384e9f706");
         assertNotNull(match);
         assertTrue(match.isSuccess());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
         assertEquals("Chelonia mydas", match.getScientificName());
     }
 
     @Test
     public void testGet2() throws Exception {
-        NameUsageMatch match = client.get("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f");
+        NameUsageMatch match = client.get("https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f");
         assertNotNull(match);
         assertTrue(match.isSuccess());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f", match.getTaxonConceptID());
         assertEquals("Caretta esculenta", match.getScientificName());
     }
 
     @Test
     public void testGet3() throws Exception {
-        NameUsageMatch match = client.get("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", false);
+        NameUsageMatch match = client.get("https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f", false);
         assertNotNull(match);
         assertTrue(match.isSuccess());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f", match.getTaxonConceptID());
         assertEquals("Caretta esculenta", match.getScientificName());
     }
 
     @Test
     public void testGet4() throws Exception {
-        NameUsageMatch match = client.get("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", true);
+        NameUsageMatch match = client.get("https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f", true);
         assertNotNull(match);
         assertTrue(match.isSuccess());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
         assertEquals("Chelonia mydas", match.getScientificName());
     }
 
@@ -163,8 +163,8 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     public void testGetAll1() throws Exception {
         List<String> ids = Arrays.asList(
                 "https://id.biodiversity.org.au/taxon/apni/51286863",
-                "urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706",
-                "urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f",
+                "https://biodiversity.org.au/afd/taxa/2d605472-979b-49b4-aed3-03a384e9f706",
+                "https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f",
                 "A random unknown id"
         );
         List<NameUsageMatch> matches = client.getAll(ids, false);
@@ -176,11 +176,11 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertEquals("Acacia dealbata", match.getScientificName());
         match = matches.get(1);
         assertTrue(match.isSuccess());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
         assertEquals("Chelonia mydas", match.getScientificName());
         match = matches.get(2);
         assertTrue(match.isSuccess());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f", match.getTaxonConceptID());
         assertEquals("Caretta esculenta", match.getScientificName());
         match = matches.get(3);
         assertFalse(match.isSuccess());
@@ -190,8 +190,8 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     public void testGetAll2() throws Exception {
         List<String> ids = Arrays.asList(
                 "https://id.biodiversity.org.au/taxon/apni/51286863",
-                "urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706",
-                "urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f"
+                "https://biodiversity.org.au/afd/taxa/2d605472-979b-49b4-aed3-03a384e9f706",
+                "https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f"
         );
         List<NameUsageMatch> matches = client.getAll(ids, true);
         assertNotNull(matches);
@@ -202,11 +202,11 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertEquals("Acacia dealbata", match.getScientificName());
         match = matches.get(1);
         assertTrue(match.isSuccess());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
         assertEquals("Chelonia mydas", match.getScientificName());
         match = matches.get(2);
         assertTrue(match.isSuccess());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/2d605472-979b-49b4-aed3-03a384e9f706", match.getTaxonConceptID());
         assertEquals("Chelonia mydas", match.getScientificName());
         assertEquals("SYNONYM", match.getSynonymType());
     }
@@ -214,14 +214,14 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
 
     @Test
     public void testGetName1() throws Exception {
-        String name = client.getName("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", false);
+        String name = client.getName("https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f", false);
         assertNotNull(name);
         assertEquals("Caretta esculenta", name);
     }
 
     @Test
     public void testGetName2() throws Exception {
-        String name = client.getName("urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f", true);
+        String name = client.getName("https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f", true);
         assertNotNull(name);
          assertEquals("Chelonia mydas", name);
     }
@@ -237,8 +237,8 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     public void testGetAllNames1() throws Exception {
         List<String> ids = Arrays.asList(
                 "https://id.biodiversity.org.au/taxon/apni/51286863",
-                "urn:lsid:biodiversity.org.au:afd.taxon:2d605472-979b-49b4-aed3-03a384e9f706",
-                "urn:lsid:biodiversity.org.au:afd.name:a838ad85-6ead-4bd2-8741-75f571d7062f"
+                "https://biodiversity.org.au/afd/taxa/2d605472-979b-49b4-aed3-03a384e9f706",
+                "https://biodiversity.org.au/afd/taxa/a838ad85-6ead-4bd2-8741-75f571d7062f"
         );
         List<String> names = client.getAllNames(ids, true);
         assertNotNull(names);
@@ -266,7 +266,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     @Test
     public void testAutocomplete2() throws Exception {
         // incomplete vernacular name match
-        List<Map> result = client.autocomplete("common w", 10, false);
+        List<Map> result = client.autocomplete("womba", 10, false);
         assertNotNull(result);
         assertTrue(result.size() > 0 && result.size() <= 20);
     }
@@ -282,9 +282,9 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     @Test
     public void testSearchForLsidById1() throws Exception {
         // taxonID -> acceptedID
-        String result = client.searchForLsidById("urn:lsid:biodiversity.org.au:afd.name:05691642-5191-426a-b469-f1514b880481");
+        String result = client.searchForLsidById("https://biodiversity.org.au/afd/taxa/05691642-5191-426a-b469-f1514b880481");
         assertNotNull(result);
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:462548c3-6464-4e35-b71f-f4ad3fff3ebb", result);
+        assertEquals("https://biodiversity.org.au/afd/taxa/462548c3-6464-4e35-b71f-f4ad3fff3ebb", result);
     }
 
     @Test
@@ -299,7 +299,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         // Genus
         String result = client.searchForLSID("Eucalyptus");
         assertNotNull(result);
-        assertEquals(result, "https://id.biodiversity.org.au/taxon/apni/51302291");
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51360942", result);
     }
 
     @Test
@@ -315,7 +315,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         List<String> result = client.getGuidsForTaxa(Collections.singletonList("Eucalyptus"));
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51302291", result.get(0));
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51360942", result.get(0));
     }
 
     @Test
@@ -323,17 +323,17 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         // 1 match to fail, 1 species match
         List<String> result = client.getGuidsForTaxa(Arrays.asList("no match", "Macropus agilis"));
         assertNotNull(result);
-        assertEquals(result.size(), 2);
+        assertEquals(2, result.size());
         assertNull(result.get(0));
-        assertEquals(result.get(1), "urn:lsid:biodiversity.org.au:afd.taxon:462548c3-6464-4e35-b71f-f4ad3fff3ebb");
+        assertEquals(result.get(1), "https://biodiversity.org.au/afd/taxa/462548c3-6464-4e35-b71f-f4ad3fff3ebb");
     }
 
     @Test
     public void testGetCommonNamesForLSID1() throws Exception {
         // LSID with >1 common names
-        Set<String> result = client.getCommonNamesForLSID("urn:lsid:biodiversity.org.au:afd.taxon:e079f94d-3d7f-4deb-ae29-053fec4d1b53", 10);
+        Set<String> result = client.getCommonNamesForLSID("https://biodiversity.org.au/afd/taxa/e079f94d-3d7f-4deb-ae29-053fec4d1b53", 10);
         assertNotNull(result);
-        assertEquals(result.size(), 2);
+        assertEquals(2, result.size());
         assertTrue(result.contains("Common Wombat"));
     }
 
