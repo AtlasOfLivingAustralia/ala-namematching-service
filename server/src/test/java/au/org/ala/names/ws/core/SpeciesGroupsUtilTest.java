@@ -25,35 +25,40 @@ public class SpeciesGroupsUtilTest extends TestUtils {
 
     @Test
     public void testGetGroup1() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(82670);
+        // Osphranter rufus
+        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(85347);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Animals", "Mammals"), groups);
     }
 
     @Test
     public void testGetGroup2() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(54260);
+        // Dromaius novaehollandiae
+        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(62481);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Animals", "Birds"), groups);
     }
 
     @Test
     public void testGetGroup3() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(602320);
+        // Acacia dealbata
+        List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(732274);
         assertNotNull(groups);
-        assertEquals(Arrays.asList("Plants", "Angiosperms", "Monocots"), groups);
+        assertEquals(Arrays.asList("Plants", "Angiosperms", "Dicots"), groups);
     }
 
     @Test
     public void testGetSubgroup1() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(82000);
+        // Osphranter rufus
+        List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(85347);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Herbivorous Marsupials"), groups);
     }
 
     @Test
     public void testGetSubgroup2() throws Exception {
-        List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(59021);
+        // Anas superciliosa
+        List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(62250);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Ducks, Geese, Swans"), groups);
     }
