@@ -10,7 +10,7 @@ It consists of three components. all with maven groupId `au.org.ala.names`:
 ## How to start the ALANameMatchingService application
 
 1. Run `mvn clean install` to build your application
-1. Download a pre-built name matching index (e.g https://archives.ala.org.au/archives/nameindexes/latest/namematching-20200214.tgz), and untar in `/data/lucene` This will create a `/data/lucene/namematching-20200214` directory.
+1. Download a pre-built name matching index (e.g https://archives.ala.org.au/archives/nameindexes/latest/namematching-20210811.tgz), and untar in `/data/lucene` This will create a `/data/lucene/namematching-20210811` directory.
 1. cd to the `server` subdirectory
 1. Start application with `java -jar target/ala-name-matching-server-1.1-SNAPSHOT.jar server config-local.yml`
 1. To check that your application is running enter url `http://localhost:9180`
@@ -168,12 +168,12 @@ As with the groups list, the subgroups are matched using the current name index.
 Change directory to the `server` module.
 
 ```shell script
-docker build -f docker/Dockerfile . -t ala-namematching-service:v20200214-7
+docker build -f docker/Dockerfile . -t ala-namematching-service:v20210811-1
 ```
 for use ALA namematching and for use the GBIF backbone:
 
 ```shell script
-docker build -f docker/Dockerfile . -t  ala-namematching-service:v20200214-7 --build-arg ENV=gbif-backbone
+docker build -f docker/Dockerfile . -t  ala-namematching-service:v20210811-1 --build-arg ENV=gbif-backbone
 ```
 
 If you want a quick'n'easy docker instance for testing, use

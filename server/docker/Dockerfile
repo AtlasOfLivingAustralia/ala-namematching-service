@@ -18,7 +18,7 @@ RUN echo "deb [arch=amd64] https://apt.gbif.es/ bionic main" > /etc/apt/sources.
 RUN apt-get install -y -q openjdk-8-jdk rsync tar curl
 
 # If we want to change the default URL over time
-RUN echo "ala-namematching-service ala-namematching-service/source string https://archives.ala.org.au/archives/nameindexes/latest/namematching-20200214.tgz" | debconf-set-selections
+RUN echo "ala-namematching-service ala-namematching-service/source string https://archives.ala.org.au/archives/nameindexes/20210811/namematching-20210811.tgz" | debconf-set-selections
 # SHA1 of the previous file
 RUN echo "ala-namematching-service ala-namematching-service/sha1 string f9e42325db8d41ca0c8afeb6aeadf670978a13ac" | debconf-set-selections
 
