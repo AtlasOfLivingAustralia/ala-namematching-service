@@ -21,7 +21,7 @@
 
     <groupId>au.org.ala.names</groupId>
     <artifactId>ala-namematching-service</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5</version>
     <packaging>pom</packaging>
 
     <name>ALA Name Matching Service</name>
@@ -55,7 +55,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <ala-name-matching.version>4.0-SNAPSHOT</ala-name-matching.version>
+        <ala-name-matching.version>4.0</ala-name-matching.version>
         <cache2k.version>1.2.0.Final</cache2k.version>
         <jackson.version>2.10.4</jackson.version>
         <retrofit.version>2.6.2</retrofit.version>

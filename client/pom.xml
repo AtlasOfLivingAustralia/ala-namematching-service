@@ -7,7 +7,7 @@
   <parent>
     <artifactId>ala-namematching-service</artifactId>
     <groupId>au.org.ala.names</groupId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5</version>
   </parent>
 
   <artifactId>ala-namematching-client</artifactId>

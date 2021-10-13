@@ -33,7 +33,7 @@ debian/ala-namematching-service
 You can test the generated package without install it with `piuparts` like:
 
 ```bash
-sudo piuparts -D ubuntu -d xenial -d bionic ../ala-namematching-service_1.1-SNAPSHOT_all.deb
+sudo piuparts -D ubuntu -d xenial -d bionic ../ala-namematching-service_1.5_all.deb
 ```
 in this way you can also test it in different releases.
 
@@ -68,6 +68,6 @@ Once you have done this, in the repository root directory, use the following com
 docker run --rm -v ~/src:/src -w /src/ala-namematching-service deb-builder:latest debuild -us -uc -b
 ```
 
-Where you replace `~/src/` with the parent directory of the repository.
+Where you replace `~/src` with the parent directory of the repository.
 This command will do a complete build from a clean image and
 put the resulting debian package in `~/src` or whereever your project resides.

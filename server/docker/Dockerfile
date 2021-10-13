@@ -26,12 +26,13 @@ RUN echo "ala-namematching-service ala-namematching-service/sha1 string f9e42325
 RUN apt-get -y update && \
         apt-get install -y -q ala-namematching-service  # 202105191731
 
-COPY groups.json /data/ala-namematching-service/config/groups.json
-COPY subgroups.json /data/ala-namematching-service/config/subgroups.json
+COPY docker/groups.json /data/ala-namematching-service/config/groups.json
+COPY docker/subgroups.json /data/ala-namematching-service/config/subgroups.json
 
 # Uncomment and edit to use locally built debian package See debian/README.md for how to build these
-#COPY "./ala-namematching-service_1.1.3-SNAPSHOT+0~2020528050446.1_all.deb" /tmp
-#RUN dpkg -i /tmp/ala-namematching-service_1.1.3-SNAPSHOT+0~2020528050446.1_all.deb
+# You will have to copy the build .deb into the working directory
+#COPY ./ala-namematching-service_1.5_all.deb /tmp
+#RUN dpkg -i /tmp/ala-namematching-service_1.5_all.deb
 
 EXPOSE 9179
 EXPOSE 9180

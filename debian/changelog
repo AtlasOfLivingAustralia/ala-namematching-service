@@ -1,3 +1,9 @@
+ala-namematching-service (1.5) unstable; urgency=medium
+
+  * Use updated name matching library 4.0
+
+ -- ALA Development Team <support@ala.org.au>  Thu, 14 Oct 2021 10:05:46 +1100
+
 ala-namematching-service (1.4) unstable; urgency=medium
 
   * Include batch lookup for guids
