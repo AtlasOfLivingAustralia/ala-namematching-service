@@ -12,7 +12,7 @@ It consists of three components. all with maven groupId `au.org.ala.names`:
 1. Run `mvn clean install` to build your application
 1. Download a pre-built name matching index (e.g https://archives.ala.org.au/archives/nameindexes/20210811/namematching-20210811.tgz), and untar in `/data/lucene` This will create a `/data/lucene/namematching-20210811` directory.
 1. cd to the `server` subdirectory
-1. Start application with `java -jar target/ala-name-matching-server-1.5.jar server config-local.yml`
+1. Start application with `java -jar target/ala-name-matching-server-1.6-SNAPSHOT.jar server config-local.yml`
 1. To check that your application is running enter url `http://localhost:9180`
 1. Test with `http://localhost:9179/api/search?q=Acacia`. The response should look similar to:
 
