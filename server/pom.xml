@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ala-namematching-service</artifactId>
         <groupId>au.org.ala.names</groupId>
-        <version>1.4</version>
+        <version>1.5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -56,37 +56,11 @@
         </dependency>
 
 
+        <!-- Search library -->
         <dependency>
             <groupId>au.org.ala</groupId>
-            <artifactId>ala-name-matching</artifactId>
+            <artifactId>ala-name-matching-search</artifactId>
             <version>${ala-name-matching.version}</version>
-            <!-- Stop jetty 1.x infecting everything -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.jersey</groupId>
-                    <artifactId>jersey-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.jersey</groupId>
-                    <artifactId>jersey-client</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.gbif.registry</groupId>
-                    <artifactId>registry-ws-client</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.beust</groupId>
-                    <artifactId>jcommander</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Caching -->

@@ -19,3 +19,5 @@ server:
   adminConnectors:
     - type: http
       port: 9180
+search:
+  index: /data/lucene/namematching-20210811
