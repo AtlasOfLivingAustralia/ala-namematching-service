@@ -426,6 +426,16 @@ public class NameSearchResourceTest {
     }
 
     @Test
+    public void testAutocomplete4() throws Exception {
+        // Get Elusor first
+        List<Map> result = this.resource.autocomplete("Elusor", 10, false);
+        assertNotNull(result);
+        assertTrue(result.size() > 0);
+        Map first = result.get(0);
+        assertEquals("Elusor", first.get("name"));
+    }
+
+    @Test
     public void testSearchForLsidById1() throws Exception {
         // taxonID -> acceptedID
         String result = this.resource.searchForLsidById("https://biodiversity.org.au/afd/taxa/05691642-5191-426a-b469-f1514b880481");
