@@ -35,14 +35,16 @@ case "$1" in
 
         echo "Downloading nameindex $URL ..."
 
-        # Try to resume previous download
-        curl -sLC - -o "$DEST" "$URL"
+        # Try to resume previous download (continue if fails)
+        set +e
+        curl -sLC - -o "$DEST" -f "$URL"
+        set -e
 
         SHA1_DOWNLOADED=$(sha1sum $DEST | awk '{ print $1 }')
 
         # Downloaded file sha1 does not match provided sha1, so retry full download
         if [[ "$SHA1" != "$SHA1_DOWNLOADED" ]]; then
-            echo "SHA1 does not match, trying to download again $URL ..."
+            echo "SHA1 does not match ($SHA1 vs $SHA1_DOWNLOADED), trying to download again $URL ..."
             curl -sL -o "$DEST" "$URL"
         fi
 
@@ -51,7 +53,7 @@ case "$1" in
         ROOTDIR2=$(tar tf $DEST | head -1 | cut -d "/" -f 2)
 
         echo "Untar nameindex source ..."
-        tar zxf $DEST -C /tmp/
+        tar zxf $DEST -C /tmp/ --no-same-owner
 
         if [[ -n "$ROOTDIR1" && ${#ROOTDIR1} -gt 1 ]]; then
             echo "Provided nameindex tar uses $ROOTDIR1 as root directory"
