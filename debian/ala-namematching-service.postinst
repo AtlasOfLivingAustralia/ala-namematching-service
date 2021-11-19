@@ -67,6 +67,13 @@ case "$1" in
             fi
         fi
         chown -R namematching:namematching /data/lucene/namematching/
+
+        # Restart the service with the downloaded namematching
+
+        if [ -d /run/systemd/system ]; then
+            deb-systemd-invoke restart ala-namematching-service.service || true
+        fi
+
     ;;
 esac
 
