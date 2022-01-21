@@ -25,6 +25,24 @@ public interface NameMatchService extends Closeable {
     NameUsageMatch match(NameSearch search);
 
     /**
+     * Bulk name search
+     * <p>
+     * Nulls are allowed in the searches.
+     * If a null is present, then no search is conducted.
+     * This allows a client to send a partially cached list of
+     * requests to the server and just get lookups on the specific
+     * elements needed.
+     * </p>
+     *
+     * @param searches The search specifications. possibly containing nulls
+     *
+     * @return A list of matches, with success=false if not found and nulls for null requests
+     * 
+     * @see #match(NameSearch)
+     */
+    List<NameUsageMatch> matchAll(List<NameSearch> searches);
+
+    /**
      * Find a mataching taxon based on the Linnaean hierarchy.
      *
      * @see #match(NameSearch)

@@ -7,6 +7,116 @@ It consists of three components. all with maven groupId `au.org.ala.names`:
 * `ala-namematching-client` A client library that can be linked into other applications and which accesses the web services
 * `ala-namemacthing-server` A server application that can be used for name searches
 
+## Client Library
+
+To include the client library in an application include the following dependency
+
+```xml
+<dependency>
+    <groupId>au.org.ala.names</groupId>
+    <version>1.6-SNAPSHOT</version>
+    <artifactId>ala-namematching-client</artifactId>
+</dependency>
+```
+
+To access the client library, create a configuration and then create a client based on the configuration.
+The client implements the [name matching API](client/src/main/java/au/org/ala/names/ws/api/NameMatchService.java).
+You can do this either programmatically, using the client configuration builder:
+
+```java
+ClientConficonfiguration configuration = ClientConfiguration.builder()
+    .baseUrl(new URL("https://namematching-ws.arg.au"))
+    .timeOut(300000)
+    .cacheSize(200000)
+    .build();
+this.client = new ALANameUsageMatchServiceClient(configuration);
+```
+
+The possible configuration parameters are
+
+| parameter | default | description |
+| --------- | ------- | ------------ |
+| baseUrl | | The base URL of the name matching service |
+| timeOut | 30000 | The connection timeout in milliseconds |
+| cache | true | Cache server requests and responses (see below for *data* caching) |
+| cacheDir |  | The cache directory (defaults to a temporary directory) |
+| cacheSize | 52428800 (50Mb) | The cache size in bytes |
+
+Or you can read a configuration from a json or YML document, via Jackson.
+For example:
+
+```json
+{
+  "baseUrl": "https://namematching-ws.arg.au",
+  "timeOut": 3000,
+  "cache": false
+}
+```
+```java
+ObjectMapper mapper = new ObjectMapper();
+ClientConficonfiguration configuration = om.readValue(new File("config.json"), ClientCondifguration.class);
+this.client = new ALANameUsageMatchServiceClient(configuration);
+```
+
+### Data caching
+
+As well as a web service cache, the application can configure a *data cache* that holds
+the results of name searches.
+The data cache can be used to improve the performance of the `match(NameSearch)` and
+`matchAll(List<NameSearch>)` calls by caching responses.
+In the case of the `matchAll` call, partial matches result in a partial request to the
+server, with the already cached items filled from the cache.
+
+The client library has data caching disabled by default.
+If you intend to use a sara cache, you will need to include an cache2k implementation
+in your dependencies.
+For example:
+
+```xml
+<dependency>   
+  <groupId>org.cache2k</groupId>
+  <artifactId>cache2k-jcache</artifactId>
+  <version>1.2.0.Final</version>
+</dependency>
+```
+
+
+To build a data-cached client, you need to build a data cache configuration and
+add it to the client cofiguration.
+
+```java
+DataCacheConfiguration dataCache = DataCacheConfiguration.builder()
+        .enableJmx(false)
+        .build();
+ClientConficonfiguration configuration = ClientConfiguration.builder()
+        .baseUrl(new URL("https://namematching-ws.arg.au"))
+        .dataCache(dataCache)
+        .build();
+this.client = new ALANameUsageMatchServiceClient(configuration);
+```
+
+or
+
+```json
+{
+  "baseUrl": "https://namematching-ws.arg.au",
+  "dataCache": {
+    "enableJmx": false
+  }
+}
+```
+
+The possible data cache configuration parameters are:
+
+| parameter | default | description |
+| --------- | ------- | ------------ |
+| enableJmx | true | Enable Java Management Extension monitoring of the cache. This allows a running applicationm to be queried about cache performance via applications such as `jconsole` |
+| entryCapacity | 100000 | The number of entries to cache |
+| eternal | true | If true, do not expire old entries |
+| keepDataAfterExpired | false  | Keep data in the cache after expiry |
+| permitNullValues | true | Allow caching of nulls |
+| suppressExceptions | false | Suppress, rather than propagate exceptions |
+
 ## How to start the ALANameMatchingService application
 
 1. Run `mvn clean install` to build your application

@@ -7,6 +7,7 @@ import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.ClientException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import org.cache2k.Cache;
 import retrofit2.Call;
 import retrofit2.HttpException;
 import retrofit2.Response;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -26,6 +28,9 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
 
     private final OkHttpClient okHttpClient;
 
+    // A data cache, if configured
+    private final Optional<Cache<NameSearch, MatchResult>> matchCache;
+
     /**
      * Creates an instance using the provided configuration settings.
      * 
@@ -35,6 +40,8 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      */
     public ALANameUsageMatchServiceClient(ClientConfiguration configuration) throws IOException {
         this.okHttpClient = configuration.createClient();
+        this.matchCache = configuration.buildDataCache(NameSearch.class, MatchResult.class)
+                .map(b -> b.loader(k -> MatchResult.empty(k)).build());
         alaNameUsageMatchService = configuration.createRetrofitClient(this.okHttpClient, ALANameUsageMatchRetrofitService.class);
     }
 
@@ -49,9 +56,62 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
       */
     @Override
     public NameUsageMatch match(NameSearch search)  {
-        return this.call(this.alaNameUsageMatchService.match(search));
+        if (!this.matchCache.isPresent())
+            return this.call(this.alaNameUsageMatchService.match(search));
+        MatchResult result = this.matchCache.get().get(search);
+        return this.resolve(result);
     }
 
+    // Resolve a result and return the match
+    protected NameUsageMatch resolve(MatchResult result) {
+        if (result.getValue() == null) {
+            NameUsageMatch match = this.call(this.alaNameUsageMatchService.match(result.getKey()));
+            result.setValue(match);
+            this.matchCache.get().put(result.getKey(), result);
+        }
+        return result.getValue();
+    }
+
+    /**
+     * Search for a match for a list of search keys.
+     *
+     * @param searches The search keys
+     *
+     * @return The matching results
+     *
+     * @see NameMatchService#matchAll(List)
+     */
+    @Override
+    public List<NameUsageMatch> matchAll(List<NameSearch> searches)  {
+        if (!this.matchCache.isPresent())
+            return this.call(this.alaNameUsageMatchService.matchAll(searches));
+        List<MatchResult> results = searches.stream()
+                .map(s -> this.matchCache.get().get(s))
+                .collect(Collectors.toList());
+        return this.resolve(results);
+    }
+
+    // Resolve a list of results and return the matches
+    // Uses a bulk query
+    protected List<NameUsageMatch> resolve(List<MatchResult> results) {
+        if (results.stream().allMatch(Result::isSet)) {
+            return results.stream().map(Result::getValue).collect(Collectors.toList());
+        }
+        final List<NameSearch> query = results.stream().map(r -> r.isSet() ? null : r.getKey()).collect(Collectors.toList());
+        final List<NameUsageMatch> values = this.call(this.alaNameUsageMatchService.matchAll(query));
+        final List<NameUsageMatch> matches = new ArrayList<>(query.size());
+        final int len = Math.min(query.size(), values.size());
+        for (int i = 0; i < len; i++) {
+            NameUsageMatch match = values.get(i);
+            MatchResult result = results.get(i);
+            if (match != null) {
+                result.setValue(match);
+                this.matchCache.get().put(result.getKey(), result);
+            }
+            matches.add(result.getValue());
+        }
+        return matches;
+    }
     /**
      * Find a mataching taxon based on the Linnaean hierarchy.
      *
@@ -134,7 +194,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
     /**
      * Search for a record with a specific LSID.
      *
-     * @param lsid      The taxon identifier
+     * @param id      The taxon identifier
      * @return The matching LSID or null.
      */
     @Override

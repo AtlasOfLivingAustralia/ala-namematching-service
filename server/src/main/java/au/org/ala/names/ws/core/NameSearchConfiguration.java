@@ -1,5 +1,6 @@
 package au.org.ala.names.ws.core;
 
+import au.org.ala.ws.DataCacheConfiguration;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -32,7 +33,7 @@ public class NameSearchConfiguration {
     private boolean checkHints = true;
     /** The cache configuration */
     @JsonProperty
-    private CacheConfiguration cache = new CacheConfiguration();
+    private DataCacheConfiguration cache = DataCacheConfiguration.builder().build();
 
     public NameSearchConfiguration() {
         try {

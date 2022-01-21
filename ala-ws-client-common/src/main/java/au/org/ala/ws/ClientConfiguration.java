@@ -9,6 +9,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import org.cache2k.Cache2kBuilder;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
@@ -19,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 /**
  * A generic set of configuration parameters for a web client.
@@ -49,6 +51,9 @@ public class ClientConfiguration {
     @JsonProperty
     @Builder.Default
     private long cacheSize = (long) 50 * 1024 * 1024;
+    /** The data cache (as opposed to the HTTP cache) */
+    @JsonProperty
+    private DataCacheConfiguration dataCache;
 
     /**
      * Get the timeout duration.
@@ -98,5 +103,22 @@ public class ClientConfiguration {
         .addConverterFactory(JacksonConverterFactory.create())
         .validateEagerly(true)
         .build().create(service);
+    }
+
+    /**
+     * Build a data cache builder for responses.
+     *
+     * @param keyClass The cache key class
+     * @param valueClass The expected value class
+     *
+     * @param <K> The key type
+     * @param <V> The value type
+     *
+     * @return An optional builder containing the cache configuration or null for no cache
+     */
+    public <K, V> Optional<Cache2kBuilder<K, V>> buildDataCache(Class<K> keyClass, Class<V> valueClass) {
+        if (this.dataCache == null)
+            return Optional.empty();
+        return Optional.of(this.dataCache.cacheBuilder(keyClass, valueClass));
     }
 }

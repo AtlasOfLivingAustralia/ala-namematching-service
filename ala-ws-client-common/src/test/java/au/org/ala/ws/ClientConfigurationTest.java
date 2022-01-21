@@ -1,11 +1,14 @@
 package au.org.ala.ws;
 
+import org.cache2k.Cache;
+import org.cache2k.Cache2kBuilder;
 import org.junit.Test;
 
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class ClientConfigurationTest {
     @Test
@@ -51,4 +54,24 @@ public class ClientConfigurationTest {
         ClientConfiguration configuration = builder.build();
         assertEquals(2000, configuration.getCacheSize());
     }
+
+    @Test
+    public void testBuild6() throws Exception {
+        ClientConfiguration.ClientConfigurationBuilder builder = ClientConfiguration.builder();
+        DataCacheConfiguration dataCache = DataCacheConfiguration.builder().build();
+        builder.dataCache(dataCache);
+        ClientConfiguration configuration = builder.build();
+        Optional<Cache2kBuilder<String, String>> cacheBuilder = configuration.buildDataCache(String.class, String.class);
+        assertNotNull(cacheBuilder);
+        Optional<Cache<String, String>> cache = cacheBuilder.map(b -> b.loader(k -> k + ":loaded").build());
+        assertNotNull(cache);
+        assertTrue(cache.isPresent());
+        assertEquals("a:loaded", cache.get().get("a"));
+        cache.get().clearAndClose();
+    }
+
+    protected String testLoader(String key) {
+        return key + ":loaded";
+    }
+
 }
