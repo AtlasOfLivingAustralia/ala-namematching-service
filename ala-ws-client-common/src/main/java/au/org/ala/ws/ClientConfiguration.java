@@ -3,6 +3,7 @@ package au.org.ala.ws;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -31,6 +32,7 @@ import java.util.Optional;
 @Builder
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonDeserialize(builder = ClientConfiguration.ClientConfigurationBuilder.class)
 @Slf4j
 public class ClientConfiguration {
     /** The base url to use when accessing the API */

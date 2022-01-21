@@ -2,6 +2,7 @@ package au.org.ala.ws;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -23,6 +24,7 @@ import org.cache2k.Cache2kBuilder;
 @Builder
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonDeserialize(builder = DataCacheConfiguration.DataCacheConfigurationBuilder.class)
 public class DataCacheConfiguration {
     /** If true, allow JMX interrogation. False by default */
     @JsonProperty
