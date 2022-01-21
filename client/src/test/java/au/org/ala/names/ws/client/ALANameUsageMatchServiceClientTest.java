@@ -110,7 +110,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         server.enqueue(new MockResponse().setBody(response));
         List<NameSearch> searches = new ArrayList<>();
         searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
-        searches.add(NameSearch.builder().scientificName("Ospranter rufus").build());
+        searches.add(NameSearch.builder().scientificName("Osphranter rufus").build());
         List<NameUsageMatch> matches = client.matchAll(searches);
 
         assertNotNull(matches);
