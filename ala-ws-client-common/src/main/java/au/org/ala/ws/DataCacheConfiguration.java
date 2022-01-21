@@ -23,7 +23,7 @@ import org.cache2k.Cache2kBuilder;
 @Value
 @Builder
 @EqualsAndHashCode
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(builder = DataCacheConfiguration.DataCacheConfigurationBuilder.class)
 public class DataCacheConfiguration {
     /** If true, allow JMX interrogation. False by default */
@@ -39,6 +39,7 @@ public class DataCacheConfiguration {
     @Builder.Default
     private boolean eternal = true;
     /** Keep data in the cache after it has expired. False by default */
+    @JsonProperty
     @Builder.Default
     private boolean keepDataAfterExpired = false;
     /** Permit null values to be cached. True by default */

@@ -1,1 +1,14 @@
-{"baseUrl":"http://localhost:8080","timeOut":30000,"cache":true,"cacheSize":52428800,"dataCache":{"entryCapacity":20,"eternal":true,"permitNullValues":true}}
+{
+  "baseUrl" : "http://localhost:8080",
+  "timeOut" : 30000,
+  "cache" : true,
+  "cacheSize" : 52428800,
+  "dataCache" : {
+    "enableJmx" : false,
+    "entryCapacity" : 20,
+    "eternal" : true,
+    "keepDataAfterExpired" : false,
+    "permitNullValues" : true,
+    "suppressExceptions" : false
+  }
+}

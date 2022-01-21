@@ -2,6 +2,7 @@ package au.org.ala.ws;
 
 import au.org.ala.util.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.cache2k.Cache;
 import org.cache2k.Cache2kBuilder;
 import org.junit.Test;
@@ -81,6 +82,7 @@ public class ClientConfigurationTest extends TestUtils {
                 .cacheDir(new File("/data/tmp/cache").toPath())
                 .build();
         ObjectMapper om = new ObjectMapper();
+        om.enable(SerializationFeature.INDENT_OUTPUT);
         StringWriter writer = new StringWriter();
         om.writeValue(writer, configuration);
         // System.out.println(writer.toString());
@@ -97,6 +99,7 @@ public class ClientConfigurationTest extends TestUtils {
                 .dataCache(dataCache)
                 .build();
         ObjectMapper om = new ObjectMapper();
+        om.enable(SerializationFeature.INDENT_OUTPUT);
         StringWriter writer = new StringWriter();
         om.writeValue(writer, configuration);
         // System.out.println(writer.toString());

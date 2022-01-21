@@ -2,6 +2,7 @@ package au.org.ala.ws;
 
 import au.org.ala.util.TestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.cache2k.Cache;
 import org.junit.Assert;
 import org.junit.Test;
@@ -47,6 +48,7 @@ public class DataCacheConfigurationTest extends TestUtils {
                 .suppressExceptions(true)
                 .build();
         ObjectMapper om = new ObjectMapper();
+        om.enable(SerializationFeature.INDENT_OUTPUT);
         StringWriter writer = new StringWriter();
         om.writeValue(writer, configuration);
         // System.out.println(writer.toString());
@@ -59,6 +61,7 @@ public class DataCacheConfigurationTest extends TestUtils {
                 .entryCapacity(20000)
                 .build();
         ObjectMapper om = new ObjectMapper();
+        om.enable(SerializationFeature.INDENT_OUTPUT);
         StringWriter writer = new StringWriter();
         om.writeValue(writer, configuration);
         // System.out.println(writer.toString());

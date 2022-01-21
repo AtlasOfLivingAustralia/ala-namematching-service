@@ -31,7 +31,7 @@ import java.util.Optional;
 @Value
 @Builder
 @EqualsAndHashCode
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonDeserialize(builder = ClientConfiguration.ClientConfigurationBuilder.class)
 @Slf4j
 public class ClientConfiguration {
