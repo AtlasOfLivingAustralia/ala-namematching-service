@@ -21,6 +21,10 @@ interface ALANameUsageMatchRetrofitService {
     @Headers({"Content-Type: application/json"})
     Call<NameUsageMatch> match(@Body NameSearch search);
 
+    @POST("/api/searchAllByClassification")
+    @Headers({"Content-Type: application/json"})
+    Call<List<NameUsageMatch>> matchAll(@Body List<NameSearch> searches);
+
     @GET("/api/searchByClassification")
     @Headers({"Content-Type: application/json"})
     Call<NameUsageMatch> match(

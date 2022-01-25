@@ -1,0 +1,72 @@
+[
+  null,
+  {
+    "success": true,
+    "scientificName": "Vachellia nilotica",
+    "scientificNameAuthorship": "(L.) P.J.H.Hurter & Mabb.",
+    "taxonConceptID": "https://id.biodiversity.org.au/node/apni/7384761",
+    "rank": "species",
+    "rankID": 7000,
+    "lft": 604183,
+    "rgt": 604185,
+    "matchType": "exactMatch",
+    "nameType": "SCIENTIFIC",
+    "kingdom": "Plantae",
+    "kingdomID": "https://id.biodiversity.org.au/taxon/apni/51337710",
+    "phylum": "Charophyta",
+    "phylumID": "https://id.biodiversity.org.au/taxon/apni/51337706",
+    "classs": "Equisetopsida",
+    "classID": "https://id.biodiversity.org.au/taxon/apni/51337705",
+    "order": "Fabales",
+    "orderID": "https://id.biodiversity.org.au/taxon/apni/51311090",
+    "family": "Fabaceae",
+    "familyID": "https://id.biodiversity.org.au/taxon/apni/51311092",
+    "genus": "Vachellia",
+    "genusID": "https://id.biodiversity.org.au/taxon/apni/51300992",
+    "species": "Vachellia nilotica",
+    "speciesID": "https://id.biodiversity.org.au/node/apni/7384761",
+    "speciesGroup": [
+      "Plants"
+    ],
+    "issues": [
+      "noIssue"
+    ]
+  },
+  {
+    "success": true,
+    "scientificName": "Dalatias licha",
+    "scientificNameAuthorship": "(Bonnaterre, 1788)",
+    "taxonConceptID": "urn:lsid:biodiversity.org.au:afd.taxon:2bd8e210-9bc2-42a1-a432-9212ce959682",
+    "rank": "species",
+    "rankID": 7000,
+    "lft": 185013,
+    "rgt": 185013,
+    "matchType": "exactMatch",
+    "nameType": "SCIENTIFIC",
+    "kingdom": "Animalia",
+    "kingdomID": "urn:lsid:biodiversity.org.au:afd.taxon:4647863b-760d-4b59-aaa1-502c8cdf8d3c",
+    "phylum": "Chordata",
+    "phylumID": "urn:lsid:biodiversity.org.au:afd.taxon:065f1da4-53cd-40b8-a396-80fa5c74dedd",
+    "classs": "Chondrichthyes",
+    "classID": "urn:lsid:biodiversity.org.au:afd.taxon:6f1093ab-9b44-4a55-9066-7daa2f902093",
+    "order": "Squaliformes",
+    "orderID": "urn:lsid:biodiversity.org.au:afd.taxon:a96a2f84-12b4-49d7-9c67-5275eda8e74e",
+    "family": "Dalatiidae",
+    "familyID": "urn:lsid:biodiversity.org.au:afd.taxon:574aae25-1339-4708-a0e3-843a792e8f6b",
+    "genus": "Dalatias",
+    "genusID": "urn:lsid:biodiversity.org.au:afd.taxon:314b1ef4-c31f-4dd2-a73d-ec384aab378c",
+    "species": "Dalatias licha",
+    "speciesID": "urn:lsid:biodiversity.org.au:afd.taxon:2bd8e210-9bc2-42a1-a432-9212ce959682",
+    "vernacularName": "black shark",
+    "speciesGroup": [
+      "Animals",
+      "Fishes"
+    ],
+    "speciesSubgroup": [
+      "Dogfish Sharks"
+    ],
+    "issues": [
+      "noIssue"
+    ]
+  }
+]

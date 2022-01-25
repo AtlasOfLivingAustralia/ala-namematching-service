@@ -13,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
