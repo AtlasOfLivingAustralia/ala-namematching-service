@@ -19,6 +19,12 @@ To include the client library in an application include the following dependency
 </dependency>
 ```
 
+or for gradle
+
+```groovy
+compile "au.org.ala.names:ala-namematching-client:1.6-SNAPSHOT"
+```
+
 To access the client library, create a configuration and then create a client based on the configuration.
 The client implements the [name matching API](client/src/main/java/au/org/ala/names/ws/api/NameMatchService.java).
 You can do this either programmatically, using the client configuration builder:
@@ -78,6 +84,12 @@ For example:
   <artifactId>cache2k-jcache</artifactId>
   <version>1.2.0.Final</version>
 </dependency>
+```
+
+or for gradle
+
+```groovy
+runtime "org.cache2:cache2k-jcache:1.2.0.Final"
 ```
 
 
