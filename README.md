@@ -198,6 +198,12 @@ Hints are used in two ways, if the server is configured to use them - see [below
   If hints are available, then the resulting match is checked against the list of hints and
   flagged with a `hintMismatch` issue if the match does not correspond to the hint.
 
+#### Loose matches
+
+Search requests may contain a `"loose": true` value.
+Loose searches will see if the supplied scientific name is a
+verncaular name or taxon identifier, as well as a proper scientific name.
+Search requests with parameters are always loose.
 
 ### Health Check
 
@@ -222,6 +228,7 @@ Most of these entries have suitable defaults.
 | | subgroups | | URL of the subgroups configuration |  | `file:///data/ala-namematching-service/config/subgroups.json` | 
 | | useHints | | Use hints supplied by the request to aid matching | | true |
 | | checkHints | | Check the resulting match against the supplied hints as a sanity check | | true |
+| | allowLoose | | Allow loose searches |  | true |
 
 The `groups.json` file is a list of common names for taxa, eg.
 
