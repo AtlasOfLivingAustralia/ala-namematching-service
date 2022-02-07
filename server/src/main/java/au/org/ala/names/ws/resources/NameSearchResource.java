@@ -37,6 +37,8 @@ public class NameSearchResource implements NameMatchService {
     private final boolean useHints;
     /** Use hints to check search */
     private final boolean checkHints;
+    /** Allow loose searched */
+    private final boolean allowLoose;
 
     // Cache2k instance for searches
     private final Cache<NameSearch, NameUsageMatch> searchCache;
@@ -52,6 +54,7 @@ public class NameSearchResource implements NameMatchService {
             this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);
             this.useHints = configuration.isUseHints();
             this.checkHints = configuration.isCheckHints();
+            this.allowLoose = configuration.isAllowLoose();
             this.searchCache = configuration.getCache().cacheBuilder(NameSearch.class, NameUsageMatch.class)
                     .loader(nameSearch -> this.search(nameSearch)) //auto populating function
                     .build();
@@ -151,6 +154,7 @@ public class NameSearchResource implements NameMatchService {
                 .specificEpithet(specificEpithet)
                 .infraspecificEpithet(infraspecificEpithet)
                 .rank(rank)
+                .loose(true)
                 .build();
         try {
             return this.searchCache.get(search);
@@ -173,7 +177,7 @@ public class NameSearchResource implements NameMatchService {
             @ApiParam(value = "The scientific name", required = true, example = "Acacia dealbata") @QueryParam("q") String name
     ) {
         try {
-            NameSearch cl = NameSearch.builder().scientificName(name).build();
+            NameSearch cl = NameSearch.builder().scientificName(name).loose(true).build();
             return this.searchCache.get(cl);
         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with query: " + name);
@@ -439,6 +443,15 @@ public class NameSearchResource implements NameMatchService {
             result = metrics == null ? null : metrics.getResult();
         }
 
+        // See if the scientific name is actually a LSID
+        if (this.allowLoose && search.isLoose()) {
+            idnsr = searcher.searchForRecordByLsid(search.getScientificName());
+            if (idnsr != null){
+                Set<String> vernacularNames = searcher.getCommonNamesForLSID(idnsr.getLsid(), 1);
+                return create(idnsr, vernacularNames, idnsr.getMatchType(), null, null, null);
+            }
+        }
+
         // Last resort, search using a vernacular name in either the vernacular or scientific slots
         if (metrics == null)
             metrics = new MetricsResultDTO();
@@ -449,7 +462,7 @@ public class NameSearchResource implements NameMatchService {
                 metrics.setResult(result);
             }
         }
-        if (result == null && nsearch.getScientificName() != null) {
+        if (result == null && nsearch.getScientificName() != null && this.allowLoose && search.isLoose()) {
             result = this.searcher.searchForCommonName(nsearch.getScientificName());
             if (result != null) {
                 metrics.setNameType(NameType.INFORMAL);

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @JsonDeserialize(builder = NameSearch.NameSearchBuilder.class)
 @Value
 @Builder
@@ -157,6 +157,10 @@ public class NameSearch {
         notes = "http://rs.tdwg.org/dwc/terms/vernacularName"
     )
     private Map<String, List<String>> hints;
+    @ApiModelProperty(
+        value = "Allow a loose search. Loose searches will treat the scientific name as a vernacular name or a taxon identifier if the name cannot be found."
+    )
+    private boolean loose;
 
     /**
      * Get a version of this that has been normalised.
@@ -191,6 +195,7 @@ public class NameSearch {
                         k -> this.hints.get(k).stream().map(v -> NORMALISER.normalise(v)).collect(Collectors.toList()))
                     )
             )
+            .loose(this.loose)
             .build();
     }
 

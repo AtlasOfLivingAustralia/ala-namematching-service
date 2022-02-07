@@ -31,6 +31,8 @@ public class NameSearchConfiguration {
     /** Use hints to confirm the matching result (true by default) */
     @JsonProperty
     private boolean checkHints = true;
+    /** Allow loose searching on taxon identifier and vernacular name in place of scientific name, if requested */
+    private boolean allowLoose = true;
     /** The cache configuration */
     @JsonProperty
     private DataCacheConfiguration cache = DataCacheConfiguration.builder().build();
