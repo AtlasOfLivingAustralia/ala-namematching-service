@@ -1,10 +1,9 @@
 [Unit]
 Description=ala-namematching-service
-After=syslog.target
 
 [Service]
 User=namematching
-ExecStart=/usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar /data/ala-namematching-server.jar server /data/config.yml
+ExecStart=/usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar /opt/atlas/ala-namematching-service/ala-namematching-server.jar server /data/ala-namematching-service/config/config.yml
 SuccessExitStatus=143
 
 [Install]

@@ -14,12 +14,12 @@ Vcs-Git: https://github.com/AtlasOfLivingAustralia/ala-namematching-service.git
 
 Package: ala-namematching-service
 Architecture: all
-Depends: ${misc:Depends}, openjdk-8-jdk, ca-certificates, tar (>= 1.0), rsync, curl
+Depends: ${misc:Depends}, openjdk-8-jdk, ca-certificates, tar (>= 1.0), rsync,
+ curl, adduser
 Suggests:
-Description: The ALA Name Matching Service application
+Description: ALA Name Matching Service application
  This package contains the ala-namematching-service package from
  Atlas of Living Australia, Free and open source IT infrastructure
  for the aggregation and delivery of biodiversity data.
  .
- Read: https://github.com/AtlasOfLivingAustralia/documentation/wiki/A-Guide-to-Getting-Names-into-the-ALA
- for a good description
+ Read: https://github.com/AtlasOfLivingAustralia/ala-namematching-service
