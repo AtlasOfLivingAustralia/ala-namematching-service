@@ -21,6 +21,7 @@ public class SpeciesGroupsUtil {
     private static final Map<NameSearchConfiguration, SpeciesGroupsUtil> managerCache = new HashMap<>();
 
     /** The name index used to match names to actual taxon entries */
+    @Getter
     private final ALANameSearcher nameIndex;
     /** The list of possible species groups */
     @Getter

@@ -33,7 +33,7 @@ debian/ala-namematching-service
 You can test the generated package without install it with `piuparts` like:
 
 ```bash
-sudo piuparts -D ubuntu -d xenial -d bionic ../ala-namematching-service_1.5_all.deb
+sudo piuparts -D ubuntu -d xenial -d bionic ../ala-namematching-service_1.6_all.deb
 ```
 in this way you can also test it in different releases.
 

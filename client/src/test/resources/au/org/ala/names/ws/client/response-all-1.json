@@ -1,0 +1,73 @@
+[
+    {
+    "success": true,
+    "scientificName": "Acacia dealbata",
+    "scientificNameAuthorship": "Link",
+    "taxonConceptID": "https://id.biodiversity.org.au/taxon/apni/51286863",
+    "rank": "species",
+    "rankID": 7000,
+    "lft": 607769,
+    "rgt": 607791,
+    "matchType": "exactMatch",
+    "nameType": "SCIENTIFIC",
+    "kingdom": "Plantae",
+    "kingdomID": "https://id.biodiversity.org.au/taxon/apni/51337710",
+    "phylum": "Charophyta",
+    "phylumID": "https://id.biodiversity.org.au/taxon/apni/51337706",
+    "classs": "Equisetopsida",
+    "classID": "https://id.biodiversity.org.au/taxon/apni/51337705",
+    "order": "Fabales",
+    "orderID": "https://id.biodiversity.org.au/taxon/apni/51311090",
+    "family": "Fabaceae",
+    "familyID": "https://id.biodiversity.org.au/taxon/apni/51311092",
+    "genus": "Acacia",
+    "genusID": "https://id.biodiversity.org.au/taxon/apni/51311124",
+    "species": "Acacia dealbata",
+    "speciesID": "https://id.biodiversity.org.au/taxon/apni/51286863",
+    "vernacularName": null,
+    "speciesGroup": [
+      "Plants"
+    ],
+    "speciesSubgroup": [],
+    "issues": [
+      "noIssue"
+    ]
+  },
+  {
+    "success": true,
+    "scientificName": "Osphranter rufus",
+    "scientificNameAuthorship": "(Desmarest, 1822)",
+    "taxonConceptID": "urn:lsid:biodiversity.org.au:afd.taxon:e6aff6af-ff36-4ad5-95f2-2dfdcca8caff",
+    "rank": "species",
+    "rankID": 7000,
+    "lft": 202407,
+    "rgt": 202407,
+    "matchType": "exactMatch",
+    "nameType": "SCIENTIFIC",
+    "kingdom": "Animalia",
+    "kingdomID": "urn:lsid:biodiversity.org.au:afd.taxon:4647863b-760d-4b59-aaa1-502c8cdf8d3c",
+    "phylum": "Chordata",
+    "phylumID": "urn:lsid:biodiversity.org.au:afd.taxon:065f1da4-53cd-40b8-a396-80fa5c74dedd",
+    "classs": "Mammalia",
+    "classID": "urn:lsid:biodiversity.org.au:afd.taxon:e9e7db31-04df-41fb-bd8d-e0b0f3c332d6",
+    "order": "Diprotodontia",
+    "orderID": "urn:lsid:biodiversity.org.au:afd.taxon:bd223248-af12-4ce9-9380-4f9a85be38db",
+    "family": "Macropodidae",
+    "familyID": "urn:lsid:biodiversity.org.au:afd.taxon:190ad4b1-0444-4791-96a5-ee514438d7e6",
+    "genus": "Osphranter",
+    "genusID": "urn:lsid:biodiversity.org.au:afd.taxon:288b19b6-1b3a-4746-aecd-5b2127aa2855",
+    "species": "Osphranter rufus",
+    "speciesID": "urn:lsid:biodiversity.org.au:afd.taxon:e6aff6af-ff36-4ad5-95f2-2dfdcca8caff",
+    "vernacularName": "Red Kangaroo",
+    "speciesGroup": [
+      "Animals",
+      "Mammals"
+    ],
+    "speciesSubgroup": [
+      "Herbivorous Marsupials"
+    ],
+    "issues": [
+      "noIssue"
+    ]
+  }
+]

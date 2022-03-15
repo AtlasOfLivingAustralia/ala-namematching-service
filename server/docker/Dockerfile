@@ -31,8 +31,8 @@ COPY docker/subgroups.json /data/ala-namematching-service/config/subgroups.json
 
 # Uncomment and edit to use locally built debian package See debian/README.md for how to build these
 # You will have to copy the build .deb into the working directory
-#COPY ./ala-namematching-service_1.5_all.deb /tmp
-#RUN dpkg -i /tmp/ala-namematching-service_1.5_all.deb
+#COPY ./ala-namematching-service_1.6_all.deb /tmp
+#RUN dpkg -i /tmp/ala-namematching-service_1.6_all.deb
 
 EXPOSE 9179
 EXPOSE 9180

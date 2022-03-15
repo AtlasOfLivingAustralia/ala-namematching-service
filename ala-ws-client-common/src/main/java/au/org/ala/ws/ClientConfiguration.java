@@ -3,12 +3,14 @@ package au.org.ala.ws;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import org.cache2k.Cache2kBuilder;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
@@ -19,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 /**
  * A generic set of configuration parameters for a web client.
@@ -28,7 +31,8 @@ import java.time.temporal.ChronoUnit;
 @Value
 @Builder
 @EqualsAndHashCode
-@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonDeserialize(builder = ClientConfiguration.ClientConfigurationBuilder.class)
 @Slf4j
 public class ClientConfiguration {
     /** The base url to use when accessing the API */
@@ -49,6 +53,9 @@ public class ClientConfiguration {
     @JsonProperty
     @Builder.Default
     private long cacheSize = (long) 50 * 1024 * 1024;
+    /** The data cache (as opposed to the HTTP cache) */
+    @JsonProperty
+    private DataCacheConfiguration dataCache;
 
     /**
      * Get the timeout duration.
@@ -98,5 +105,22 @@ public class ClientConfiguration {
         .addConverterFactory(JacksonConverterFactory.create())
         .validateEagerly(true)
         .build().create(service);
+    }
+
+    /**
+     * Build a data cache builder for responses.
+     *
+     * @param keyClass The cache key class
+     * @param valueClass The expected value class
+     *
+     * @param <K> The key type
+     * @param <V> The value type
+     *
+     * @return An optional builder containing the cache configuration or null for no cache
+     */
+    public <K, V> Optional<Cache2kBuilder<K, V>> buildDataCache(Class<K> keyClass, Class<V> valueClass) {
+        if (this.dataCache == null)
+            return Optional.empty();
+        return Optional.of(this.dataCache.cacheBuilder(keyClass, valueClass));
     }
 }
