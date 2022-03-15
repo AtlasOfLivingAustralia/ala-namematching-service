@@ -6,6 +6,7 @@ import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
+import au.org.ala.ws.DataCacheConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
 import org.junit.After;
@@ -31,7 +32,11 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     @Before
     public void setUp() throws Exception {
         SUPPORT.before();
-        this.configuration = ClientConfiguration.builder().baseUrl(new URL(NAMEMATCHING_SERVER_URL)).build();
+        DataCacheConfiguration dataCacheConfig = DataCacheConfiguration.builder().build();
+        this.configuration = ClientConfiguration.builder()
+                .baseUrl(new URL(NAMEMATCHING_SERVER_URL))
+                .dataCache(dataCacheConfig)
+                .build();
         this.client = new ALANameUsageMatchServiceClient(configuration);
     }
 
@@ -81,6 +86,105 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
         assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
+    }
+
+
+    /** Multiple search */
+    @Test
+    public void testMatchAllNameSearch1() throws Exception {
+        List<NameSearch> searches = new ArrayList<>();
+        searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
+        searches.add(NameSearch.builder().scientificName("Osphranter rufus").build());
+        List<NameUsageMatch> matches = client.matchAll(searches);
+
+        assertNotNull(matches);
+        assertEquals(2, matches.size());
+        NameUsageMatch match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        match = matches.get(1);
+        assertTrue(match.isSuccess());
+        assertEquals("Osphranter rufus", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://biodiversity.org.au/afd/taxa/e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+    }
+
+    /** Multiple search with caching */
+    @Test
+    public void testMatchAllNameSearch2() throws Exception {
+        List<NameSearch> searches = new ArrayList<>();
+        searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
+        searches.add(NameSearch.builder().scientificName("Osphranter rufus").build());
+        List<NameUsageMatch> matches = client.matchAll(searches);
+
+        assertNotNull(matches);
+        assertEquals(2, matches.size());
+        NameUsageMatch match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        match = matches.get(1);
+        assertTrue(match.isSuccess());
+        assertEquals("Osphranter rufus", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://biodiversity.org.au/afd/taxa/e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+
+        matches = client.matchAll(searches);
+        assertNotNull(matches);
+        assertEquals(2, matches.size());
+        match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        match = matches.get(1);
+        assertTrue(match.isSuccess());
+        assertEquals("Osphranter rufus", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://biodiversity.org.au/afd/taxa/e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+    }
+
+    /** Multiple search with caching */
+    @Test
+    public void testMatchAllNameSearch3() throws Exception {
+        List<NameSearch> searches;
+        List<NameUsageMatch> matches;
+        NameUsageMatch match;
+
+        searches = new ArrayList<>();
+        searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
+        searches.add(NameSearch.builder().scientificName("Osphranter rufus").build());
+        matches = client.matchAll(searches);
+
+        assertNotNull(matches);
+        assertEquals(2, matches.size());
+
+        searches = new ArrayList<>();
+        searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
+        searches.add(NameSearch.builder().scientificName("Vachellia nilotica").build());
+        searches.add(NameSearch.builder().scientificName("Dalatias licha").build());
+        matches = client.matchAll(searches);
+
+        assertNotNull(matches);
+        assertEquals(3, matches.size());
+        match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        match = matches.get(1);
+        assertTrue(match.isSuccess());
+        assertEquals("Vachellia nilotica", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://id.biodiversity.org.au/node/apni/7384761", match.getTaxonConceptID());
+        match = matches.get(2);
+        assertTrue(match.isSuccess());
+        assertEquals("Dalatias licha", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://biodiversity.org.au/afd/taxa/2bd8e210-9bc2-42a1-a432-9212ce959682", match.getTaxonConceptID());
     }
 
     /** Simple request/response */

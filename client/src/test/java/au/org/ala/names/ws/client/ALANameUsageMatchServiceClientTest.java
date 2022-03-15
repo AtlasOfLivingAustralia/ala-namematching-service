@@ -101,6 +101,37 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals(request, req.getBody().readUtf8());
     }
 
+    /** Multiple search */
+    @Test
+    public void testMatchAllNameSearch1() throws Exception {
+        String request = this.getResource("request-all-1.json");
+        String response = this.getResource("response-all-1.json");
+
+        server.enqueue(new MockResponse().setBody(response));
+        List<NameSearch> searches = new ArrayList<>();
+        searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
+        searches.add(NameSearch.builder().scientificName("Osphranter rufus").build());
+        List<NameUsageMatch> matches = client.matchAll(searches);
+
+        assertNotNull(matches);
+        assertEquals(2, matches.size());
+        NameUsageMatch match = matches.get(0);
+        assertTrue(match.isSuccess());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+        match = matches.get(1);
+        assertTrue(match.isSuccess());
+        assertEquals("Osphranter rufus", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+
+        assertEquals(1, server.getRequestCount());
+        RecordedRequest req = server.takeRequest();
+        assertEquals("/api/searchAllByClassification", req.getPath());
+        assertEquals(request, req.getBody().readUtf8());
+    }
+
     /** Ignored. Does not cache on POST request */
     @Test
     @Ignore

@@ -22,7 +22,7 @@ public class NameSearchResourceTest {
     public void setUp() throws Exception {
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.INFO); // Stop logging insanity
         this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20210811"); // Ensure consistent index
+        this.configuration.setIndex("/data/lucene/namematching-20210811-2"); // Ensure consistent index
         this.configuration.setGroups(this.getClass().getResource("../core/test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("../core/test-subgroups-1.json"));
         this.resource = new NameSearchResource(this.configuration);
@@ -118,6 +118,47 @@ public class NameSearchResourceTest {
         assertEquals("Animalia", match.getKingdom());
         assertEquals("Pterophoridae", match.getFamily());
         assertEquals("family", match.getRank());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+
+    @Test
+    public void testSearchByClassification7() throws Exception {
+        NameSearch search = NameSearch.builder().genus("Osphranter").specificEpithet("rufus").loose(false).build();
+        NameUsageMatch match = this.resource.match(search);
+        assertTrue(match.isSuccess());
+        assertEquals("Osphranter rufus", match.getScientificName());
+        assertEquals("Animalia", match.getKingdom());
+        assertEquals("Osphranter", match.getGenus());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+    @Test
+    public void testSearchByClassification8() throws Exception {
+        NameSearch search = NameSearch.builder().scientificName("Blue gum").loose(false).build();
+        NameUsageMatch match = this.resource.match(search);
+        assertFalse(match.isSuccess());
+    }
+
+    @Test
+    public void testSearchByClassification9() throws Exception {
+        NameSearch search = NameSearch.builder().scientificName("Splendid Telopea").loose(true).build();
+        NameUsageMatch match = this.resource.match(search);
+        assertTrue(match.isSuccess());
+        assertEquals("Telopea speciosissima", match.getScientificName());
+        assertEquals("Plantae", match.getKingdom());
+        assertEquals("vernacularMatch", match.getMatchType());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+    @Test
+    public void testSearchByClassification10() throws Exception {
+        NameSearch search = NameSearch.builder().scientificName("https://id.biodiversity.org.au/node/apni/5272169").loose(true).build();
+        NameUsageMatch match = this.resource.match(search);
+        assertTrue(match.isSuccess());
+        assertEquals("Eucalyptus globulus", match.getScientificName());
+        assertEquals("https://id.biodiversity.org.au/node/apni/5272169", match.getTaxonConceptID());
+        assertEquals("taxonIdMatch", match.getMatchType());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 

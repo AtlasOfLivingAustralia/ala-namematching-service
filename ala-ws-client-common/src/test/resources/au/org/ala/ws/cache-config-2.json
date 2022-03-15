@@ -1,0 +1,8 @@
+{
+  "enableJmx" : false,
+  "entryCapacity" : 20000,
+  "eternal" : true,
+  "keepDataAfterExpired" : false,
+  "permitNullValues" : true,
+  "suppressExceptions" : false
+}

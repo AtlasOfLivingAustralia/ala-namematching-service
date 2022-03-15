@@ -25,12 +25,13 @@ case "$1" in
         db_get ala-namematching-service/sha1
         SHA1=$RET
 
-        DEST=/data/lucene/namematching.tgz
+        DEST=/data/lucene/namematching-nm.tgz
+        FINAL_DEST=/data/lucene/namematching-nm/
 
         # To prevent /data/lucene installed nameindexes to fill our disk:
         #
         # 1) we try to not download the same nameindex again and again (this is why we use curl -C)
-        # 2) we rsync the tar over /data/lucene/namematching overwritting the previous nameindex
+        # 2) we rsync the tar over /data/lucene/namematching-nm overwritting the previous nameindex
         #
 
         echo "Downloading nameindex $URL ..."
@@ -57,16 +58,16 @@ case "$1" in
 
         if [[ -n "$ROOTDIR1" && ${#ROOTDIR1} -gt 1 ]]; then
             echo "Provided nameindex tar uses $ROOTDIR1 as root directory"
-            rsync -a --delete "/tmp/$ROOTDIR1/" /data/lucene/namematching/;
+            rsync -a --delete "/tmp/$ROOTDIR1/" "$FINAL_DEST";
         else
             if [[ -n "$ROOTDIR2" && ${#ROOTDIR2} -gt 1 ]]; then
                 echo "Provided nameindex tar uses $ROOTDIR2 as root directory"
-                rsync -a --delete "/tmp/$ROOTDIR2/" /data/lucene/namematching/;
+                rsync -a --delete "/tmp/$ROOTDIR2/" "$FINAL_DEST";
             else
                 echo "ERROR: Incorrect nameindex tar"
             fi
         fi
-        chown -R namematching:namematching /data/lucene/namematching/
+        chown -R namematching:namematching "$FINAL_DEST"
 
         # Restart the service with the downloaded namematching
 
