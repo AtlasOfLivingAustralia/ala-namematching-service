@@ -9,12 +9,12 @@ RUN mkdir -p /data/ala-namematching-service/config
 
 COPY ./src/main/resources/subgroups.json /data/ala-namematching-service/config/subgroups.json
 COPY ./src/main/resources/groups.json /data/ala-namematching-service/config/groups.json
-COPY ./target/ala-namematching-server-1.6.jar /data/ala-namematching-server.jar
+COPY ./target/ala-namematching-server-1.7-SNAPSHOT.jar /data/ala-namematching-server.jar
 COPY ./config.yml /data/config.yml
 
-RUN curl -sf  -o /data/lucene/namematching.tgz -L https://archives.ala.org.au/archives/nameindexes/20210811/namematching-20210811.tgz
+RUN curl -sf  -o /data/lucene/namematching.tgz -L https://archives.ala.org.au/archives/nameindexes/20210811-3/namematching-20210811-3.tgz
 RUN tar zxf /data/lucene/namematching.tgz -C /data/lucene
-RUN mv /data/lucene/namematching-20210811 /data/lucene/namematching
+RUN mv /data/lucene/namematching-20210811-3 /data/lucene/namematching
 
 EXPOSE 9179
 EXPOSE 9180
