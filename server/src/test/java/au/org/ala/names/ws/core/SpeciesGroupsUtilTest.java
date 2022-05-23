@@ -19,7 +19,7 @@ public class SpeciesGroupsUtilTest extends TestUtils {
     @Before
     public void setUp() throws Exception {
         this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20210811-2"); // Assumed to be there
+        this.configuration.setIndex("/data/lucene/namematching-20210811-3"); // Assumed to be there
         this.configuration.setGroups(this.getClass().getResource("test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("test-subgroups-1.json"));
         this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);

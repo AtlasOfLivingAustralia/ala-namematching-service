@@ -22,7 +22,7 @@ public class NameSearchResourceTest {
     public void setUp() throws Exception {
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.INFO); // Stop logging insanity
         this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20210811-2"); // Ensure consistent index
+        this.configuration.setIndex("/data/lucene/namematching-20210811-3"); // Ensure consistent index
         this.configuration.setGroups(this.getClass().getResource("../core/test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("../core/test-subgroups-1.json"));
         this.resource = new NameSearchResource(this.configuration);
