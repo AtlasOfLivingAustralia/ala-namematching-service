@@ -253,11 +253,11 @@ public class NameSearchResourceTest {
 
     @Test
     public void testMisapplied1() throws Exception {
-        NameSearch search = NameSearch.builder().scientificName("Corybas macranthus").build();
+        NameSearch search = NameSearch.builder().scientificName("Bertya rosmarinifolia").build();
         NameUsageMatch match = this.resource.match(search);
         assertTrue(match.isSuccess());
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51401037", match.getTaxonConceptID());
-        assertEquals(Arrays.asList("misappliedName"), match.getIssues());
+        assertEquals("https://id.biodiversity.org.au/node/apni/2893214", match.getTaxonConceptID());
+        assertEquals(Arrays.asList("matchedToMisappliedName"), match.getIssues());
     }
 
     @Test
