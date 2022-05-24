@@ -14,7 +14,7 @@ To include the client library in an application include the following dependency
 ```xml
 <dependency>
     <groupId>au.org.ala.names</groupId>
-    <version>1.7</version>
+    <version>1.8-SNAPSHOT</version>
     <artifactId>ala-namematching-client</artifactId>
 </dependency>
 ```
@@ -22,7 +22,7 @@ To include the client library in an application include the following dependency
 or for gradle
 
 ```groovy
-compile "au.org.ala.names:ala-namematching-client:1.7"
+compile "au.org.ala.names:ala-namematching-client:1.8-SNAPSHOT"
 ```
 
 To access the client library, create a configuration and then create a client based on the configuration.
@@ -134,7 +134,7 @@ The possible data cache configuration parameters are:
 1. Run `mvn clean install` to build your application
 1. Download a pre-built name matching index (e.g https://archives.ala.org.au/archives/nameindexes/20210811-3/namematching-20210811-3.tgz), and untar in `/data/lucene` This will create a `/data/lucene/namematching-20210811` directory.
 1. cd to the `server` subdirectory
-1. Start application with `java -jar target/ala-name-matching-server-1.7.jar server config-local.yml`
+1. Start application with `java -jar target/ala-name-matching-server-1.8-SNAPSHOT.jar server config-local.yml`
 1. To check that your application is running enter url `http://localhost:9180`
 1. Test with `http://localhost:9179/api/search?q=Acacia`. The response should look similar to:
 
