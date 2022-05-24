@@ -22,7 +22,7 @@ public class NameSearchResourceTest {
     public void setUp() throws Exception {
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.INFO); // Stop logging insanity
         this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20210811-2"); // Ensure consistent index
+        this.configuration.setIndex("/data/lucene/namematching-20210811-3"); // Ensure consistent index
         this.configuration.setGroups(this.getClass().getResource("../core/test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("../core/test-subgroups-1.json"));
         this.resource = new NameSearchResource(this.configuration);
@@ -253,11 +253,11 @@ public class NameSearchResourceTest {
 
     @Test
     public void testMisapplied1() throws Exception {
-        NameSearch search = NameSearch.builder().scientificName("Corybas macranthus").build();
+        NameSearch search = NameSearch.builder().scientificName("Bertya rosmarinifolia").build();
         NameUsageMatch match = this.resource.match(search);
         assertTrue(match.isSuccess());
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51401037", match.getTaxonConceptID());
-        assertEquals(Arrays.asList("misappliedName"), match.getIssues());
+        assertEquals("https://id.biodiversity.org.au/node/apni/2893214", match.getTaxonConceptID());
+        assertEquals(Arrays.asList("matchedToMisappliedName"), match.getIssues());
     }
 
     @Test
