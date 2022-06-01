@@ -188,6 +188,26 @@ public class Statistics<T> {
         return this.values.stream().max(this.comparator);
     }
 
+
+    /**
+     * Create a header for the output
+     *
+     * @param writer The writer to write to
+     *
+     * @throws IOException if unable to writer
+     */
+    public static void reportHeader(Writer writer) throws IOException {
+        writer.write("samples");
+        writer.write(",");
+        writer.write("mean");
+        writer.write(",");
+        writer.write("stddev");
+        writer.write(",");
+        writer.write("min");
+        writer.write(",");
+        writer.write("max");
+    }
+
     /**
      * Print out the statistics
      *
@@ -197,21 +217,14 @@ public class Statistics<T> {
      */
     public void report(Writer writer) throws IOException {
         DecimalFormat cFormat = new DecimalFormat("0");
-        DecimalFormat tFormat = new DecimalFormat("0.00");
-        writer.append("Samples,Mean,StdDev,Min,Max,Rate");
-        writer.append("\n");
-        writer.append(cFormat.format(this.getN()));
-        writer.append(",");
-        writer.append(cFormat.format(this.getMean()));
-        writer.append(",");
-        writer.append(cFormat.format(this.getStdDev()));
-        writer.append(",");
-        writer.append(cFormat.format(this.getMin().orElse(this.zero)));
-        writer.append(",");
-        writer.append(cFormat.format(this.getMax().orElse(this.zero)));
-        writer.append(",");
-        writer.append(tFormat.format(this.getThroughput()));
-        writer.append("\n");
-        writer.flush();
+        writer.write(cFormat.format(this.getN()));
+        writer.write(",");
+        writer.write(cFormat.format(this.getMean()));
+        writer.write(",");
+        writer.write(cFormat.format(this.getStdDev()));
+        writer.write(",");
+        writer.write(cFormat.format(this.getMin().orElse(this.zero)));
+        writer.write(",");
+        writer.write(cFormat.format(this.getMax().orElse(this.zero)));
     }
 }
