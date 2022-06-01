@@ -63,6 +63,7 @@ public class ListSource<T> extends LoadSource<T> {
      *
      * @param reader The CSV file reader
      * @param client The client object
+     * @param clazz The class of object returned by the methods
      * @param methods The methods to type
      * @param <T> The type of object returned by the methods
      *
@@ -71,7 +72,7 @@ public class ListSource<T> extends LoadSource<T> {
      * @throws IOException id unable to read the file
      * @throws CsvValidationException If unabnle to parse the file
      */
-    public static <T> ListSource<T> fromCsv(Reader reader, Object client, Method... methods) throws IOException, CsvValidationException {
+    public static <T> ListSource<T> fromCsv(Reader reader, Object client, Class<T> clazz, Method... methods) throws IOException, CsvValidationException {
         CSVReaderBuilder builder = new CSVReaderBuilder(reader);
         CSVReader csv = builder.build();
         final String[] header = csv.readNext();
