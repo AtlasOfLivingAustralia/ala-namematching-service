@@ -20,4 +20,4 @@ server:
     - type: http
       port: 9180
 search:
-  index: /data/lucene/namematching-nm
+  index: /data/lucene/namematching
