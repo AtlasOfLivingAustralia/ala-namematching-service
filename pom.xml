@@ -22,7 +22,7 @@
 
     <groupId>au.org.ala.names</groupId>
     <artifactId>ala-namematching-service</artifactId>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.8</version>
     <packaging>pom</packaging>
 
     <name>ALA Name Matching Service</name>
