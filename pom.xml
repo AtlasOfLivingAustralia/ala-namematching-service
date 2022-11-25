@@ -17,11 +17,12 @@
         <module>core</module>
         <module>ala-ws-client-common</module>
         <module>ala-ws-client-testing</module>
+        <module>ala-namematching-tools</module>
     </modules>
 
     <groupId>au.org.ala.names</groupId>
     <artifactId>ala-namematching-service</artifactId>
-    <version>1.7</version>
+    <version>1.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ALA Name Matching Service</name>
@@ -57,7 +58,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <ala-name-matching.version>4.2</ala-name-matching.version>
         <cache2k.version>1.2.0.Final</cache2k.version>
-        <jackson.version>2.10.4</jackson.version>
+        <jackson.version>2.14.0</jackson.version>
         <retrofit.version>2.6.2</retrofit.version>
         <okhttp.version>4.3.1</okhttp.version>
         <dropwizard.version>2.0.11</dropwizard.version>
@@ -66,6 +67,8 @@
         <slf4j.version>1.7.5</slf4j.version>
         <log4j.version>2.13.2</log4j.version>
         <kotlin-stdlib.version>1.3.50</kotlin-stdlib.version>
+        <swagger-v3.version>2.2.6</swagger-v3.version>
+        <swagger-ui.version>4.15.0</swagger-ui.version>
     </properties>
 
     <dependencyManagement>
@@ -92,6 +95,13 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-project-info-reports-plugin</artifactId>
+            <version>3.4.1</version>
+            <type>maven-plugin</type>
         </dependency>
     </dependencies>
 
