@@ -5,8 +5,7 @@ import au.org.ala.util.Normaliser;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -25,8 +24,8 @@ import java.util.stream.Stream;
 @Builder
 @With
 @EqualsAndHashCode
-@ApiModel(
-    value = "Search Parameters",
+@Schema(
+    name = "Search Parameters",
     description = "A set of parameters that can be used to search for taxa. " +
         "The various entries, kingdom etc., refer to names in the Linnaean hierarchy. " +
         "The only strictly required thing is some sort of scientific name. " +
@@ -61,104 +60,88 @@ public class NameSearch {
         }
     }
 
-    @ApiModelProperty(
-        value = "The Linnaean kingdom",
+    @Schema(
         example = "Animalia",
-        notes = "http://rs.tdwg.org/dwc/terms/kingdom"
+        description = "The Linnaean kingdom. http://rs.tdwg.org/dwc/terms/kingdom"
     )
     private String kingdom;
-    @ApiModelProperty(
-        value = "The Linnaean phylum",
+    @Schema(
         example = "Chordata",
-        notes = "http://rs.tdwg.org/dwc/terms/phylum"
+        description = "The Linnaean phylum. http://rs.tdwg.org/dwc/terms/phylum"
     )
     private String phylum;
-    @ApiModelProperty(
-        value = "The Linnaean class",
+    @Schema(
         example = "Aves",
-        notes = "http://rs.tdwg.org/dwc/terms/class"
+        description = "The Linnaean class. http://rs.tdwg.org/dwc/terms/class"
     )
     private String clazz;
-    @ApiModelProperty(
-        value = "The Linnaean order",
+    @Schema(
         example = "Anseriformes",
-        notes = "http://rs.tdwg.org/dwc/terms/order"
+        description = "The Linnaean order. http://rs.tdwg.org/dwc/terms/order"
     )
     private String order;
-    @ApiModelProperty(
-        value = "The Linnaean family",
+    @Schema(
         example = "Anatidae",
-        notes = "http://rs.tdwg.org/dwc/terms/family"
+        description = "The Linnaean family. http://rs.tdwg.org/dwc/terms/family"
     )
     private String family;
-    @ApiModelProperty(
-        value = "The Linnaean genus",
+    @Schema(
         example = "Anas",
-        notes = "http://rs.tdwg.org/dwc/terms/genus"
+        description = "The Linnaean genus. http://rs.tdwg.org/dwc/terms/genus"
     )
     private String genus;
-    @ApiModelProperty(
-        value = "The species part of a Linnaean binomial name",
+    @Schema(
         example = "superciliosa",
-        notes = "http://rs.tdwg.org/dwc/terms/specificEptithet"
+        description = "The species part of a Linnaean binomial name. http://rs.tdwg.org/dwc/terms/specificEptithet"
     )
     private String specificEpithet;
-    @ApiModelProperty(
-        value = "The below-species (subspecies, variety, form etc.) part of a Linnaean binomial name",
+    @Schema(
         example = "superciliosa",
-        notes = "http://rs.tdwg.org/dwc/terms/infraspecificEptithet"
+        description = "The below-species (subspecies, variety, form etc.) part of a Linnaean binomial name. http://rs.tdwg.org/dwc/terms/infraspecificEptithet"
     )
     private String infraspecificEpithet;
-    @ApiModelProperty(
-        value = "The Linnaean rank of the expected result",
+    @Schema(
         example = "subspecies",
-        notes = "http://rs.tdwg.org/dwc/terms/taxonRank"
+        description = "The Linnaean rank of the expected result. http://rs.tdwg.org/dwc/terms/taxonRank"
     )
     private String rank;
-    @ApiModelProperty(
-        value = "The Linnaean rank of the expected result, as supplied",
+    @Schema(
         example = "SubSpecies",
-        notes = "http://rs.tdwg.org/dwc/terms/verbatimTaxonRank"
+        description = "The Linnaean rank of the expected result, as supplied. http://rs.tdwg.org/dwc/terms/verbatimTaxonRank"
     )
     private String verbatimTaxonRank;
-    @ApiModelProperty(
-        value = "The expected taxon concept (placement in a taxonomy)",
+    @Schema(
         example = "urn:lsid:biodiversity.org.au:afd.taxon:7d8e4927-90d6-40ba-a1e9-d6e917d2270b",
-        notes = "http://rs.tdwg.org/dwc/terms/taxonConceptID"
+        description = "The expected taxon concept (placement in a taxonomy). http://rs.tdwg.org/dwc/terms/taxonConceptID"
     )
     private String taxonConceptID;
-    @ApiModelProperty(
-        value = "The expected taxon identifier",
+    @Schema(
         example = "urn:lsid:biodiversity.org.au:afd.taxon:7d8e4927-90d6-40ba-a1e9-d6e917d2270b",
-        notes = "http://rs.tdwg.org/dwc/terms/taxonID"
+        description = "The expected taxon identifier. http://rs.tdwg.org/dwc/terms/taxonID"
     )
     private String taxonID;
-    @ApiModelProperty(
-        value = "The scientific name authorship (with the scientific name, corresponds to the taxon concept)",
+    @Schema(
         example = "Gmelin, 1789",
-        notes = "http://rs.tdwg.org/dwc/terms/scientificNameAuthorship"
+        description = "The scientific name authorship (with the scientific name, corresponds to the taxon concept). http://rs.tdwg.org/dwc/terms/scientificNameAuthorship"
     )
     private String scientificNameAuthorship;
-    @ApiModelProperty(
-        value = "The scientific name",
+    @Schema(
         example = "Anas superciliosa superciliosa",
-        notes = "http://rs.tdwg.org/dwc/terms/scientificName"
+        description = "The scientific name. http://rs.tdwg.org/dwc/terms/scientificName"
     )
     private String scientificName;
-    @ApiModelProperty(
-        value = "The vernacular name",
+    @Schema(
         example = "Grey Duck",
-        notes = "http://rs.tdwg.org/dwc/terms/vernacularName"
+        description = "The vernacular name. http://rs.tdwg.org/dwc/terms/vernacularName"
     )
     private String vernacularName;
-    @ApiModelProperty(
-        value = "Taxonomic hints. A map of Linnaean rank names onto possible values if there is difficulty looking up a name. This also acts as a sanity check on the returned results.",
-        example = "{ \"kingdom\": [ \"Plantae\", \"Fungi\" }",
-        notes = "http://rs.tdwg.org/dwc/terms/vernacularName"
+    @Schema(
+        example = "{ \"kingdom\": [ \"Plantae\", \"Fungi\" ] }",
+        description = "Taxonomic hints. A map of Linnaean rank names onto possible values if there is difficulty looking up a name. This also acts as a sanity check on the returned results. http://rs.tdwg.org/dwc/terms/vernacularName"
     )
     private Map<String, List<String>> hints;
-    @ApiModelProperty(
-        value = "Allow a loose search. Loose searches will treat the scientific name as a vernacular name or a taxon identifier if the name cannot be found."
+    @Schema(
+        description = "Allow a loose search. Loose searches will treat the scientific name as a vernacular name or a taxon identifier if the name cannot be found."
     )
     private boolean loose;
 

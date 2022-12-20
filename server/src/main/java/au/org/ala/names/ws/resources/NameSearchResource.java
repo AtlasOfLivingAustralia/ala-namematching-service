@@ -9,7 +9,15 @@ import au.org.ala.names.ws.api.NameUsageMatch;
 import au.org.ala.names.ws.core.NameSearchConfiguration;
 import au.org.ala.names.ws.core.SpeciesGroupsUtil;
 import com.codahale.metrics.annotation.Timed;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.Cache;
 import org.gbif.api.vocabulary.NameType;
@@ -23,7 +31,7 @@ import java.util.stream.Collectors;
 /**
  * TODO add diagnostics to payload - similar to GBIF
  */
-@Api("Taxonomy search")
+@Tag(name="Taxonomy search")
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/api")
 @Slf4j
@@ -85,13 +93,15 @@ public class NameSearchResource implements NameMatchService {
         }
     }
 
-    @ApiOperation(
-            value = "Search by full classification",
-            notes = "Search based on a partially filled out classification. " +
+    @Operation(
+            summary = "Search by full classification",
+            description = "Search based on a partially filled out classification. " +
                     "The search will use the parameters contained in the body to perform as precise a search as is possible."
     )
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = NameUsageMatch.class), mediaType = MediaType.APPLICATION_JSON))
+    @RequestBody(description = "Partially filled out classification", content = @Content(schema = @Schema(implementation = NameSearch.class), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/searchByClassification")
     public NameUsageMatch match(NameSearch search) {
@@ -104,9 +114,9 @@ public class NameSearchResource implements NameMatchService {
     }
 
 
-    @ApiOperation(
-            value = "Bulk search by full classification",
-            notes = "Search based on a list of partially filled out classifications. " +
+    @Operation(
+            summary = "Bulk search by full classification",
+            description = "Search based on a list of partially filled out classifications. " +
                     "The result is a list of matches. " +
                     "Nulls are allowed in the list of searches. " +
                     "If a null is present, then no search is conducted and a null returned. " +
@@ -116,32 +126,35 @@ public class NameSearchResource implements NameMatchService {
     )
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(array = @ArraySchema(schema = @Schema(implementation = NameUsageMatch.class)), mediaType = MediaType.APPLICATION_JSON))
+    @RequestBody(description = "List of partially filled out classifications", content = @Content(array = @ArraySchema(schema = @Schema(implementation = NameSearch.class)), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("searchAllByClassification")
     public List<NameUsageMatch> matchAll(List<NameSearch> search) {
         return search.stream().map(s -> s == null ? null : this.match(s)).collect(Collectors.toList());
     }
 
-    @ApiOperation(
-            value = "Search by full classification via query parameters",
-            notes = "Search based on a partially filled out classification. " +
+    @Operation(
+            summary = "Search by full classification via query parameters",
+            description = "Search based on a partially filled out classification. " +
                     "The search will use the parameters supplied to perform as precise a search as is possible."
     )
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = NameUsageMatch.class), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/searchByClassification")
     public NameUsageMatch match(
-            @ApiParam(value = "The scientific name. If not supplied, inferred from other parameters", example = "Dentimitrella austrina") @QueryParam("scientificName") String scientificName,
-            @ApiParam(value = "The kingdom name", example = "Animalia") @QueryParam("kingdom") String kingdom,
-            @ApiParam(value = "The phylum name") @QueryParam("phylum") String phylum,
-            @ApiParam(value = "The class name") @QueryParam("class") String clazz,
-            @ApiParam(value = "The order name") @QueryParam("order") String order,
-            @ApiParam(value = "The family name", example = "Columbellidae") @QueryParam("family") String family,
-            @ApiParam(value = "The genus name") @QueryParam("genus") String genus,
-            @ApiParam(value = "The specific epithet, the species part of a binomial name") @QueryParam("specificEpithet") String specificEpithet,
-            @ApiParam(value = "The below species (subspecies, variety, form etc.) epithet") @QueryParam("infraspecificEpithet") String infraspecificEpithet,
-            @ApiParam(value = "The taxon rank. If not supplied, it may be inferred from other parameters", example = "species") @QueryParam("rank") String rank
+            @Parameter(description = "The scientific name. If not supplied, inferred from other parameters", example = "Dentimitrella austrina") @QueryParam("scientificName") String scientificName,
+            @Parameter(description = "The kingdom name", example = "Animalia") @QueryParam("kingdom") String kingdom,
+            @Parameter(description = "The phylum name") @QueryParam("phylum") String phylum,
+            @Parameter(description = "The class name") @QueryParam("class") String clazz,
+            @Parameter(description = "The order name") @QueryParam("order") String order,
+            @Parameter(description = "The family name", example = "Columbellidae") @QueryParam("family") String family,
+            @Parameter(description = "The genus name") @QueryParam("genus") String genus,
+            @Parameter(description = "The specific epithet, the species part of a binomial name") @QueryParam("specificEpithet") String specificEpithet,
+            @Parameter(description = "The below species (subspecies, variety, form etc.) epithet") @QueryParam("infraspecificEpithet") String infraspecificEpithet,
+            @Parameter(description = "The taxon rank. If not supplied, it may be inferred from other parameters", example = "species") @QueryParam("rank") String rank
     ) {
         NameSearch search = NameSearch.builder()
                 .scientificName(scientificName)
@@ -164,17 +177,18 @@ public class NameSearchResource implements NameMatchService {
         return NameUsageMatch.FAIL;
     }
 
-    @ApiOperation(
-            value = "Search by name",
-            notes = "A simple search based only on scientific name. " +
+    @Operation(
+            summary = "Search by name",
+            description = "A simple search based only on scientific name. " +
                     "The search will not be able to resolve complications, such as homonyms."
     )
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = NameUsageMatch.class), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/search")
     public NameUsageMatch match(
-            @ApiParam(value = "The scientific name", required = true, example = "Acacia dealbata") @QueryParam("q") String name
+            @Parameter(description = "The scientific name", required = true, example = "Acacia dealbata") @QueryParam("q") String name
     ) {
         try {
             NameSearch cl = NameSearch.builder().scientificName(name).loose(true).build();
@@ -186,16 +200,17 @@ public class NameSearchResource implements NameMatchService {
     }
 
 
-    @ApiOperation(
-            value = "Get taxon information by by vernacular (common) name.",
-            notes = "The same Vernacular name may be given to multiple taxa with different scientific names. The result returned is a best-effort match."
+    @Operation(
+            summary = "Get taxon information by by vernacular (common) name.",
+            description = "The same Vernacular name may be given to multiple taxa with different scientific names. The result returned is a best-effort match."
     )
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = NameUsageMatch.class), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/searchByVernacularName")
     public NameUsageMatch matchVernacular(
-            @ApiParam(value = "The common name", required = true, example = "Red Kangaroo") @QueryParam("vernacularName") String vernacularName
+            @Parameter(description = "The common name", required = true, example = "Red Kangaroo") @QueryParam("vernacularName") String vernacularName
     ) {
         try {
             NameSearch cl = NameSearch.builder().vernacularName(vernacularName).build();
@@ -206,16 +221,17 @@ public class NameSearchResource implements NameMatchService {
         return NameUsageMatch.FAIL;
     }
 
-    @ApiOperation(
-            value = "Get taxon information by taxon identifier."
+    @Operation(
+            summary = "Get taxon information by taxon identifier."
     )
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = NameUsageMatch.class), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/getByTaxonID")
     public NameUsageMatch get(
-            @ApiParam(value = "The unique taxon identifier", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonID") String taxonID,
-            @ApiParam(value = "Follow synonyms to the accepted taxon", required = false) @QueryParam("follow") @DefaultValue("false") boolean follow
+            @Parameter(description = "The unique taxon identifier", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonID") String taxonID,
+            @Parameter(description = "Follow synonyms to the accepted taxon") @QueryParam("follow") @DefaultValue("false") Boolean follow
     ) {
         try {
             Cache<String, NameUsageMatch> cache = follow ? this.idAcceptedCache : this.idCache;
@@ -226,16 +242,17 @@ public class NameSearchResource implements NameMatchService {
         return NameUsageMatch.FAIL;
     }
 
-    @ApiOperation(
-            value = "Get bulk taxon information by a list of taxon identifiers."
+    @Operation(
+            summary = "Get bulk taxon information by a list of taxon identifiers."
     )
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(array = @ArraySchema(schema = @Schema(implementation = NameUsageMatch.class)), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/getAllByTaxonID")
     public List<NameUsageMatch> getAll(
-            @ApiParam(value = "The list of unique taxon identifiers", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonIDs") List<String> taxonIDs,
-            @ApiParam(value = "Follow synonyms to the accepted taxon", required = false) @QueryParam("follow") @DefaultValue("false") boolean follow
+            @Parameter(description = "The list of unique taxon identifiers", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonIDs") List<String> taxonIDs,
+            @Parameter(description = "Follow synonyms to the accepted taxon") @QueryParam("follow") @DefaultValue("false") Boolean follow
     ) {
         List<NameUsageMatch> matches = new ArrayList<>(taxonIDs.size());
         Cache<String, NameUsageMatch> cache = follow ? this.idAcceptedCache : this.idCache;
@@ -251,16 +268,17 @@ public class NameSearchResource implements NameMatchService {
         return matches;
     }
 
-    @ApiOperation(
-            value = "Get the taxon scientific name by taxon identifier."
+    @Operation(
+            summary = "Get the taxon scientific name by taxon identifier."
     )
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = String.class), mediaType = MediaType.TEXT_PLAIN))
     @Timed
     @Path("/getNameByTaxonID")
     public String getName(
-            @ApiParam(value = "The unique taxon identifier", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonID") String taxonID,
-            @ApiParam(value = "Follow synonyms to the accepted taxon", required = false) @QueryParam("follow") @DefaultValue("false") boolean follow
+            @Parameter(description = "The unique taxon identifier", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonID") String taxonID,
+            @Parameter(description = "Follow synonyms to the accepted taxon") @QueryParam("follow") @DefaultValue("false") Boolean follow
     ) {
         try {
             Cache<String, NameUsageMatch> cache = follow ? this.idAcceptedCache : this.idCache;
@@ -272,36 +290,34 @@ public class NameSearchResource implements NameMatchService {
         return null;
     }
 
-    @ApiOperation(
-            value = "Get bulk taxon scientific names from a list of taxon identifiers."
+    @Operation(
+            summary = "Get bulk taxon scientific names from a list of taxon identifiers."
     )
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/getAllNamesByTaxonID")
     public List<String> getAllNames(
-            @ApiParam(value = "The list of unique taxon identifiers", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonIDs") List<String> taxonIDs,
-            @ApiParam(value = "Follow synonyms to the accepted taxon", required = false) @QueryParam("follow") @DefaultValue("false") boolean follow
+            @Parameter(description = "The list of unique taxon identifiers", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("taxonIDs") List<String> taxonIDs,
+            @Parameter(description = "Follow synonyms to the accepted taxon", required = false) @QueryParam("follow") @DefaultValue("false") Boolean follow
     ) {
         return taxonIDs.stream().map(id -> this.getName(id, follow)).collect(Collectors.toList());
     }
 
-    @ApiOperation(
-        value = "Check a name/rank combination and see if it is valid.",
-        notes = "Returns true if the result is valuid, false if not and null (empty) if unable to check because of an error (usually something like a homonym)"
+    @Operation(
+        summary = "Check a name/rank combination and see if it is valid.",
+        description = "Returns true if the result is valuid, false if not and null (empty) if unable to check because of an error (usually something like a homonym)"
     )
-    @ApiResponses(
-        value = {
-            @ApiResponse(code = 204, message = "Unable to check due to search error")
-        }
-    )
+    @ApiResponse(responseCode = "204", description = "Unable to check due to search error")
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(examples = @ExampleObject(value="true")))
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Timed
     @Path("/check")
     public Boolean check(
-        @ApiParam(value = "The scientific name", required = true, example = "Animalia") @QueryParam("name") String name,
-        @ApiParam(value = "The Linnaean rank", required = true, example = "kingdom") @QueryParam("rank") String rank
+        @Parameter(description = "The scientific name", required = true, example = "Animalia") @QueryParam("name") String name,
+        @Parameter(description = "The Linnaean rank", required = true, example = "kingdom") @QueryParam("rank") String rank
     ) {
         if (name == null || rank == null)
             return false;
@@ -317,44 +333,52 @@ public class NameSearchResource implements NameMatchService {
         }
     }
 
-    @ApiOperation(
-            value = "Autocomplete search with the beginning of a scientific or common name.",
-            notes = "Returns a list of matches. Up to 2 * max matches are returned."
+    @Operation(
+            summary = "Autocomplete search with the beginning of a scientific or common name.",
+            description = "Returns a list of matches. Up to 2 * max matches are returned."
     )
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Map.class)), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/autocomplete")
     public List<Map> autocomplete(
-            @ApiParam(value = "The query", required = true, example = "eucalypt") @QueryParam("q") String query,
-            @ApiParam(value = "Maximum results to return", required = false, defaultValue = "10") @QueryParam("max") Integer max,
-            @ApiParam(value = "Include synonyms", required = false, defaultValue = "true") @QueryParam("includeSynonyms") Boolean includeSynonyms) {
+            @Parameter(description = "The query", required = true, example = "eucalypt")
+            @QueryParam("q") String query,
+
+            @Parameter(description = "Maximum results to return")
+            @QueryParam("max") @DefaultValue("10") Integer max,
+
+            @Parameter(description = "Include synonyms")
+            @QueryParam("includeSynonyms") @DefaultValue("true") Boolean includeSynonyms) {
 
         return this.searcher.autocomplete(query, max, includeSynonyms);
     }
 
-    @ApiOperation(
-            value = "Search for an LSID by ID"
+    @Operation(
+            summary = "Search for an LSID by ID"
     )
     @GET
     @Produces(MediaType.TEXT_PLAIN)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = String.class), mediaType = MediaType.TEXT_PLAIN))
     @Timed
     @Path("/searchForLsidById")
     public String searchForLsidById(
-            @ApiParam(value = "The ID", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("id") String id
+            @Parameter(description = "The ID", required = true, example = "https://id.biodiversity.org.au/node/apni/2908670") @QueryParam("id") String id
     ) {
         return this.searcher.searchForLsidById(id);
     }
 
-    @ApiOperation(
-            value = "Search for an LSID with a scientific name."
+    @Operation(
+            summary = "Search for an LSID with a scientific name."
     )
     @GET
     @Produces(MediaType.TEXT_PLAIN)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = String.class), mediaType = MediaType.TEXT_PLAIN))
     @Timed
     @Path("/searchForLSID")
     public String searchForLSID(
-            @ApiParam(value = "The name", required = true, example = "Acacia dealbata") @QueryParam("name") String name
+            @Parameter(description = "The name", required = true, example = "Acacia dealbata") @QueryParam("name") String name
     ) {
         try {
             return this.searcher.searchForLSID(name);
@@ -364,11 +388,13 @@ public class NameSearchResource implements NameMatchService {
         return "";
     }
 
-    @ApiOperation(
-            value = "Search for a list of LSIDs with a list of scientificName or scientificName(kingdom)."
+    @Operation(
+            summary = "Search for a list of LSIDs with a list of scientificName or scientificName(kingdom)."
     )
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), mediaType = MediaType.APPLICATION_JSON))
+    @RequestBody(description = "List of taxa", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/getGuidsForTaxa")
     public List<String> getGuidsForTaxa(List<String> taxa) {
@@ -382,17 +408,18 @@ public class NameSearchResource implements NameMatchService {
         return new ArrayList();
     }
 
-    @ApiOperation(
-            value = "Get taxon information by by vernacular (common) name.",
-            notes = "The same Vernacular name may be given to multiple taxa with different scientific names. The result returned is a best-effort match."
+    @Operation(
+            summary = "Get taxon information by by vernacular (common) name.",
+            description = "The same Vernacular name may be given to multiple taxa with different scientific names. The result returned is a best-effort match."
     )
     @GET
     @Timed
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class)), mediaType = MediaType.APPLICATION_JSON))
     @Path("/getCommonNamesForLSID")
     public Set<String> getCommonNamesForLSID(
-            @ApiParam(value = "lsid", required = true, example = "Red Kangaroo") @QueryParam("lsid") String lsid,
-            @ApiParam(value = "max", required = true, example = "10") @QueryParam("max") Integer max
+            @Parameter(required = true, example = "Red Kangaroo") @QueryParam("lsid") String lsid,
+            @Parameter(required = true, example = "10") @QueryParam("max") Integer max
     ) {
         try {
             Set<String> vernacularNames = this.searcher.getCommonNamesForLSID(lsid, max);

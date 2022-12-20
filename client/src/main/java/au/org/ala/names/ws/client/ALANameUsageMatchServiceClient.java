@@ -33,9 +33,9 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
 
     /**
      * Creates an instance using the provided configuration settings.
-     * 
+     *
      * @param configuration Rest client configuration
-     *                      
+     *
      * @throws IOException if unable to build underlying services
      */
     public ALANameUsageMatchServiceClient(ClientConfiguration configuration) throws IOException {
@@ -47,7 +47,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
 
     /**
      * Search for a match for a search key.
-     * 
+     *
      * @param search The search key
      *
      * @return The matching result
@@ -243,7 +243,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * @return A matching taxon, with success=false if not found
      */
     @Override
-    public NameUsageMatch get(String taxonID, boolean follow) {
+    public NameUsageMatch get(String taxonID, Boolean follow) {
         return this.call(this.alaNameUsageMatchService.get(taxonID, follow));
     }
 
@@ -256,7 +256,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * @return The list of matches, will fail results for no match.
      */
     @Override
-    public List<NameUsageMatch> getAll(List<String> taxonIDs, boolean follow) {
+    public List<NameUsageMatch> getAll(List<String> taxonIDs, Boolean follow) {
         return this.call(this.alaNameUsageMatchService.getAll(taxonIDs, follow));
     }
 
@@ -268,7 +268,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * @return The matching name, or null for not found
      */
     @Override
-    public String getName(String taxonID, boolean follow) {
+    public String getName(String taxonID, Boolean follow) {
         return this.call(this.alaNameUsageMatchService.getName(taxonID, follow));
     }
 
@@ -280,7 +280,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * @return A list containing the matching name The matching taxon, or null for not found
      */
     @Override
-    public List<String> getAllNames(List<String> taxonIDs, boolean follow) {
+    public List<String> getAllNames(List<String> taxonIDs, Boolean follow) {
         return this.call(this.alaNameUsageMatchService.getAllNames(taxonIDs, follow));
     }
 

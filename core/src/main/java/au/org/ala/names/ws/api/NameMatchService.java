@@ -37,7 +37,7 @@ public interface NameMatchService extends Closeable {
      * @param searches The search specifications. possibly containing nulls
      *
      * @return A list of matches, with success=false if not found and nulls for null requests
-     * 
+     *
      * @see #match(NameSearch)
      */
     List<NameUsageMatch> matchAll(List<NameSearch> searches);
@@ -102,7 +102,7 @@ public interface NameMatchService extends Closeable {
     /**
      * Get taxon information via a specific taxon identifier.
      * <p>
-     * See {@link #get(String, boolean)}. By default, synonyms are not followed.
+     * See {@link #get(String, Boolean)}. By default, synonyms are not followed.
      * </p>
      *
      * @param taxonID The taxon identifier
@@ -121,7 +121,7 @@ public interface NameMatchService extends Closeable {
      *
      * @return A matching taxon, with success=false if not found
      */
-    NameUsageMatch get(String taxonID, boolean follow);
+    NameUsageMatch get(String taxonID, Boolean follow);
 
     /**
      * Get the scientific name for a specific taxon identifier.
@@ -131,7 +131,7 @@ public interface NameMatchService extends Closeable {
      *
      * @return The matching name, or null for not found
      */
-    String getName(String taxonID, boolean follow);
+    String getName(String taxonID, Boolean follow);
 
     /**
      * Bulk lookup for taxon identifiers
@@ -141,9 +141,9 @@ public interface NameMatchService extends Closeable {
      * @return A corresponding list of name match results
      * @param follow Follow synonyms to the accepted taxon
      *
-     * @see #get(String, boolean)
+     * @see #get(String, Boolean)
      */
-    List<NameUsageMatch> getAll(List<String> taxonIDs, boolean follow);
+    List<NameUsageMatch> getAll(List<String> taxonIDs, Boolean follow);
 
     /**
      * Bulk lookup for scientific names for taxon identifiers.
@@ -153,7 +153,7 @@ public interface NameMatchService extends Closeable {
      *
      * @return A list containing the matching name The matching taxon, or null for not found
      */
-    List<String> getAllNames(List<String> taxonIDs, boolean follow);
+    List<String> getAllNames(List<String> taxonIDs, Boolean follow);
 
     /**
      * Check to see if a given name is in the index for this rank.
