@@ -28,7 +28,7 @@ public class NameUsageMatch {
     private static final String[] RANK_FIELD_NAMES = {"phylum", "genus", "order", "classs", "family", "kingdom"};
     private static final Field[] RANK_FIELDS = new Field[RANK_FIELD_NAMES.length];
 
-    {
+    static {
         try {
             for (int i = 0; i < RANK_FIELD_NAMES.length; i++)
                 RANK_FIELDS[i] = NameUsageMatch.class.getDeclaredField(RANK_FIELD_NAMES[i]);
