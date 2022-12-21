@@ -5,12 +5,13 @@
     <parent>
         <artifactId>ala-namematching-service</artifactId>
         <groupId>au.org.ala.names</groupId>
-        <version>1.8-SNAPSHOT</version>
+        <version>1.9-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>au.org.ala.ws</groupId>
     <artifactId>ala-ws-client-testing</artifactId>
+    <version>${project.parent.version}</version>
     <name>Common Retrofit Web Service Test Utilities</name>
     <description>Common classes and libraries for testing a retrofit web services client/server</description>
 
