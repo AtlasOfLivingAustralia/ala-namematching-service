@@ -17,16 +17,24 @@ import java.util.Map;
  */
 @Slf4j
 public class SpeciesGroupsUtil {
-    /** Making resources is fairly expensive. Reuse existing instances */
+    /**
+     * Making resources is fairly expensive. Reuse existing instances
+     */
     private static final Map<NameSearchConfiguration, SpeciesGroupsUtil> managerCache = new HashMap<>();
 
-    /** The name index used to match names to actual taxon entries */
+    /**
+     * The name index used to match names to actual taxon entries
+     */
     @Getter
     private final ALANameSearcher nameIndex;
-    /** The list of possible species groups */
+    /**
+     * The list of possible species groups
+     */
     @Getter
     private final List<SpeciesGroup> speciesGroups;
-    /** The list of possible species subgroups */
+    /**
+     * The list of possible species subgroups
+     */
     @Getter
     private final List<SpeciesGroup> speciesSubgroups;
 
@@ -34,7 +42,6 @@ public class SpeciesGroupsUtil {
      * Construct for a name index configuration
      *
      * @param configuration The name index configuration
-     *
      * @throws IllegalArgumentException if unable to open any of the resources specified in the configuration, which makes an invalid configuration
      */
     private SpeciesGroupsUtil(NameSearchConfiguration configuration) throws IllegalArgumentException {
@@ -57,7 +64,7 @@ public class SpeciesGroupsUtil {
         ObjectMapper om = new ObjectMapper();
         List<Map<String, Object>> groupsConfig = om.readValue(source, List.class);
 
-        for (Map<String, Object> config: groupsConfig){
+        for (Map<String, Object> config : groupsConfig) {
             String speciesGroup = config.getOrDefault("name", "").toString();
             String rank = config.getOrDefault("rank", "").toString();
             List<String> values = (List<String>) config.getOrDefault("included", new ArrayList<String>());
@@ -73,63 +80,27 @@ public class SpeciesGroupsUtil {
      * Retrieve subgroups to use when indexing records.
      */
     private List<SpeciesGroup> readSpeciesSubgroups(URL source) throws Exception {
-
         List<SpeciesGroup> subgroups = new ArrayList<SpeciesGroup>();
         ObjectMapper om = new ObjectMapper();
         List<Map<String, Object>> list = om.readValue(source, List.class);
 
-        for (Map<String, Object> map : list){
-            String parentGroup = (String) map.getOrDefault("speciesGroup", "");
-
-            if (map.containsKey("taxonRank")) {
-                String rank = (String) map.getOrDefault("taxonRank", "class");
-
-                List<Map<String, Object>> taxaList = (List<Map<String, Object>>) map.getOrDefault("taxa", new ArrayList<Map<String, String>>());
-                for (Map<String, Object> taxaMap : taxaList){
-
-                    String name = ((String) taxaMap.getOrDefault("name", "")).trim();
-                    List<String> excluded = (List<String>) taxaMap.getOrDefault("excluded", new ArrayList<String>());
-                    List<String> taxa = new ArrayList<String>();
-                    taxa.add(name);
-
-                    subgroups.add(createSpeciesGroup(
-                            ((String) taxaMap.getOrDefault("common", "")).trim(),
-                            rank,
-                            taxa,
-                            excluded,
-                            parentGroup
-                    ));
-                }
-            } else {
-                List<Map<String, String>> taxaList = (List<Map<String, String>>) map.getOrDefault("taxa", new ArrayList<Map<String, String>>());
-
-                for (Map<String,String> taxaMap : taxaList){
-
-                    List<SpeciesGroup> groups = getSpeciesGroups();
-
-                    //search for the sub group in the species group
-                    SpeciesGroup selectedGroup = null;
-                    for (SpeciesGroup g : groups){
-                        if(g.name.equalsIgnoreCase(taxaMap.getOrDefault("name", "NONE"))){
-                            selectedGroup = g;
-                        }
-                    }
-                    if (selectedGroup != null) {
-                        subgroups.add(createSpeciesGroup(
-                                taxaMap.getOrDefault("common", "").trim(),
-                                selectedGroup.rank,
-                                selectedGroup.values,
-                                selectedGroup.excludedValues,
-                                parentGroup));
-                    }
-                }
+        for (Map<String, Object> map : list) {
+            String parent = (String) map.getOrDefault("parent", "");
+            String defaultRank = (String) map.getOrDefault("rank", "order");
+            List<Map<String, Object>> taxaList = (List<Map<String, Object>>) map.getOrDefault("taxa", new ArrayList<Map<String, String>>());
+            for (Map<String, Object> taxaMap : taxaList) {
+                String name = ((String) taxaMap.getOrDefault("name", "")).trim();
+                String rank = ((String) taxaMap.getOrDefault("rank", defaultRank)).trim();
+                List<String> included = (List<String>) taxaMap.getOrDefault("included", new ArrayList<String>());
+                List<String> excluded = (List<String>) taxaMap.getOrDefault("excluded", new ArrayList<String>());
+                subgroups.add(createSpeciesGroup(name, rank, included, excluded, parent));
             }
         }
         return subgroups;
     }
 
 
-    private SpeciesGroup createSpeciesGroup(String title, String rank,  List<String> values,  List<String> excludedValues, String parent) throws Exception {
+    private SpeciesGroup createSpeciesGroup(String title, String rank, List<String> values, List<String> excludedValues, String parent) throws Exception {
 
         List<LftRgtValues> lftRgts = new ArrayList<LftRgtValues>();
 
@@ -154,7 +125,7 @@ public class SpeciesGroupsUtil {
             }
         }
 
-        for (String v: values) {
+        for (String v : values) {
 
             NameSearchResult snr = this.nameIndex.searchForRecord(v, au.org.ala.names.model.RankType.getForName(rank));
 
@@ -185,7 +156,7 @@ public class SpeciesGroupsUtil {
      * Returns all the species groups to which the supplied left right values belong
      */
     public List<String> getSpeciesGroups(Integer lft) throws Exception {
-        return getGenericGroups(lft,  getSpeciesGroups());
+        return getGenericGroups(lft, getSpeciesGroups());
     }
 
     public List<String> getSpeciesSubGroups(Integer lft) throws Exception {
@@ -210,10 +181,9 @@ public class SpeciesGroupsUtil {
      * It's a bit of a pain to import the groups.
      * So keep a copy available.
      * </p>
+     *
      * @param configuration The configuration
-     *
      * @return An species group resource
-     *
      * @throws Exception if unable to load the resource
      */
     synchronized public static SpeciesGroupsUtil getInstance(NameSearchConfiguration configuration) throws Exception {
