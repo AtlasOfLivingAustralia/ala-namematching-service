@@ -144,6 +144,11 @@ public class NameSearch {
         description = "Allow a loose search. Loose searches will treat the scientific name as a vernacular name or a taxon identifier if the name cannot be found."
     )
     private boolean loose;
+    @Schema(
+            example = "MATCH",
+            description = "The style of search to perform. If absent, the server default style is used."
+    )
+    private SearchStyle style;
 
     /**
      * Get a version of this that has been normalised.
@@ -179,6 +184,7 @@ public class NameSearch {
                     )
             )
             .loose(this.loose)
+            .style(this.style)
             .build();
     }
 

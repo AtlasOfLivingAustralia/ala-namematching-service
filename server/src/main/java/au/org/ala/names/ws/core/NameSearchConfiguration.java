@@ -1,5 +1,6 @@
 package au.org.ala.names.ws.core;
 
+import au.org.ala.names.ws.api.SearchStyle;
 import au.org.ala.ws.DataCacheConfiguration;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,7 +33,11 @@ public class NameSearchConfiguration {
     @JsonProperty
     private boolean checkHints = true;
     /** Allow loose searching on taxon identifier and vernacular name in place of scientific name, if requested */
+    @JsonProperty
     private boolean allowLoose = true;
+    /** The default search style to use, if not specified */
+    @JsonProperty
+    private SearchStyle defaultStyle = SearchStyle.MATCH;
     /** The cache configuration */
     @JsonProperty
     private DataCacheConfiguration cache = DataCacheConfiguration.builder().build();

@@ -4,6 +4,7 @@ import au.org.ala.names.ws.ALANameMatchingServiceApplication;
 import au.org.ala.names.ws.ALANameMatchingServiceConfiguration;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
+import au.org.ala.names.ws.api.SearchStyle;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.DataCacheConfiguration;
@@ -86,6 +87,39 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
         assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
+    }
+
+    /** Supply style */
+    @Test
+    public void testMatchNameSearch4() throws Exception {
+        NameSearch search = NameSearch.builder().scientificName("Acacia dealbata").style(SearchStyle.STRICT).build();
+        NameUsageMatch match = client.match(search);
+
+        assertTrue(match.isSuccess());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+
+    /** Supply style */
+    @Test
+    public void testMatchNameSearch5() throws Exception {
+        NameSearch search = NameSearch.builder().scientificName("Akacia dealbata").style(SearchStyle.FUZZY).build();
+        NameUsageMatch match = client.match(search);
+
+        assertTrue(match.isSuccess());
+        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+    }
+
+
+    /** Supply style */
+    @Test
+    public void testMatchNameSearch6() throws Exception {
+        NameSearch search = NameSearch.builder().scientificName("Akacia dealbata").style(SearchStyle.STRICT).build();
+        NameUsageMatch match = client.match(search);
+
+        assertFalse(match.isSuccess());
+        assertEquals(Collections.singletonList("noMatch"), match.getIssues());
     }
 
 
@@ -190,7 +224,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     /** Simple request/response */
     @Test
     public void testMatchNameParams1() throws Exception {
-        NameUsageMatch match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null);
+        NameUsageMatch match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null, null);
 
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
@@ -201,12 +235,32 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     /** Simple name match */
     @Test
     public void testMatchName1() throws Exception {
-        NameUsageMatch match = client.match("Acacia dealbata");
+        NameUsageMatch match = client.match("Acacia dealbata", null);
 
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
         assertEquals("species", match.getRank());
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+    }
+
+
+    /** Simple name match with style */
+    @Test
+    public void testMatchName2() throws Exception {
+        NameUsageMatch match = client.match("Acacia dealbata", SearchStyle.STRICT);
+
+        assertTrue(match.isSuccess());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertEquals("species", match.getRank());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
+    }
+
+    /** Simple name match with style */
+    @Test
+    public void testMatchName3() throws Exception {
+        NameUsageMatch match = client.match("Acacia dealbatae", SearchStyle.STRICT);
+
+        assertFalse(match.isSuccess());
     }
 
     /** Simple vernacular name match */

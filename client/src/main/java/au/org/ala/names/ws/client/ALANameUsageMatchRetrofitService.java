@@ -3,6 +3,7 @@ package au.org.ala.names.ws.client;
 import au.org.ala.names.ws.api.NameMatchService;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
+import au.org.ala.names.ws.api.SearchStyle;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -37,12 +38,13 @@ interface ALANameUsageMatchRetrofitService {
             @Query("genus") String genus,
             @Query("specificEpithet") String specificEpithet,
             @Query("infraspecificEpithet") String infraspecificEpithet,
-            @Query("rank") String rank
+            @Query("rank") String rank,
+            @Query("style")SearchStyle style
     );
 
     @GET("/api/search")
     @Headers({"Content-Type: application/json"})
-    Call<NameUsageMatch> match(@Query("q") String scientificName);
+    Call<NameUsageMatch> match(@Query("q") String scientificName, @Query("style") SearchStyle style);
 
     @GET("/api/searchByVernacularName")
     @Headers({"Content-Type: application/json"})

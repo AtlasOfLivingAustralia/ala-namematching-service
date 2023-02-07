@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.cache2k.Cache2kBuilder;
+import org.cache2k.addon.UniversalResiliencePolicy;
+import org.cache2k.extra.jmx.JmxSupport;
 
 /**
  * A simple cache configuration for {@link Cache2kBuilder}.
@@ -66,12 +68,15 @@ public class DataCacheConfiguration {
      * @return A partially initialised builder.
      */
     public <K, V> Cache2kBuilder<K, V> cacheBuilder(Class<K> keyClass, Class<V> valueClass) {
-        return Cache2kBuilder.of(keyClass, valueClass)
-                .enableJmx(this.enableJmx)
+        Cache2kBuilder<K, V> builder = Cache2kBuilder.of(keyClass, valueClass)
                 .entryCapacity(this.entryCapacity)
                 .eternal(this.eternal)
                 .keepDataAfterExpired(this.keepDataAfterExpired)
-                .permitNullValues(this.permitNullValues)
-                .suppressExceptions(this.suppressExceptions);
+                .permitNullValues(this.permitNullValues);
+        if (enableJmx)
+            builder.enable(JmxSupport.class);
+        if (this.suppressExceptions)
+            builder.setup(UniversalResiliencePolicy::enable);
+        return builder;
     }
 }
