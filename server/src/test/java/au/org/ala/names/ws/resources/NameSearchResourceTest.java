@@ -609,4 +609,17 @@ public class NameSearchResourceTest {
         assertNotNull(result);
         assertEquals(result.size(), 0);
     }
+
+
+    @Test
+    public void testGroups1() throws Exception {
+        NameSearch search = NameSearch.builder().scientificName("Asparagus officinalis").build();
+        NameUsageMatch match = this.resource.match(search);
+        assertNotNull(match);
+        assertTrue(match.isSuccess());
+        assertEquals(2, match.getSpeciesGroup().size());
+        assertEquals("Plants", match.getSpeciesGroup().get(0));
+        assertEquals("Flowering Plants", match.getSpeciesGroup().get(1));
+    }
+
 }

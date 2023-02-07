@@ -1,63 +1,71 @@
 [
   {
-    "speciesGroup": "Mammals",
-    "taxonRank": "order",
+    "parent": "Mammals",
+    "rank": "order",
     "taxa": [
       {
-        "name": "DASYUROMORPHIA",
-        "common": "Carnivorous Marsupials"
+        "name": "Carnivorous Marsupials",
+        "included": [
+          "DASYUROMORPHIA"
+        ]
       },
       {
-        "name": "DIPROTODONTIA",
-        "common": "Herbivorous Marsupials"
+        "name": "Herbivorous Marsupials",
+        "included": [
+          "DIPROTODONTIA"
+        ]
       },
       {
-        "name": "NOTORYCTEMORPHIA",
-        "common": "Marsupial Moles"
+        "name": "Marsupial Moles",
+        "included": [
+          "NOTORYCTEMORPHIA"
+        ]
       },
       {
-        "name": "PERAMELEMORPHIA",
-        "common": "Bandicoots, Bilbies"
+        "name": "Bandicoots, Bilbies",
+        "included": [
+          "PERAMELEMORPHIA"
+        ]
       }
     ]
   },
   {
-    "speciesGroup": "Birds",
-    "taxonRank": "order",
+    "parent": "Birds",
+    "rank": "order",
     "taxa": [
       {
-        "name": "ANSERIFORMES",
-        "common": "Ducks, Geese, Swans"
+        "name": "Ducks, Geese, Swans",
+        "included": [
+          "ANSERIFORMES"
+        ]
       },
       {
-        "name": "APODIFORMES",
-        "common": "Hummingbirds, Swifts"
+        "name": "Hummingbirds, Swifts",
+        "included": [
+          "APODIFORMES"
+        ]
       }
     ]
   },
   {
-    "speciesGroup": "Plants",
-    "facetName": "species_group",
+    "parent": "Angiosperms",
     "taxa": [
       {
         "name": "Monocots",
-        "common": "Monocots"
+        "rank": "superorder",
+        "included": [
+          "Lilianae"
+        ]
       },
       {
         "name": "Dicots",
-        "common": "Dicots"
-      },
-      {
-        "name": "Angiosperms",
-        "common": "Flowering plants"
-      },
-      {
-        "name": "FernsAndAllies",
-        "common": "Ferns and Allies"
-      },
-      {
-        "name": "Gymnosperms",
-        "common": "Conifers, Cycads"
+        "rank": "subclass",
+        "included": [
+          "Magnoliidae"
+        ],
+        "excluded": [
+          "Lilianae"
+        ]
       }
     ]
   }
