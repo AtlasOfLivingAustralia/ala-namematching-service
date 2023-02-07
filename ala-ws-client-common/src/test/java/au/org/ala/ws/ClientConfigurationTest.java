@@ -72,7 +72,7 @@ public class ClientConfigurationTest extends TestUtils {
         assertNotNull(cache);
         assertTrue(cache.isPresent());
         assertEquals("a:loaded", cache.get().get("a"));
-        cache.get().clearAndClose();
+        cache.get().close();
     }
 
     @Test

@@ -3,6 +3,7 @@ package au.org.ala.names.ws.client;
 import au.org.ala.names.ws.api.NameMatchService;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
+import au.org.ala.names.ws.api.SearchStyle;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.ClientException;
 import lombok.extern.slf4j.Slf4j;
@@ -125,12 +126,13 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * @param specificEpithet      The specific epithet (species component of a binomial name)
      * @param infraspecificEpithet The infraspecific epithet (subspecies, variety etc component of a trinomial name)
      * @param rank                 The Linnaean rank name
+     * @param style                The search style (defaults to {@link au.org.ala.names.ws.api.SearchStyle#MATCH}
      * @return A matching taxon, with success=false if not found
      * @see #match(NameSearch)
      */
     @Override
-    public NameUsageMatch match(String scientificName, String kingdom, String phylum, String clazz, String order, String family, String genus, String specificEpithet, String infraspecificEpithet, String rank) {
-        return this.call(this.alaNameUsageMatchService.match(scientificName, kingdom, phylum, clazz, order, family, genus, specificEpithet, infraspecificEpithet, rank));
+    public NameUsageMatch match(String scientificName, String kingdom, String phylum, String clazz, String order, String family, String genus, String specificEpithet, String infraspecificEpithet, String rank, SearchStyle style) {
+        return this.call(this.alaNameUsageMatchService.match(scientificName, kingdom, phylum, clazz, order, family, genus, specificEpithet, infraspecificEpithet, rank, style));
     }
 
     /**
@@ -141,11 +143,12 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * </p>
      *
      * @param scientificName The scientific name of the taxon
+     * @param style The search style (defaults to {@link au.org.ala.names.ws.api.SearchStyle#MATCH}
      * @return A matching taxon, with success=false if not found
      */
     @Override
-    public NameUsageMatch match(String scientificName) {
-        return this.call(this.alaNameUsageMatchService.match(scientificName));
+    public NameUsageMatch match(String scientificName, SearchStyle style) {
+        return this.call(this.alaNameUsageMatchService.match(scientificName, style));
     }
 
     /**

@@ -236,7 +236,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
     public void testError1() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(500).setBody("Unable to connect to index"));
         try {
-            NameUsageMatch match = client.match("Acacia dealbata");
+            NameUsageMatch match = client.match("Acacia dealbata", null);
             fail("Expecting HttpException");
         } catch (HttpException ex) {
             assertEquals(500, ex.code());

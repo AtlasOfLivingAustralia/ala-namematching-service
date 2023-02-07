@@ -2,6 +2,7 @@ package au.org.ala.names.ws.client;
 
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
+import au.org.ala.names.ws.api.SearchStyle;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.ClientException;
@@ -101,6 +102,26 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals(request, req.getBody().readUtf8());
     }
 
+    @Test
+    public void testMatchNameSearch4() throws Exception {
+        String request = this.getResource("request-4.json");
+        String response = this.getResource("response-3.json");
+
+        server.enqueue(new MockResponse().setBody(response));
+        Map<String, List<String>> hints = new HashMap<>();
+        hints.put("kingdom", Arrays.asList("Animalia"));
+        NameSearch search = NameSearch.builder().scientificName("Acacia dealbata").hints(hints).style(SearchStyle.STRICT).build();
+        NameUsageMatch match = client.match(search);
+
+        assertTrue(match.isSuccess());
+        assertEquals("Acacia dealbata", match.getScientificName());
+        assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
+        assertEquals(1, server.getRequestCount());
+        RecordedRequest req = server.takeRequest();
+        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals(request, req.getBody().readUtf8());
+    }
+
     /** Multiple search */
     @Test
     public void testMatchAllNameSearch1() throws Exception {
@@ -162,7 +183,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         String response = this.getResource("response-1.json");
 
         server.enqueue(new MockResponse().setBody(response));
-        NameUsageMatch match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null);
+        NameUsageMatch match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null, null);
 
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
@@ -180,9 +201,9 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         server.enqueue(new MockResponse().addHeader("Cache-Control: max-age=60").setBody(response));
         server.enqueue(new MockResponse().setResponseCode(500));
 
-        NameUsageMatch match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null);
-        match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null);
-        match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null);
+        NameUsageMatch match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null, null);
+        match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null, null);
+        match = client.match("Acacia dealbata", "Plantae", null, null, null, null, null, null, null, null, null);
 
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
@@ -197,7 +218,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         String response = this.getResource("response-1.json");
 
         server.enqueue(new MockResponse().setBody(response));
-        NameUsageMatch match = client.match("Acacia dealbata");
+        NameUsageMatch match = client.match("Acacia dealbata", null);
 
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
@@ -215,9 +236,9 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
 
         server.enqueue(new MockResponse().addHeader("Cache-Control: max-age=60").setBody(response));
         server.enqueue(new MockResponse().setResponseCode(500));
-        NameUsageMatch match = client.match("Acacia dealbata");
-        match = client.match("Acacia dealbata");
-        match = client.match("Acacia dealbata");
+        NameUsageMatch match = client.match("Acacia dealbata", null);
+        match = client.match("Acacia dealbata", null);
+        match = client.match("Acacia dealbata", null);
 
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
@@ -263,7 +284,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
     public void testError1() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(500).setBody("Unable to connect to index"));
         try {
-            NameUsageMatch match = client.match("Acacia dealbata");
+            NameUsageMatch match = client.match("Acacia dealbata", null);
             fail("Expecting HttpException");
         } catch (HttpException ex) {
             assertEquals(500, ex.code());
@@ -280,7 +301,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         try {
             ClientConfiguration errorConfiguration = ClientConfiguration.builder().baseUrl(new URL("http://nothing.nowhere")).build();
             this.client = new ALANameUsageMatchServiceClient(errorConfiguration);
-            NameUsageMatch match = client.match("Acacia dealbata");
+            NameUsageMatch match = client.match("Acacia dealbata", null);
             fail("Expecting ClientException");
         } catch (ClientException ex) {
         }

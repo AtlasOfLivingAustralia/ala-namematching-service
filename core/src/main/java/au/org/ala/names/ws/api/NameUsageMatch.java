@@ -241,6 +241,33 @@ public class NameUsageMatch {
         return true;
     }
 
+    /**
+     * Return information about the error that has occurred.
+     *
+     * @param ex The error
+     * @param search The search that caused the error (may be null)
+     *
+     * @return An error match.
+     */
+    public static NameUsageMatch forException(Exception ex, NameSearch search) {
+        StringBuffer message = new StringBuffer();
+
+        message.append("Internal error ");
+        message.append(ex.getClass());
+        if (ex.getMessage() != null) {
+            message.append(": ");
+            message.append(ex.getMessage());
+        }
+        if (search != null) {
+            message.append(" for ");
+            message.append(search);
+        }
+        return NameUsageMatch.builder()
+                .success(false)
+                .issues(Collections.singletonList(message.toString()))
+                .build();
+    }
+
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class NameUsageMatchBuilder {}

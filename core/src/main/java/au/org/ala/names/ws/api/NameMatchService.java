@@ -57,6 +57,7 @@ public interface NameMatchService extends Closeable {
      * @param specificEpithet The specific epithet (species component of a binomial name)
      * @param infraspecificEpithet The infraspecific epithet (subspecies, variety etc component of a trinomial name)
      * @param rank The Linnaean rank name
+     * @param style The search style to use
      *
      * @return A matching taxon, with success=false if not found
      */
@@ -70,7 +71,8 @@ public interface NameMatchService extends Closeable {
             String genus,
             String specificEpithet,
             String infraspecificEpithet,
-            String rank
+            String rank,
+            SearchStyle style
     );
 
     /**
@@ -81,10 +83,11 @@ public interface NameMatchService extends Closeable {
      * </p>
      *
      * @param scientificName The scientific name of the taxon
+     * @param style The search style to use
      *
      * @return A matching taxon, with success=false if not found
      */
-    NameUsageMatch match(String scientificName);
+    NameUsageMatch match(String scientificName, SearchStyle style);
 
     /**
      * Search for a taxon with a given vernacular (common) name.

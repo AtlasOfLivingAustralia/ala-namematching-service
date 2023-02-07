@@ -14,8 +14,7 @@ import lombok.Setter;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Collections;
 
 public class ALANameMatchingServiceConfiguration extends Configuration {
     /** The swagger UI configuration */
@@ -45,7 +44,7 @@ public class ALANameMatchingServiceConfiguration extends Configuration {
     /**
      * Construct with default setttings.
      * <p>
-     * The settings can be overridden in the
+     * The settings can be overridden in the configuraion YAML file
      * </p>
      */
     public ALANameMatchingServiceConfiguration()  {
@@ -56,7 +55,7 @@ public class ALANameMatchingServiceConfiguration extends Configuration {
         this.swaggerBundleConfiguration.setContactEmail("support@ala.org.au");
         this.swaggerBundleConfiguration.setResourcePackage("au.org.ala.names.ws.api,au.org.ala.names.ws.client,au.org.ala.names.ws.resources");
         this.swaggerBundleConfiguration.setLicense("Mozilla Public Licence 1.1");
-        this.swaggerBundleConfiguration.setVersion("1.8-SNAPSHOT");
+        this.swaggerBundleConfiguration.setVersion("1.9-SNAPSHOT");
         this.swaggerBundleConfiguration.getSwaggerViewConfiguration().setPageTitle("ALA Namematching API");
 
         // swagger openapi v3
@@ -64,15 +63,18 @@ public class ALANameMatchingServiceConfiguration extends Configuration {
         Info info = new Info()
                 .title("ALA Namematching API")
                 .description("A taxonomy service that maps scientific name queries onto taxon concepts")
-                .contact(new Contact().email("support@ala.org.au").url("https://ala.org.au"))
-                .license(new License().name("Mozilla Public Licence 1.1"))
-                .version("1.8-SNAPSHOT");
+                .contact(new Contact()
+                        .email("support@ala.org.au")
+                        .url("https://ala.org.au"))
+                .license(new License()
+                        .name("Mozilla Public Licence 1.1")
+                        .url("https://www.mozilla.org/en-US/MPL/1.1/"))
+                .version("1.9-SNAPSHOT");
 
         oas.info(info);
-        swaggerConfiguration = new SwaggerConfiguration()
+        this.swaggerConfiguration = new SwaggerConfiguration()
                 .openAPI(oas)
                 .prettyPrint(true)
-                .resourcePackages(Stream.of("au.org.ala.names.ws")
-                        .collect(Collectors.toSet()));
-    }
+                .resourcePackages(Collections.singleton("au.org.ala.names.ws.resources"));
+     }
 }

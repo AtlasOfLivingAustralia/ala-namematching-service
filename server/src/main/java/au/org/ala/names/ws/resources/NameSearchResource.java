@@ -6,6 +6,7 @@ import au.org.ala.names.search.SearchResultException;
 import au.org.ala.names.ws.api.NameMatchService;
 import au.org.ala.names.ws.api.NameSearch;
 import au.org.ala.names.ws.api.NameUsageMatch;
+import au.org.ala.names.ws.api.SearchStyle;
 import au.org.ala.names.ws.core.NameSearchConfiguration;
 import au.org.ala.names.ws.core.SpeciesGroupsUtil;
 import com.codahale.metrics.annotation.Timed;
@@ -20,8 +21,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.Cache;
+import org.cache2k.operation.CacheControl;
+import org.cache2k.operation.CacheStatistics;
 import org.gbif.api.vocabulary.NameType;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -29,9 +33,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * Resource that implements the name search API.
+ *
  * TODO add diagnostics to payload - similar to GBIF
  */
-@Tag(name="Taxonomy search")
+@Tag(
+        name = "Taxonomy search",
+        description = "Search for taxonomic information on names, classifications or identifiers"
+)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/api")
 @Slf4j
@@ -47,6 +56,8 @@ public class NameSearchResource implements NameMatchService {
     private final boolean checkHints;
     /** Allow loose searched */
     private final boolean allowLoose;
+    /** Default search style */
+    private final SearchStyle defaultStyle;
 
     // Cache2k instance for searches
     private final Cache<NameSearch, NameUsageMatch> searchCache;
@@ -55,6 +66,7 @@ public class NameSearchResource implements NameMatchService {
     // Cache2k instance for derefereced lookups
     private final Cache<String, NameUsageMatch> idAcceptedCache;
 
+    @Inject
     public NameSearchResource(NameSearchConfiguration configuration){
         try {
             log.info("Initialising NameSearchResource.....");
@@ -63,6 +75,7 @@ public class NameSearchResource implements NameMatchService {
             this.useHints = configuration.isUseHints();
             this.checkHints = configuration.isCheckHints();
             this.allowLoose = configuration.isAllowLoose();
+            this.defaultStyle = configuration.getDefaultStyle();
             this.searchCache = configuration.getCache().cacheBuilder(NameSearch.class, NameUsageMatch.class)
                     .loader(nameSearch -> this.search(nameSearch)) //auto populating function
                     .build();
@@ -109,8 +122,8 @@ public class NameSearchResource implements NameMatchService {
             return this.searchCache.get(search);
         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with nameSearch: " + search);
+            return NameUsageMatch.forException(e, search);
         }
-        return NameUsageMatch.FAIL;
     }
 
 
@@ -154,8 +167,10 @@ public class NameSearchResource implements NameMatchService {
             @Parameter(description = "The genus name") @QueryParam("genus") String genus,
             @Parameter(description = "The specific epithet, the species part of a binomial name") @QueryParam("specificEpithet") String specificEpithet,
             @Parameter(description = "The below species (subspecies, variety, form etc.) epithet") @QueryParam("infraspecificEpithet") String infraspecificEpithet,
-            @Parameter(description = "The taxon rank. If not supplied, it may be inferred from other parameters", example = "species") @QueryParam("rank") String rank
+            @Parameter(description = "The taxon rank. If not supplied, it may be inferred from other parameters", example = "species") @QueryParam("rank") String rank,
+            @Parameter(description = "The search style. If not supplied the server default style is used.", example = "MATCH") @QueryParam("style") SearchStyle style
     ) {
+        style = style == null ? this.defaultStyle : style;
         NameSearch search = NameSearch.builder()
                 .scientificName(scientificName)
                 .kingdom(kingdom)
@@ -167,15 +182,16 @@ public class NameSearchResource implements NameMatchService {
                 .specificEpithet(specificEpithet)
                 .infraspecificEpithet(infraspecificEpithet)
                 .rank(rank)
-                .loose(true)
+                .loose(style.isLoose())
+                .style(style)
                 .build();
         try {
             return this.searchCache.get(search);
         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with nameSearch: " + search);
+            return NameUsageMatch.forException(e, search);
         }
-        return NameUsageMatch.FAIL;
-    }
+     }
 
     @Operation(
             summary = "Search by name",
@@ -188,15 +204,17 @@ public class NameSearchResource implements NameMatchService {
     @Timed
     @Path("/search")
     public NameUsageMatch match(
-            @Parameter(description = "The scientific name", required = true, example = "Acacia dealbata") @QueryParam("q") String name
+            @Parameter(description = "The scientific name", required = true, example = "Acacia dealbata") @QueryParam("q") String name,
+            @Parameter(description = "The search style. If not supplied the server default style is used.", example = "MATCH") @QueryParam("style") SearchStyle style
     ) {
+        style = style == null ? this.defaultStyle : style;
+        NameSearch search = NameSearch.builder().scientificName(name).loose(true).style(style).build();
         try {
-            NameSearch cl = NameSearch.builder().scientificName(name).loose(true).build();
-            return this.searchCache.get(cl);
+            return this.searchCache.get(search);
         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with query: " + name);
+            return NameUsageMatch.forException(e, search);
         }
-        return NameUsageMatch.FAIL;
     }
 
 
@@ -212,13 +230,13 @@ public class NameSearchResource implements NameMatchService {
     public NameUsageMatch matchVernacular(
             @Parameter(description = "The common name", required = true, example = "Red Kangaroo") @QueryParam("vernacularName") String vernacularName
     ) {
+        NameSearch search = NameSearch.builder().vernacularName(vernacularName).build();
         try {
-            NameSearch cl = NameSearch.builder().vernacularName(vernacularName).build();
-            return this.searchCache.get(cl);
+            return this.searchCache.get(search);
         } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with vernacularName: " + vernacularName);
+            return NameUsageMatch.forException(e, search);
         }
-        return NameUsageMatch.FAIL;
     }
 
     @Operation(
@@ -238,8 +256,8 @@ public class NameSearchResource implements NameMatchService {
             return cache.get(taxonID);
          } catch (Exception e){
             log.warn("Problem matching name : " + e.getMessage() + " with taxonID: " + taxonID);
+            return NameUsageMatch.forException(e, null);
         }
-        return NameUsageMatch.FAIL;
     }
 
     @Operation(
@@ -262,6 +280,7 @@ public class NameSearchResource implements NameMatchService {
                 match = cache.get(taxonID);
             } catch (Exception e) {
                 log.warn("Problem matching name : " + e.getMessage() + " with taxonID: " + taxonID);
+                match = NameUsageMatch.forException(e, null);
             }
             matches.add(match);
         }
@@ -441,6 +460,7 @@ public class NameSearchResource implements NameMatchService {
      */
     private NameUsageMatch search(NameSearch search) throws Exception {
         NameUsageMatch match = null;
+        SearchStyle style = search.getStyle() == null ? this.defaultStyle : search.getStyle();
         //attempt 1: search via taxonConceptID or taxonID if provided
         NameSearchResult idnsr = null;
 
@@ -458,20 +478,33 @@ public class NameSearchResource implements NameMatchService {
         final NameSearch nsearch = search.normalised();
         MetricsResultDTO metrics = null;
         NameSearchResult result = null;
-        // Get the first result that works
+
+        // Get the first result that works with hints
         if (useHints) {
-            metrics = nsearch.hintStream().map(s -> this.findMetrics(s, false)).filter(m -> m != null && m.getResult() != null).findFirst().orElse(null);
+            metrics = nsearch.hintStream().map(s -> this.findMetrics(s, SearchStyle.STRICT)).filter(m -> m != null && m.getResult() != null).findFirst().orElse(null);
             result = metrics == null ? null : metrics.getResult();
         }
 
-        // Try fuzzier approaches
+        // Look for an exact match
         if (result == null) {
-            metrics = nsearch.bareStream().filter(s -> !s.equals(nsearch)).map(s -> this.findMetrics(s, true)).filter(m -> m != null && m.getResult() != null).findFirst().orElseGet(() -> this.findMetrics(nsearch, true));
+            metrics = nsearch.bareStream().filter(s -> !s.equals(nsearch)).map(s -> this.findMetrics(s, SearchStyle.STRICT)).filter(m -> m != null && m.getResult() != null).findFirst().orElse(null);
+            result = metrics == null ? null : metrics.getResult();
+        }
+
+        // Try fuzzier approaches, if allowed
+        if (result == null && style != SearchStyle.STRICT) {
+            metrics = nsearch.bareStream().filter(s -> !s.equals(nsearch)).map(s -> this.findMetrics(s, style)).filter(m -> m != null && m.getResult() != null).findFirst().orElse(null);
+            result = metrics == null ? null : metrics.getResult();
+        }
+
+        // Last try with what we've got
+        if (result == null) {
+            metrics = this.findMetrics(nsearch, style);
             result = metrics == null ? null : metrics.getResult();
         }
 
         // See if the scientific name is actually a LSID
-        if (this.allowLoose && search.isLoose()) {
+        if (result == null && this.allowLoose && search.isLoose()) {
             idnsr = searcher.searchForRecordByLsid(search.getScientificName());
             if (idnsr != null){
                 Set<String> vernacularNames = searcher.getCommonNamesForLSID(idnsr.getLsid(), 1);
@@ -517,7 +550,7 @@ public class NameSearchResource implements NameMatchService {
         return match;
     }
 
-    private MetricsResultDTO findMetrics(NameSearch search, boolean approximate) {
+    private MetricsResultDTO findMetrics(NameSearch search, SearchStyle style) {
         if (search.getScientificName() == null)
             return null;
         LinnaeanRankClassification lrc = new LinnaeanRankClassification();
@@ -535,7 +568,7 @@ public class NameSearchResource implements NameMatchService {
 
         MetricsResultDTO metrics = null;
         try {
-            metrics = searcher.searchForRecordMetrics(lrc, approximate, approximate);
+            metrics = searcher.searchForRecordMetrics(lrc, style.isHisherOrder(), style.isFuzzy());
         } catch (SearchResultException ex) {
             log.warn("Unable to complete search for " + lrc, ex);
         }
@@ -621,15 +654,39 @@ public class NameSearchResource implements NameMatchService {
                     .issues(issues != null ? issues.stream().map(ErrorType::toString).sorted().collect(Collectors.toList()) : Collections.singletonList("noIssue"))
                     .build();
         } else {
+            issues.remove(ErrorType.NONE);
             return NameUsageMatch.builder()
                     .success(false)
                     .matchType(matchType != null ? matchType.toString() : "")
                     .nameType(nameType != null ? nameType.toString() : null)
                     .synonymType(synonymType != null ? synonymType.name() : null)
-                    .issues(issues != null ? issues.stream().map(ErrorType::toString).sorted().collect(Collectors.toList()) : Collections.singletonList("noMatch"))
+                    .issues(issues != null && !issues.isEmpty() ? issues.stream().map(ErrorType::toString).sorted().collect(Collectors.toList()) : Collections.singletonList("noMatch"))
                     .build();
 
         }
+    }
+
+    /**
+     * Get information about the name search resource.
+     *
+     * @return A suitably jsonable map of configuration and metrics
+     */
+    public Map<String, Object> getMetrics() {
+        Map<String, Object> metrics = new HashMap();
+        Map<String, Object> config = new HashMap<>();
+        config.put("useHints", this.useHints);
+        config.put("checkHints", this.checkHints);
+        config.put("allowLoose", this.allowLoose);
+        config.put("defaultStyle", this.defaultStyle);
+        metrics.put("config", config);
+        CacheStatistics stats = CacheControl.of(this.searchCache).sampleStatistics();
+        Map<String, Object> cache = new HashMap<>();
+        cache.put("hitRate", stats.getHitRate());
+        cache.put("getCount", stats.getGetCount());
+        cache.put("loadCount", stats.getLoadCount());
+        cache.put("millisPerLoad", stats.getMillisPerLoad());
+        metrics.put("cache", cache);
+        return metrics;
     }
 
     /**
@@ -638,4 +695,5 @@ public class NameSearchResource implements NameMatchService {
     @Override
     public void close()  {
     }
+
 }
