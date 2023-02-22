@@ -80,5 +80,16 @@ public class DataCacheConfigurationTest extends TestUtils {
         Assert.assertEquals("fredX", cache.get("fred"));
     }
 
+    // Test with JMX
+    @Test
+    public void testCreateBuilder2() throws Exception {
+        DataCacheConfiguration configuration = DataCacheConfiguration.builder()
+                .entryCapacity(20000)
+                .enableJmx(true)
+                .build();
+        Cache<String, String> cache = configuration.cacheBuilder(String.class, String.class).loader(k -> k + "X").build();
+        Assert.assertEquals("helloX", cache.get("hello"));
+    }
+
 
 }
