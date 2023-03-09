@@ -56,7 +56,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <ala-name-matching.version>4.3-SNAPSHOT</ala-name-matching.version>
+        <ala-name-matching.version>4.3</ala-name-matching.version>
         <cache2k.version>2.6.1.Final</cache2k.version>
         <jackson.version>2.14.0</jackson.version>
         <retrofit.version>2.6.2</retrofit.version>
