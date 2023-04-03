@@ -1,0 +1,25 @@
+# Run from server directory with command: docker build -f docker/Dockerfile-gbif-backbone . -t  ala-namematching-service:v20221123-2 --build-arg ENV=gbif-backbone
+
+FROM openjdk:8-jdk-alpine
+
+ARG ENV
+
+RUN apk --no-cache add curl
+
+RUN mkdir -p /data/lucene
+RUN mkdir -p /data/ala-namematching-service/config
+
+COPY ./src/main/resources/subgroups.json /data/ala-namematching-service/config/subgroups.json
+COPY ./src/main/resources/groups.json /data/ala-namematching-service/config/groups.json
+COPY ./target/ala-namematching-server-1.9-SNAPSHOT.jar /data/ala-namematching-server.jar
+COPY ./config.yml /data/config.yml
+
+RUN curl -sf  -o /data/lucene/namematching.tgz -L https://datos.gbif.es/others/nameindex-gbif-backbone-lucene-8-2022-11-23-v2.tgz
+RUN tar zxf /data/lucene/namematching.tgz -C /data/lucene
+RUN ls -l /data/lucene/
+RUN mv /data/lucene/namematching-gbif-backbone-lucene-8-2022-11-23-v2 /data/lucene/namematching
+
+EXPOSE 9180
+EXPOSE 9179
+
+CMD ["java", "-jar", "/data/ala-namematching-server.jar", "server", "/data/config.yml"]

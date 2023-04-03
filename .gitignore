@@ -11,3 +11,4 @@ dependency-reduced-pom.xml
 debian/files
 debian/ala-namematching-service
 debian/debhelper-build-stamp
+.history/
