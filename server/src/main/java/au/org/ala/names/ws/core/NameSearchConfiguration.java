@@ -35,6 +35,9 @@ public class NameSearchConfiguration {
     /** Allow loose searching on taxon identifier and vernacular name in place of scientific name, if requested */
     @JsonProperty
     private boolean allowLoose = true;
+    /** Use the preferred vernacular name supplied by the index, if present. Available in 2023+ namematching indexes */
+    @JsonProperty
+    private boolean preferredVernacular = true;
     /** The default search style to use, if not specified */
     @JsonProperty
     private SearchStyle defaultStyle = SearchStyle.MATCH;

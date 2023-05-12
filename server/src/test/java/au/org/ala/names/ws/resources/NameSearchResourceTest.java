@@ -23,7 +23,7 @@ public class NameSearchResourceTest {
     public void setUp() throws Exception {
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.INFO); // Stop logging insanity
         this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20210811-3"); // Ensure consistent index
+        this.configuration.setIndex("/data/lucene/namematching-20230329-2"); // Ensure consistent index
         this.configuration.setGroups(this.getClass().getResource("../core/test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("../core/test-subgroups-1.json"));
         this.resource = new NameSearchResource(this.configuration);
@@ -74,7 +74,7 @@ public class NameSearchResourceTest {
         assertTrue(match.isSuccess());
         assertEquals("Acacia", match.getScientificName());
         assertEquals("genus", match.getRank());
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51382879", match.getTaxonConceptID());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51471290", match.getTaxonConceptID());
         assertEquals("higherMatch", match.getMatchType());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
@@ -183,11 +183,11 @@ public class NameSearchResourceTest {
 
     @Test
     public void testSearchByClassification10() throws Exception {
-        NameSearch search = NameSearch.builder().scientificName("https://id.biodiversity.org.au/node/apni/5272169").loose(true).build();
+        NameSearch search = NameSearch.builder().scientificName("https://id.biodiversity.org.au/taxon/apni/51440555").loose(true).build();
         NameUsageMatch match = this.resource.match(search);
         assertTrue(match.isSuccess());
         assertEquals("Eucalyptus globulus", match.getScientificName());
-        assertEquals("https://id.biodiversity.org.au/node/apni/5272169", match.getTaxonConceptID());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51440555", match.getTaxonConceptID());
         assertEquals("taxonIdMatch", match.getMatchType());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
@@ -197,7 +197,7 @@ public class NameSearchResourceTest {
         NameUsageMatch match = this.resource.match("Eucalyptus globula", null, null, null, null, null, null, null, null, null, SearchStyle.MATCH);
         assertTrue(match.isSuccess());
         assertEquals("Eucalyptus globulus", match.getScientificName());
-        assertEquals("https://id.biodiversity.org.au/node/apni/5272169", match.getTaxonConceptID());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51440555", match.getTaxonConceptID());
         assertEquals("fuzzyMatch", match.getMatchType());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
@@ -208,7 +208,7 @@ public class NameSearchResourceTest {
         NameUsageMatch match = this.resource.match("Eucalyptus globula", null, null, null, null, null, null, null, null, null, SearchStyle.FUZZY);
         assertTrue(match.isSuccess());
         assertEquals("Eucalyptus globulus", match.getScientificName());
-        assertEquals("https://id.biodiversity.org.au/node/apni/5272169", match.getTaxonConceptID());
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51440555", match.getTaxonConceptID());
         assertEquals("fuzzyMatch", match.getMatchType());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
@@ -230,6 +230,23 @@ public class NameSearchResourceTest {
         assertEquals(Collections.singletonList("noMatch"), match.getIssues());
     }
 
+    @Test
+    public void testSearchByClassificationVernacular1() throws Exception {
+        NameUsageMatch match = this.resource.match("Osphranter rufus", null, null, null, null, null, null, null, null, null, SearchStyle.FUZZY);
+        assertTrue(match.isSuccess());
+        assertEquals("Red Kangaroo", match.getVernacularName());
+    }
+
+    // Test without preferred name in result
+    @Test
+    public void testSearchByClassificationVernacular2() throws Exception {
+        this.resource.close();
+        this.configuration.setPreferredVernacular(false);
+        this.resource = new NameSearchResource(this.configuration);
+        NameUsageMatch match = this.resource.match("Osphranter rufus", null, null, null, null, null, null, null, null, null, SearchStyle.FUZZY);
+        assertTrue(match.isSuccess());
+        assertEquals("Red Kangaroo", match.getVernacularName());
+    }
 
     @Test
     public void testHomonym1() throws Exception {
@@ -248,7 +265,7 @@ public class NameSearchResourceTest {
         search = NameSearch.builder().scientificName("Agathis").phylum("Arthropoda").build();
         match = this.resource.match(search);
         assertTrue(match.isSuccess());
-        assertEquals("https://biodiversity.org.au/afd/taxa/d02923bc-cf54-4d7f-ae74-aac1d6af1830", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/10357297-d91b-4c4c-8582-2cade1cf46d6", match.getTaxonConceptID());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 
@@ -268,7 +285,7 @@ public class NameSearchResourceTest {
         NameSearch search = NameSearch.builder().scientificName("Agathis").hints(hints).build();
         NameUsageMatch match = this.resource.match(search);
         assertTrue(match.isSuccess());
-        assertEquals("https://biodiversity.org.au/afd/taxa/d02923bc-cf54-4d7f-ae74-aac1d6af1830", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/10357297-d91b-4c4c-8582-2cade1cf46d6", match.getTaxonConceptID());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 
@@ -279,7 +296,7 @@ public class NameSearchResourceTest {
         NameSearch search = NameSearch.builder().scientificName("Agathis").hints(hints).build();
         NameUsageMatch match = this.resource.match(search);
         assertTrue(match.isSuccess());
-        assertEquals("https://biodiversity.org.au/afd/taxa/d02923bc-cf54-4d7f-ae74-aac1d6af1830", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/10357297-d91b-4c4c-8582-2cade1cf46d6", match.getTaxonConceptID());
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
     }
 
@@ -291,7 +308,7 @@ public class NameSearchResourceTest {
         NameSearch search = NameSearch.builder().scientificName("Agathis").hints(hints).build();
         NameUsageMatch match = this.resource.match(search);
         assertTrue(match.isSuccess());
-        assertEquals("https://biodiversity.org.au/afd/taxa/d02923bc-cf54-4d7f-ae74-aac1d6af1830", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/10357297-d91b-4c4c-8582-2cade1cf46d6", match.getTaxonConceptID());
         assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
     }
 
@@ -464,7 +481,7 @@ public class NameSearchResourceTest {
     public void testSearchByVerncaularName1() throws Exception {
         NameUsageMatch match = this.resource.matchVernacular("Common Wombat");
         assertTrue(match.isSuccess());
-        assertEquals("https://biodiversity.org.au/afd/taxa/e079f94d-3d7f-4deb-ae29-053fec4d1b53", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/66d42847-c556-4fa3-902c-a91d9f517286", match.getTaxonConceptID());
         assertEquals("Vombatus ursinus", match.getScientificName());
         assertEquals("INFORMAL", match.getNameType());
         assertEquals("vernacularMatch", match.getMatchType());
@@ -547,9 +564,9 @@ public class NameSearchResourceTest {
     @Test
     public void testSearchForLsidById1() throws Exception {
         // taxonID -> acceptedID
-        String result = this.resource.searchForLsidById("https://biodiversity.org.au/afd/taxa/05691642-5191-426a-b469-f1514b880481");
+        String result = this.resource.searchForLsidById("https://id.biodiversity.org.au/instance/apni/889096");
         assertNotNull(result);
-        assertEquals("https://biodiversity.org.au/afd/taxa/462548c3-6464-4e35-b71f-f4ad3fff3ebb", result);
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702984", result);
     }
 
     @Test
@@ -564,7 +581,7 @@ public class NameSearchResourceTest {
         // Genus
         String result = this.resource.searchForLSID("Eucalyptus");
         assertNotNull(result);
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51360942", result);
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702982", result);
     }
 
     @Test
@@ -580,7 +597,7 @@ public class NameSearchResourceTest {
         List<String> result = this.resource.getGuidsForTaxa(Collections.singletonList("Eucalyptus"));
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51360942", result.get(0));
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702982", result.get(0));
     }
 
     @Test
@@ -590,15 +607,16 @@ public class NameSearchResourceTest {
         assertNotNull(result);
         assertEquals(2, result.size());
         assertNull(result.get(0));
-        assertEquals( "https://biodiversity.org.au/afd/taxa/462548c3-6464-4e35-b71f-f4ad3fff3ebb", result.get(1));
+        assertNotNull(result.get(1));
+        assertEquals( "https://biodiversity.org.au/afd/taxa/44f915ad-6090-42ba-a341-a11e47555f04", result.get(1));
     }
 
     @Test
     public void testGetCommonNamesForLSID1() throws Exception {
         // LSID with >1 common names
-        Set<String> result = this.resource.getCommonNamesForLSID("https://biodiversity.org.au/afd/taxa/e079f94d-3d7f-4deb-ae29-053fec4d1b53", 10);
+        Set<String> result = this.resource.getCommonNamesForLSID("https://biodiversity.org.au/afd/taxa/66d42847-c556-4fa3-902c-a91d9f517286", 10);
         assertNotNull(result);
-        assertEquals(result.size(), 2);
+        assertEquals(2, result.size());
         assertTrue(result.contains("Common Wombat"));
     }
 

@@ -16,7 +16,7 @@ public class NameSearchConfigurationTest extends TestUtils {
     public void testReadJSON1() throws Exception {
         ObjectMapper om = new ObjectMapper();
         NameSearchConfiguration configuration = om.readValue(this.getClass().getResource("name-search-config-1.json"), NameSearchConfiguration.class);
-        assertEquals("/data/lucene/namematching-20210811-3", configuration.getIndex());
+        assertEquals("/data/lucene/namematching-20230329-2", configuration.getIndex());
         assertEquals("http://nowhere.com/groups", configuration.getGroups().toExternalForm());
         assertEquals("http://nowhere.com/subgroups", configuration.getSubgroups().toExternalForm());
         assertEquals(true, configuration.getCache().isEnableJmx());
@@ -25,7 +25,7 @@ public class NameSearchConfigurationTest extends TestUtils {
     @Test
     public void testWriteJSON1() throws Exception {
         NameSearchConfiguration configuration = new NameSearchConfiguration();
-        configuration.setIndex("/data/lucene/namematching-20210811-3");
+        configuration.setIndex("/data/lucene/namematching-20230329-2");
         configuration.setGroups(new URL("http://nowhere.com/groups"));
         configuration.setSubgroups(new URL("http://nowhere.com/subgroups"));
         configuration.setCache(DataCacheConfiguration.builder().enableJmx(true).build());

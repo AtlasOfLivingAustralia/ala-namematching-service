@@ -1,6 +1,6 @@
 Template: ala-namematching-service/source
 Type: string
-Default: https://archives.ala.org.au/archives/nameindexes/20210811-3/namematching-20210811-3.tgz
+Default: https://archives.ala.org.au/archives/nameindexes/20230329-2/namematching-20230329-2.tgz
 Description: Pre-built name matching index tar:
 
 Template: ala-namematching-service/sha1

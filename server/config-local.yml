@@ -20,7 +20,7 @@ server:
     - type: http
       port: 9180
 search:
-  index: /data/lucene/namematching-20210811-3
+  index: /data/lucene/namematching-20230329-2
   groups: file:src/main/resources/groups.json
   subgroups: file:src/main/resources/subgroups.json
   cache:
