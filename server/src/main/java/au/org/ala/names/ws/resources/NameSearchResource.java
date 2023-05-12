@@ -56,6 +56,8 @@ public class NameSearchResource implements NameMatchService {
     private final boolean checkHints;
     /** Allow loose searched */
     private final boolean allowLoose;
+    /** Use the index-supplied preferred vernacular name */
+    private final boolean preferredVernacular;
     /** Default search style */
     private final SearchStyle defaultStyle;
 
@@ -75,6 +77,7 @@ public class NameSearchResource implements NameMatchService {
             this.useHints = configuration.isUseHints();
             this.checkHints = configuration.isCheckHints();
             this.allowLoose = configuration.isAllowLoose();
+            this.preferredVernacular = configuration.isPreferredVernacular();
             this.defaultStyle = configuration.getDefaultStyle();
             this.searchCache = configuration.getCache().cacheBuilder(NameSearch.class, NameUsageMatch.class)
                     .loader(nameSearch -> this.search(nameSearch)) //auto populating function
@@ -471,8 +474,7 @@ public class NameSearchResource implements NameMatchService {
         }
 
         if (idnsr != null){
-            Set<String> vernacularNames = searcher.getCommonNamesForLSID(idnsr.getLsid(), 1);
-            return create(idnsr, vernacularNames, idnsr.getMatchType(), null, null, null);
+             return create(idnsr, idnsr.getMatchType(), null, null, null);
         }
         // Start searching by names
         final NameSearch nsearch = search.normalised();
@@ -507,8 +509,7 @@ public class NameSearchResource implements NameMatchService {
         if (result == null && this.allowLoose && search.isLoose()) {
             idnsr = searcher.searchForRecordByLsid(search.getScientificName());
             if (idnsr != null){
-                Set<String> vernacularNames = searcher.getCommonNamesForLSID(idnsr.getLsid(), 1);
-                return create(idnsr, vernacularNames, idnsr.getMatchType(), null, null, null);
+                return create(idnsr, idnsr.getMatchType(), null, null, null);
             }
         }
 
@@ -538,10 +539,9 @@ public class NameSearchResource implements NameMatchService {
                 if (result != null)
                     metrics.setResult(result);
             }
-            Set<String> vernacularNames = searcher.getCommonNamesForLSID(metrics.getResult().getLsid(), 1);
-            match = create(metrics.getResult(), vernacularNames, matchType, metrics.getNameType(), synonymType, metrics.getErrors());
+            match = create(metrics.getResult(), matchType, metrics.getNameType(), synonymType, metrics.getErrors());
         } else {
-            match = create(metrics.getResult(), null, null, metrics.getNameType(), null, metrics.getErrors());
+            match = create(metrics.getResult(), null, metrics.getNameType(), null, metrics.getErrors());
         }
         if (this.checkHints && !match.check(nsearch)) {
             match.getIssues().remove("noIssue");
@@ -598,16 +598,32 @@ public class NameSearchResource implements NameMatchService {
                 result = searcher.searchForRecordByLsid(result.getAcceptedLsid());
             }
         }
-        Set<String> vernacularNames = searcher.getCommonNamesForLSID(result.getLsid(), 1);
-        return create(result, vernacularNames, matchType, null, synonymType, null);
+         return create(result, matchType, null, synonymType, null);
     }
 
+    /**
+     * Get the preferred vernacular name for a search result.
+     * <p>
+     * If {@link #preferredVernacular} is true then use the
+     * precomputed version in the index.
+     * Otherwise retrieve a vernacular name.
+     * </p>
+     *
+     * @param nsr The search result
+     *
+     * @return The preferred vernacular name or null for none
+     */
+    private String preferredVernacularName(NameSearchResult nsr) {
+        if (this.preferredVernacular) {
+            return nsr.getVernacularName();
+        }
+        return searcher.getCommonNameForLSID(nsr.getLsid());
+    }
 
     /**
      * Build a match result out of what we have found.
      *
      * @param nsr The search result
-     * @param vernacularNames Any additional vernacular names
      * @param matchType The name match type
      * @param nameType The name type
      * @param synonymType Any synonym information
@@ -617,7 +633,7 @@ public class NameSearchResource implements NameMatchService {
      *
      * @throws Exception if unable to build the match, usually as a result of some underlying interface problem
      */
-    private NameUsageMatch create(NameSearchResult nsr, Set<String> vernacularNames, MatchType matchType, NameType nameType, SynonymType synonymType, Set<ErrorType> issues) throws Exception {
+    private NameUsageMatch create(NameSearchResult nsr, MatchType matchType, NameType nameType, SynonymType synonymType, Set<ErrorType> issues) throws Exception {
         if(nsr != null && nsr.getRankClassification() != null)  {
             LinnaeanRankClassification lrc = nsr.getRankClassification();
             Integer lft = nsr.getLeft() != null ? Integer.parseInt(nsr.getLeft()) : null;
@@ -648,7 +664,7 @@ public class NameSearchResource implements NameMatchService {
                     .genusID(lrc.getGid())
                     .species(lrc.getSpecies())
                     .speciesID(lrc.getSid())
-                    .vernacularName(!vernacularNames.isEmpty() ? vernacularNames.iterator().next() : null)
+                    .vernacularName(this.preferredVernacularName(nsr))
                     .speciesGroup(speciesGroupsUtil.getSpeciesGroups(lft))
                     .speciesSubgroup(speciesGroupsUtil.getSpeciesSubGroups(lft))
                     .issues(issues != null ? issues.stream().map(ErrorType::toString).sorted().collect(Collectors.toList()) : Collections.singletonList("noIssue"))

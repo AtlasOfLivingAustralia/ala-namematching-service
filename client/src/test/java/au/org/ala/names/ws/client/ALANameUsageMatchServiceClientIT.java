@@ -142,7 +142,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Osphranter rufus", match.getScientificName());
         assertEquals("species", match.getRank());
-        assertEquals("https://biodiversity.org.au/afd/taxa/e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/7e6e134b-2bc7-43c4-b23a-6e3f420f57ad", match.getTaxonConceptID());
     }
 
     /** Multiple search with caching */
@@ -164,7 +164,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Osphranter rufus", match.getScientificName());
         assertEquals("species", match.getRank());
-        assertEquals("https://biodiversity.org.au/afd/taxa/e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/7e6e134b-2bc7-43c4-b23a-6e3f420f57ad", match.getTaxonConceptID());
 
         matches = client.matchAll(searches);
         assertNotNull(matches);
@@ -178,7 +178,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Osphranter rufus", match.getScientificName());
         assertEquals("species", match.getRank());
-        assertEquals("https://biodiversity.org.au/afd/taxa/e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/7e6e134b-2bc7-43c4-b23a-6e3f420f57ad", match.getTaxonConceptID());
     }
 
     /** Multiple search with caching */
@@ -271,7 +271,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Vombatus ursinus", match.getScientificName());
         assertEquals("species", match.getRank());
-        assertEquals("https://biodiversity.org.au/afd/taxa/e079f94d-3d7f-4deb-ae29-053fec4d1b53", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/66d42847-c556-4fa3-902c-a91d9f517286", match.getTaxonConceptID());
     }
 
     @Test
@@ -440,9 +440,9 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     @Test
     public void testSearchForLsidById1() throws Exception {
         // taxonID -> acceptedID
-        String result = client.searchForLsidById("https://biodiversity.org.au/afd/taxa/05691642-5191-426a-b469-f1514b880481");
+        String result = client.searchForLsidById("https://id.biodiversity.org.au/instance/apni/889096");
         assertNotNull(result);
-        assertEquals("https://biodiversity.org.au/afd/taxa/462548c3-6464-4e35-b71f-f4ad3fff3ebb", result);
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702984", result);
     }
 
     @Test
@@ -457,7 +457,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         // Genus
         String result = client.searchForLSID("Eucalyptus");
         assertNotNull(result);
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51360942", result);
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702982", result);
     }
 
     @Test
@@ -473,7 +473,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         List<String> result = client.getGuidsForTaxa(Collections.singletonList("Eucalyptus"));
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51360942", result.get(0));
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702982", result.get(0));
     }
 
     @Test
@@ -483,13 +483,13 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertNotNull(result);
         assertEquals(2, result.size());
         assertNull(result.get(0));
-        assertEquals(result.get(1), "https://biodiversity.org.au/afd/taxa/462548c3-6464-4e35-b71f-f4ad3fff3ebb");
+        assertEquals("https://biodiversity.org.au/afd/taxa/44f915ad-6090-42ba-a341-a11e47555f04", result.get(1));
     }
 
     @Test
     public void testGetCommonNamesForLSID1() throws Exception {
         // LSID with >1 common names
-        Set<String> result = client.getCommonNamesForLSID("https://biodiversity.org.au/afd/taxa/e079f94d-3d7f-4deb-ae29-053fec4d1b53", 10);
+        Set<String> result = client.getCommonNamesForLSID("https://biodiversity.org.au/afd/taxa/66d42847-c556-4fa3-902c-a91d9f517286", 10);
         assertNotNull(result);
         assertEquals(2, result.size());
         assertTrue(result.contains("Common Wombat"));
