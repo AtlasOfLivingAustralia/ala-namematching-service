@@ -1,15 +1,13 @@
 [Unit]
 Description=ala-namematching-service
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
 
 [Service]
 User=namematching
 ExecStart=/usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar /opt/atlas/ala-namematching-service/ala-namematching-server.jar server /data/ala-namematching-service/config/config.yml
 SuccessExitStatus=143
-
-StartLimitIntervalSec=500
-StartLimitBurst=5
-
-[Service]
 Restart=on-failure
 RestartSec=5s
 
