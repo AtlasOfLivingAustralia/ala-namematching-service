@@ -1,7 +1,7 @@
-package au.org.ala.names.ws.client;
+package au.org.ala.names.ws.client.v1;
 
-import au.org.ala.names.ws.api.NameSearch;
-import au.org.ala.names.ws.api.NameUsageMatch;
+import au.org.ala.names.ws.api.v1.NameSearch;
+import au.org.ala.names.ws.api.v1.NameUsageMatch;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.DataCacheConfiguration;
@@ -61,7 +61,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals("/v1/api/searchByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -84,7 +84,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals("/v1/api/searchByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
 
         search = NameSearch.builder().scientificName("Acacia dealbata").build();
@@ -127,7 +127,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
 
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchAllByClassification", req.getPath());
+        assertEquals("/v1/api/searchAllByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -172,7 +172,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
 
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchAllByClassification", req.getPath());
+        assertEquals("/v1/api/searchAllByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -224,10 +224,10 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
 
         assertEquals(2, server.getRequestCount());
         RecordedRequest req1 = server.takeRequest();
-        assertEquals("/api/searchAllByClassification", req1.getPath());
+        assertEquals("/v1/api/searchAllByClassification", req1.getPath());
         assertEquals(request1, req1.getBody().readUtf8());
         RecordedRequest req2 = server.takeRequest();
-        assertEquals("/api/searchAllByClassification", req2.getPath());
+        assertEquals("/v1/api/searchAllByClassification", req2.getPath());
         assertEquals(request2, req2.getBody().readUtf8());
     }
 
@@ -244,6 +244,6 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         }
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/search?q=Acacia%20dealbata", req.getPath());
+        assertEquals("/v1/api/search?q=Acacia%20dealbata", req.getPath());
     }
 }

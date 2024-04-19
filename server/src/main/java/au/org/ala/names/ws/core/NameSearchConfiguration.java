@@ -1,6 +1,6 @@
 package au.org.ala.names.ws.core;
 
-import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.names.ws.api.v1.SearchStyle;
 import au.org.ala.ws.DataCacheConfiguration;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,10 +1,10 @@
-package au.org.ala.names.ws.client;
+package au.org.ala.names.ws.client.v1;
 
 import au.org.ala.names.ws.ALANameMatchingServiceApplication;
 import au.org.ala.names.ws.ALANameMatchingServiceConfiguration;
-import au.org.ala.names.ws.api.NameSearch;
-import au.org.ala.names.ws.api.NameUsageMatch;
-import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.names.ws.api.v1.NameSearch;
+import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.names.ws.api.v1.SearchStyle;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.DataCacheConfiguration;
@@ -442,7 +442,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         // taxonID -> acceptedID
         String result = client.searchForLsidById("https://id.biodiversity.org.au/instance/apni/889096");
         assertNotNull(result);
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702984", result);
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51738745", result);
     }
 
     @Test
@@ -457,7 +457,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         // Genus
         String result = client.searchForLSID("Eucalyptus");
         assertNotNull(result);
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702982", result);
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51738743", result);
     }
 
     @Test
@@ -473,7 +473,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         List<String> result = client.getGuidsForTaxa(Collections.singletonList("Eucalyptus"));
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702982", result.get(0));
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51738743", result.get(0));
     }
 
     @Test

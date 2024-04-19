@@ -1,18 +1,16 @@
 package au.org.ala.names.ws.health;
 
-import au.org.ala.names.ws.resources.NameSearchResource;
+import au.org.ala.names.ws.resources.NameSearchResourceV1;
 import com.codahale.metrics.health.HealthCheck;
-
-import java.util.Map;
 
 /**
  * Health check for the name search resource, to make
  * sure that nothing has gone away by accident.
  */
 public class NameSearchHealthCheck extends HealthCheck {
-    private NameSearchResource resource;
+    private NameSearchResourceV1 resource;
 
-    public NameSearchHealthCheck(NameSearchResource resource) {
+    public NameSearchHealthCheck(NameSearchResourceV1 resource) {
         this.resource = resource;
     }
 

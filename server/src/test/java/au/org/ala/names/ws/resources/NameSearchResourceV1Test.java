@@ -1,8 +1,8 @@
 package au.org.ala.names.ws.resources;
 
-import au.org.ala.names.ws.api.NameSearch;
-import au.org.ala.names.ws.api.NameUsageMatch;
-import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.names.ws.api.v1.NameSearch;
+import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.names.ws.api.v1.SearchStyle;
 import au.org.ala.names.ws.core.NameSearchConfiguration;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -15,18 +15,18 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class NameSearchResourceTest {
+public class NameSearchResourceV1Test {
     private NameSearchConfiguration configuration;
-    private NameSearchResource resource;
+    private NameSearchResourceV1 resource;
 
     @Before
     public void setUp() throws Exception {
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.INFO); // Stop logging insanity
         this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20230329-2"); // Ensure consistent index
+        this.configuration.setIndex("/data/lucene/namematching-20230725-5"); // Ensure consistent index
         this.configuration.setGroups(this.getClass().getResource("../core/test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("../core/test-subgroups-1.json"));
-        this.resource = new NameSearchResource(this.configuration);
+        this.resource = new NameSearchResourceV1(this.configuration);
     }
 
     @After
@@ -242,7 +242,7 @@ public class NameSearchResourceTest {
     public void testSearchByClassificationVernacular2() throws Exception {
         this.resource.close();
         this.configuration.setPreferredVernacular(false);
-        this.resource = new NameSearchResource(this.configuration);
+        this.resource = new NameSearchResourceV1(this.configuration);
         NameUsageMatch match = this.resource.match("Osphranter rufus", null, null, null, null, null, null, null, null, null, SearchStyle.FUZZY);
         assertTrue(match.isSuccess());
         assertEquals("Red Kangaroo", match.getVernacularName());
@@ -333,7 +333,7 @@ public class NameSearchResourceTest {
         NameUsageMatch match = this.resource.match(search);
         assertTrue(match.isSuccess());
         assertEquals("https://id.biodiversity.org.au/node/fungi/60100871", match.getTaxonConceptID()); // Uses Plantae hint first
-        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+        assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
     }
 
     @Test
@@ -566,7 +566,7 @@ public class NameSearchResourceTest {
         // taxonID -> acceptedID
         String result = this.resource.searchForLsidById("https://id.biodiversity.org.au/instance/apni/889096");
         assertNotNull(result);
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702984", result);
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51738745", result);
     }
 
     @Test
@@ -581,7 +581,7 @@ public class NameSearchResourceTest {
         // Genus
         String result = this.resource.searchForLSID("Eucalyptus");
         assertNotNull(result);
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702982", result);
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51738743", result);
     }
 
     @Test
@@ -597,7 +597,7 @@ public class NameSearchResourceTest {
         List<String> result = this.resource.getGuidsForTaxa(Collections.singletonList("Eucalyptus"));
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("https://id.biodiversity.org.au/taxon/apni/51702982", result.get(0));
+        assertEquals("https://id.biodiversity.org.au/taxon/apni/51738743", result.get(0));
     }
 
     @Test

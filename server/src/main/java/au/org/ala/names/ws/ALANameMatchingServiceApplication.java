@@ -1,7 +1,7 @@
 package au.org.ala.names.ws;
 
 import au.org.ala.names.ws.health.NameSearchHealthCheck;
-import au.org.ala.names.ws.resources.NameSearchResource;
+import au.org.ala.names.ws.resources.NameSearchResourceV1;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
@@ -59,7 +59,7 @@ public class ALANameMatchingServiceApplication extends Application<ALANameMatchi
         environment.jersey().register(new OpenApiResource()
                 .openApiConfiguration(configuration.getSwaggerConfiguration()));
 
-        final NameSearchResource resource = new NameSearchResource(configuration.getSearch());
+        final NameSearchResourceV1 resource = new NameSearchResourceV1(configuration.getSearch());
         environment.jersey().register(resource);
         environment.healthChecks().register("namesearch", new NameSearchHealthCheck(resource));
     }

@@ -1,5 +1,6 @@
 package au.org.ala.names.ws.core;
 
+import au.org.ala.names.model.LinnaeanRankClassification;
 import au.org.ala.names.model.NameSearchResult;
 import au.org.ala.names.model.RankType;
 import au.org.ala.util.TestUtils;
@@ -18,16 +19,19 @@ public class SpeciesGroupsUtilTest extends TestUtils {
     @Before
     public void setUp() throws Exception {
         this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20230329-2"); // Assumed to be there
+        this.configuration.setIndex("/data/lucene/namematching-20230725-5"); // Assumed to be there
         this.configuration.setGroups(this.getClass().getResource("test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("test-subgroups-1.json"));
         this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);
     }
 
     protected int getLeft(String name)  throws Exception {
+        LinnaeanRankClassification cl = new LinnaeanRankClassification();
+        cl.setScientificName(name);
+        cl.setRank("species");
         NameSearchResult result =  this.speciesGroupsUtil
                         .getNameIndex()
-                        .searchForRecord(name, RankType.SPECIES);
+                        .searchForAcceptedRecordDefaultHandling(cl, false, false);
         if (result == null)
             throw new IllegalStateException("Expecting result for " + name);
         if (result.getAcceptedLsid() != null) {
@@ -379,7 +383,7 @@ public class SpeciesGroupsUtilTest extends TestUtils {
 
     @Test
     public void testGetGroup20() throws Exception {
-        int left = this.getLeft("Brachymenium cellulare");
+        int left = this.getLeft("Brachymenium nepalense");
         List<String> groups = this.speciesGroupsUtil.getSpeciesGroups(left);
         assertNotNull(groups);
         assertEquals(Arrays.asList("Plants", "Mosses"), groups);
@@ -387,7 +391,7 @@ public class SpeciesGroupsUtilTest extends TestUtils {
 
     @Test
     public void testGetSubGroup20() throws Exception {
-        int left = this.getLeft("Brachymenium cellulare");
+        int left = this.getLeft("Brachymenium nepalense");
         List<String> groups = this.speciesGroupsUtil.getSpeciesSubGroups(left);
         assertNotNull(groups);
         assertEquals(Arrays.asList(), groups);

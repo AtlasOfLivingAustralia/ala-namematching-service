@@ -14,7 +14,7 @@ To include the client library in an application include the following dependency
 ```xml
 <dependency>
     <groupId>au.org.ala.names</groupId>
-    <version>1.8-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <artifactId>ala-namematching-client</artifactId>
 </dependency>
 ```
@@ -22,7 +22,7 @@ To include the client library in an application include the following dependency
 or for gradle
 
 ```groovy
-compile "au.org.ala.names:ala-namematching-client:1.8-SNAPSHOT"
+compile "au.org.ala.names:ala-namematching-client:2.0-SNAPSHOT"
 ```
 
 To access the client library, create a configuration and then create a client based on the configuration.
@@ -132,9 +132,9 @@ The possible data cache configuration parameters are:
 ## How to start the ALANameMatchingService application
 
 1. Run `mvn clean install` to build your application
-1. Download a pre-built name matching index (e.g https://archives.ala.org.au/archives/nameindexes/20230329-2/namematching-20230329-2.tgz), and untar in `/data/lucene` This will create a `/data/lucene/namematching-20210811` directory.
+1. Download a pre-built name matching index (e.g https://archives.ala.org.au/archives/nameindexes/20230725-5/namematching-20230725-5.tgz), and untar in `/data/lucene` This will create a `/data/lucene/namematching-20210811` directory.
 1. cd to the `server` subdirectory
-1. Start application with `java -jar target/ala-name-matching-server-1.8-SNAPSHOT.jar server config-local.yml`
+1. Start application with `java -jar target/ala-name-matching-server-2.0-SNAPSHOT.jar server config-local.yml`
 1. To check that your application is running enter url `http://localhost:9180`
 1. Test with `http://localhost:9179/api/search?q=Acacia`. The response should look similar to:
 
@@ -308,12 +308,12 @@ As with the groups list, the subgroups are matched using the current name index.
 Change directory to the `server` module.
 
 ```shell script
-docker build -f docker/Dockerfile . -t ala-namematching-service:v20230329-2
+docker build -f docker/Dockerfile . -t ala-namematching-service:v20230725-5
 ```
 for use ALA namematching and for use the GBIF backbone:
 
 ```shell script
-docker build -f docker/Dockerfile . -t  ala-namematching-service:v20230329-2 --build-arg ENV=gbif-backbone
+docker build -f docker/Dockerfile . -t  ala-namematching-service:v20230725-5 --build-arg ENV=gbif-backbone
 ```
 
 If you want a quick'n'easy docker instance for testing, use

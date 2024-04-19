@@ -1,4 +1,4 @@
-package au.org.ala.names.ws.api;
+package au.org.ala.names.ws.api.v1;
 
 import org.junit.Test;
 

@@ -1,9 +1,9 @@
-package au.org.ala.names.ws.client;
+package au.org.ala.names.ws.client.v1;
 
-import au.org.ala.names.ws.api.NameMatchService;
-import au.org.ala.names.ws.api.NameSearch;
-import au.org.ala.names.ws.api.NameUsageMatch;
-import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.names.ws.api.v1.NameMatchService;
+import au.org.ala.names.ws.api.v1.NameSearch;
+import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.names.ws.api.v1.SearchStyle;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.ClientException;
 import lombok.extern.slf4j.Slf4j;
@@ -126,7 +126,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * @param specificEpithet      The specific epithet (species component of a binomial name)
      * @param infraspecificEpithet The infraspecific epithet (subspecies, variety etc component of a trinomial name)
      * @param rank                 The Linnaean rank name
-     * @param style                The search style (defaults to {@link au.org.ala.names.ws.api.SearchStyle#MATCH}
+     * @param style                The search style (defaults to {@link SearchStyle#MATCH}
      * @return A matching taxon, with success=false if not found
      * @see #match(NameSearch)
      */
@@ -143,7 +143,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * </p>
      *
      * @param scientificName The scientific name of the taxon
-     * @param style The search style (defaults to {@link au.org.ala.names.ws.api.SearchStyle#MATCH}
+     * @param style The search style (defaults to {@link SearchStyle#MATCH}
      * @return A matching taxon, with success=false if not found
      */
     @Override

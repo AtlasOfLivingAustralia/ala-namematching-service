@@ -55,7 +55,7 @@ public class ALANameMatchingServiceConfiguration extends Configuration {
         this.swaggerBundleConfiguration.setContactEmail("support@ala.org.au");
         this.swaggerBundleConfiguration.setResourcePackage("au.org.ala.names.ws.api,au.org.ala.names.ws.client,au.org.ala.names.ws.resources");
         this.swaggerBundleConfiguration.setLicense("Mozilla Public Licence 1.1");
-        this.swaggerBundleConfiguration.setVersion("1.9-SNAPSHOT");
+        this.swaggerBundleConfiguration.setVersion("2.0-SNAPSHOT");
         this.swaggerBundleConfiguration.getSwaggerViewConfiguration().setPageTitle("ALA Namematching API");
 
         // swagger openapi v3
@@ -69,7 +69,7 @@ public class ALANameMatchingServiceConfiguration extends Configuration {
                 .license(new License()
                         .name("Mozilla Public Licence 1.1")
                         .url("https://www.mozilla.org/en-US/MPL/1.1/"))
-                .version("1.9-SNAPSHOT");
+                .version("2.0-SNAPSHOT");
 
         oas.info(info);
         this.swaggerConfiguration = new SwaggerConfiguration()

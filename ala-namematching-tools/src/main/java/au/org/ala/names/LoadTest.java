@@ -1,8 +1,8 @@
 package au.org.ala.names;
 
 
-import au.org.ala.names.ws.api.NameUsageMatch;
-import au.org.ala.names.ws.client.ALANameUsageMatchServiceClient;
+import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.names.ws.client.v1.ALANameUsageMatchServiceClient;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.load.ListSource;
 import au.org.ala.ws.load.LoadSource;

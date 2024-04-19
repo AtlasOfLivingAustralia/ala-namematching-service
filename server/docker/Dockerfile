@@ -18,7 +18,7 @@ RUN echo "deb [arch=amd64] https://apt.gbif.es/ bionic main" > /etc/apt/sources.
 RUN apt-get install -y -q openjdk-8-jdk rsync tar curl
 
 # If we want to change the default URL over time
-RUN echo "ala-namematching-service ala-namematching-service/source string https://archives.ala.org.au/archives/nameindexes/20230329-2/namematching-20230329-2.tgz" | debconf-set-selections
+RUN echo "ala-namematching-service ala-namematching-service/source string https://archives.ala.org.au/archives/nameindexes/20230725-5/namematching-20230725-5.tgz" | debconf-set-selections
 # SHA1 of the previous file
 RUN echo "ala-namematching-service ala-namematching-service/sha1 string 563814a7b5d886b746e10eb40c44f0d9bda62371" | debconf-set-selections
 
@@ -31,8 +31,8 @@ COPY docker/subgroups.json /data/ala-namematching-service/config/subgroups.json
 
 # Uncomment and edit to use locally built debian package See debian/README.md for how to build these
 # You will have to copy the build .deb into the working directory
-#COPY ./ala-namematching-service_1.8-SNAPSHOT_all.deb /tmp
-#RUN dpkg -i /tmp/ala-namematching-service_1.8-SNAPSHOT_all.deb
+#COPY ./ala-namematching-service_2.0-SNAPSHOT_all.deb /tmp
+#RUN dpkg -i /tmp/ala-namematching-service_2.0-SNAPSHOT_all.deb
 
 EXPOSE 9179
 EXPOSE 9180

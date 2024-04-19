@@ -1,8 +1,8 @@
-package au.org.ala.names.ws.client;
+package au.org.ala.names.ws.client.v1;
 
-import au.org.ala.names.ws.api.NameSearch;
-import au.org.ala.names.ws.api.NameUsageMatch;
-import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.names.ws.api.v1.NameSearch;
+import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.names.ws.api.v1.SearchStyle;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.ClientException;
@@ -58,7 +58,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals(Collections.singletonList("noIssue"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals("/v1/api/searchByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -77,7 +77,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals(Collections.singletonList("homonym"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals("/v1/api/searchByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -98,7 +98,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals("/v1/api/searchByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -118,7 +118,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals(Collections.singletonList("hintMismatch"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals("/v1/api/searchByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -149,7 +149,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
 
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchAllByClassification", req.getPath());
+        assertEquals("/v1/api/searchAllByClassification", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -191,7 +191,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByClassification?scientificName=Acacia%20dealbata&kingdom=Plantae", req.getPath());
+        assertEquals("/v1/api/searchByClassification?scientificName=Acacia%20dealbata&kingdom=Plantae", req.getPath());
     }
     /** Simple name match with caching */
     @Test
@@ -226,7 +226,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/search?q=Acacia%20dealbata", req.getPath());
+        assertEquals("/v1/api/search?q=Acacia%20dealbata", req.getPath());
     }
 
     /** Simple name match with caching */
@@ -246,7 +246,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/search?q=Acacia%20dealbata", req.getPath());
+        assertEquals("/v1/api/search?q=Acacia%20dealbata", req.getPath());
     }
 
     /** Simple vernacular name match */
@@ -263,7 +263,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByVernacularName?vernacularName=Silver%20Wattle", req.getPath());
+        assertEquals("/v1/api/searchByVernacularName?vernacularName=Silver%20Wattle", req.getPath());
     }
 
     @Test
@@ -275,7 +275,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         assertNotNull(valid);
         assertEquals(true, valid);
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/check?name=Animalia&rank=kingdom", req.getPath());
+        assertEquals("/v1/api/check?name=Animalia&rank=kingdom", req.getPath());
 
     }
 
@@ -292,7 +292,7 @@ public class ALANameUsageMatchServiceClientTest extends TestUtils {
         }
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/search?q=Acacia%20dealbata", req.getPath());
+        assertEquals("/v1/api/search?q=Acacia%20dealbata", req.getPath());
     }
 
     /** Respond to client error */

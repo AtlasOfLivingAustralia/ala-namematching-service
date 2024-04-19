@@ -3,10 +3,10 @@ package au.org.ala.names.ws.resources;
 import au.org.ala.names.model.*;
 import au.org.ala.names.search.ALANameSearcher;
 import au.org.ala.names.search.SearchResultException;
-import au.org.ala.names.ws.api.NameMatchService;
-import au.org.ala.names.ws.api.NameSearch;
-import au.org.ala.names.ws.api.NameUsageMatch;
-import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.names.ws.api.v1.NameMatchService;
+import au.org.ala.names.ws.api.v1.NameSearch;
+import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.names.ws.api.v1.SearchStyle;
 import au.org.ala.names.ws.core.NameSearchConfiguration;
 import au.org.ala.names.ws.core.SpeciesGroupsUtil;
 import com.codahale.metrics.annotation.Timed;
@@ -42,10 +42,10 @@ import java.util.stream.Collectors;
         description = "Search for taxonomic information on names, classifications or identifiers"
 )
 @Produces(MediaType.APPLICATION_JSON)
-@Path("/api")
+@Path("/v1/api")
 @Slf4j
 @Singleton
-public class NameSearchResource implements NameMatchService {
+public class NameSearchResourceV1 implements NameMatchService {
     /** Searcher for names */
     private final ALANameSearcher searcher;
     /** Map taxa onto species groups */
@@ -69,7 +69,7 @@ public class NameSearchResource implements NameMatchService {
     private final Cache<String, NameUsageMatch> idAcceptedCache;
 
     @Inject
-    public NameSearchResource(NameSearchConfiguration configuration){
+    public NameSearchResourceV1(NameSearchConfiguration configuration){
         try {
             log.info("Initialising NameSearchResource.....");
             this.searcher = new ALANameSearcher(configuration.getIndex());

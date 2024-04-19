@@ -1,8 +1,8 @@
 package au.org.ala.names;
 
-import au.org.ala.names.ws.api.NameSearch;
-import au.org.ala.names.ws.api.NameUsageMatch;
-import au.org.ala.names.ws.client.ALANameUsageMatchServiceClient;
+import au.org.ala.names.ws.api.v1.NameSearch;
+import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.names.ws.client.v1.ALANameUsageMatchServiceClient;
 import au.org.ala.ws.ClientConfiguration;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
