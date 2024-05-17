@@ -2,6 +2,7 @@
 
 package au.org.ala.util;
 
+import au.org.ala.names.ws.api.v1.BasicNormaliser;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

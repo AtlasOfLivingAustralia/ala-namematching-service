@@ -1,5 +1,6 @@
 package au.org.ala.names.ws.core;
 
+import au.org.ala.names.ALANameSearcherConfiguration;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.DataCacheConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +17,7 @@ public class NameSearchConfigurationTest extends TestUtils {
     public void testReadJSON1() throws Exception {
         ObjectMapper om = new ObjectMapper();
         NameSearchConfiguration configuration = om.readValue(this.getClass().getResource("name-search-config-1.json"), NameSearchConfiguration.class);
-        assertEquals("/data/lucene/namematching-20230725-5", configuration.getIndex());
+        assertEquals("/data/namematching/linnaean-20230725-5", configuration.getSearcher().getLinnaean().getAbsolutePath());
         assertEquals("http://nowhere.com/groups", configuration.getGroups().toExternalForm());
         assertEquals("http://nowhere.com/subgroups", configuration.getSubgroups().toExternalForm());
         assertEquals(true, configuration.getCache().isEnableJmx());
@@ -24,8 +25,11 @@ public class NameSearchConfigurationTest extends TestUtils {
 
     @Test
     public void testWriteJSON1() throws Exception {
+        ALANameSearcherConfiguration sc = ALANameSearcherConfiguration.builder()
+                .version("20230725-5")
+                .build();
         NameSearchConfiguration configuration = new NameSearchConfiguration();
-        configuration.setIndex("/data/lucene/namematching-20230725-5");
+        configuration.setSearcher(sc);
         configuration.setGroups(new URL("http://nowhere.com/groups"));
         configuration.setSubgroups(new URL("http://nowhere.com/subgroups"));
         configuration.setCache(DataCacheConfiguration.builder().enableJmx(true).build());

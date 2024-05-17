@@ -10,9 +10,7 @@ import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.DataCacheConfiguration;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.net.URL;
 import java.util.*;
@@ -25,14 +23,25 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     private ALANameUsageMatchServiceClient client;
     private String NAMEMATCHING_SERVER_URL = "http://localhost:9179";
 
-        public static final DropwizardTestSupport<ALANameMatchingServiceConfiguration> SUPPORT =
+    public static final DropwizardTestSupport<ALANameMatchingServiceConfiguration> SUPPORT =
             new DropwizardTestSupport<ALANameMatchingServiceConfiguration>(ALANameMatchingServiceApplication.class,
                     ResourceHelpers.resourceFilePath("config.yml")
             );
 
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        SUPPORT.before();
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        if (SUPPORT != null) {
+            SUPPORT.after();
+        }
+    }
+
     @Before
     public void setUp() throws Exception {
-        SUPPORT.before();
         DataCacheConfiguration dataCacheConfig = DataCacheConfiguration.builder().build();
         this.configuration = ClientConfiguration.builder()
                 .baseUrl(new URL(NAMEMATCHING_SERVER_URL))
@@ -43,9 +52,6 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
 
     @After
     public void tearDown() throws Exception {
-        if (SUPPORT != null) {
-            SUPPORT.after();
-        }
         if (this.client != null) {
             this.client.close();
         }
@@ -68,7 +74,7 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
     /** Fail on unresolved homonym */
     @Test
     public void testMatchNameSearch2() throws Exception {
-        NameSearch search = NameSearch.builder().scientificName("Macropus").build();
+        NameSearch search = NameSearch.builder().scientificName("Thalia").build();
         NameUsageMatch match = client.match(search);
 
         assertFalse(match.isSuccess());

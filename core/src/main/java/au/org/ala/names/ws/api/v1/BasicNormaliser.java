@@ -1,4 +1,4 @@
-package au.org.ala.util;
+package au.org.ala.names.ws.api.v1;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

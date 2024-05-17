@@ -1,5 +1,6 @@
 package au.org.ala.names.ws.core;
 
+import au.org.ala.names.ALANameSearcherConfiguration;
 import au.org.ala.names.ws.api.v1.SearchStyle;
 import au.org.ala.ws.DataCacheConfiguration;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,9 +18,9 @@ import java.net.URL;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @EqualsAndHashCode
 public class NameSearchConfiguration {
-    /** The path to the name matching index. Defaults to <code>/data/lucene/namematching</code> */
+    /** The configuration to use when building the searcher */
     @JsonProperty
-    private String index = "/data/lucene/namematching";
+    private ALANameSearcherConfiguration searcher;
     /** The location of the species groups. Defaults to <code>file:///data/ala-namematching-service/config/groups.json</code> */
     @JsonProperty
     private URL groups;

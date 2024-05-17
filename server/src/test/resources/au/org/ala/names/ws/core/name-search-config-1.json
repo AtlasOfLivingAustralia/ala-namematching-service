@@ -1,5 +1,18 @@
 {
-  "index" : "/data/lucene/namematching-20230725-5",
+  "searcher" : {
+    "version" : "20230725-5",
+    "index" : "/data/namematching",
+    "work" : "/data/tmp",
+    "searcherConfiguration" : {
+      "scoreCutoff" : 1.0,
+      "queryLimit" : 20,
+      "cache" : true,
+      "cacheSize" : 10000
+    },
+    "matcherConfiguration" : {
+      "secondaryCacheSize" : 100000
+    }
+  },
   "groups" : "http://nowhere.com/groups",
   "subgroups" : "http://nowhere.com/subgroups",
   "cache" : {

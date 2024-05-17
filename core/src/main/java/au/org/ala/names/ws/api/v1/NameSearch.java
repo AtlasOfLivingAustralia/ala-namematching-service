@@ -1,7 +1,5 @@
 package au.org.ala.names.ws.api.v1;
 
-import au.org.ala.util.BasicNormaliser;
-import au.org.ala.util.Normaliser;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;

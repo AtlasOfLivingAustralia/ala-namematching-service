@@ -1,4 +1,4 @@
-package au.org.ala.util;
+package au.org.ala.names.ws.api.v1;
 
 /**
  * Normalise a string in a consistent way.

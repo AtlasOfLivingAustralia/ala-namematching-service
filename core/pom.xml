@@ -10,7 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ala-namematching-core</artifactId>
-    <version>${project.parent.version}</version>
     <name>ALA Name Matching Service Core Class and Interfaces</name>
 
     <dependencies>

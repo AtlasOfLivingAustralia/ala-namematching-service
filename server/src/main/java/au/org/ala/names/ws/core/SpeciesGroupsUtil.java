@@ -1,7 +1,8 @@
 package au.org.ala.names.ws.core;
 
-import au.org.ala.names.model.NameSearchResult;
-import au.org.ala.names.search.ALANameSearcher;
+import au.org.ala.bayesian.*;
+import au.org.ala.names.ALANameSearcher;
+import au.org.ala.names.AlaLinnaeanClassification;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class SpeciesGroupsUtil {
      * The name index used to match names to actual taxon entries
      */
     @Getter
-    private final ALANameSearcher nameIndex;
+    private final ALANameSearcher searcher;
     /**
      * The list of possible species groups
      */
@@ -42,11 +43,12 @@ public class SpeciesGroupsUtil {
      * Construct for a name index configuration
      *
      * @param configuration The name index configuration
+     * @param searcher The shared name searcher
      * @throws IllegalArgumentException if unable to open any of the resources specified in the configuration, which makes an invalid configuration
      */
-    private SpeciesGroupsUtil(NameSearchConfiguration configuration) throws IllegalArgumentException {
+    private SpeciesGroupsUtil(NameSearchConfiguration configuration, ALANameSearcher searcher) throws IllegalArgumentException {
         try {
-            this.nameIndex = new ALANameSearcher(configuration.getIndex());
+            this.searcher = searcher;
             this.speciesGroups = this.readSpeciesGroups(configuration.getGroups());
             this.speciesSubgroups = this.readSpeciesSubgroups(configuration.getSubgroups());
         } catch (Exception ex) {
@@ -101,45 +103,43 @@ public class SpeciesGroupsUtil {
 
 
     private SpeciesGroup createSpeciesGroup(String title, String rank, List<String> values, List<String> excludedValues, String parent) throws Exception {
-
+        MatchOptions options = MatchOptions.NONE;
         List<LftRgtValues> lftRgts = new ArrayList<LftRgtValues>();
 
         if (excludedValues != null && !excludedValues.isEmpty()) {
             for (String excludedValue : excludedValues) {
-
-                NameSearchResult snr = nameIndex.searchForRecord(excludedValue);
-
-                if (snr != null) {
-                    if (snr.isSynonym())
-                        snr = nameIndex.searchForRecordByLsid(snr.getAcceptedLsid());
-                    if (snr != null && snr.getLeft() != null && snr.getRight() != null) {
-                        lftRgts.add(
-                                LftRgtValues.builder()
-                                        .lft(Integer.parseInt(snr.getLeft()))
-                                        .rgt(Integer.parseInt(snr.getRight()))
-                                        .tobeIncluded(false)
-                                        .build()
-                        );
-                    }
+                AlaLinnaeanClassification classification = new AlaLinnaeanClassification();
+                classification.scientificName = excludedValue;
+                Match<AlaLinnaeanClassification, MatchMeasurement> match = this.searcher.search(classification, options);
+                if (match.isValid()) {
+                    Classifier accepted = match.getAcceptedCandidate();
+                    int[] index = accepted.getIndex();
+                    lftRgts.add(
+                            LftRgtValues.builder()
+                                    .lft(index[0])
+                                    .rgt(index[1])
+                                    .tobeIncluded(false)
+                                    .build()
+                    );
                 }
             }
         }
 
         for (String v : values) {
+            AlaLinnaeanClassification classification = new AlaLinnaeanClassification();
+            classification.scientificName = v;
+            Match<AlaLinnaeanClassification, MatchMeasurement> match = this.searcher.search(classification, options);
 
-            NameSearchResult snr = this.nameIndex.searchForRecord(v, au.org.ala.names.model.RankType.getForName(rank));
-
-            if (snr != null) {
-                if (snr.isSynonym())
-                    snr = this.nameIndex.searchForRecordByLsid(snr.getAcceptedLsid());
-                if (snr != null && snr.getLeft() != null && snr.getRight() != null) {
-                    lftRgts.add(
-                            LftRgtValues.builder()
-                                    .lft(Integer.parseInt(snr.getLeft()))
-                                    .rgt(Integer.parseInt(snr.getRight()))
-                                    .tobeIncluded(true).build()
-                    );
-                }
+            if (match.isValid()) {
+                Classifier accepted = match.getAcceptedCandidate();
+                int[] index = accepted.getIndex();
+                lftRgts.add(
+                        LftRgtValues.builder()
+                                .lft(index[0])
+                                .rgt(index[1])
+                                .tobeIncluded(true)
+                                .build()
+                );
             }
         }
 
@@ -183,10 +183,11 @@ public class SpeciesGroupsUtil {
      * </p>
      *
      * @param configuration The configuration
+     * @param searcher The name searcher
      * @return An species group resource
      * @throws Exception if unable to load the resource
      */
-    synchronized public static SpeciesGroupsUtil getInstance(NameSearchConfiguration configuration) throws Exception {
-        return managerCache.computeIfAbsent(configuration, c -> new SpeciesGroupsUtil(c));
+    synchronized public static SpeciesGroupsUtil getInstance(NameSearchConfiguration configuration, ALANameSearcher searcher) throws Exception {
+        return managerCache.computeIfAbsent(configuration, c -> new SpeciesGroupsUtil(c, searcher));
     }
 }

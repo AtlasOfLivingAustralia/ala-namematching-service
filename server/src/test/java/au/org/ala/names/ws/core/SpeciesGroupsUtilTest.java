@@ -1,47 +1,67 @@
 package au.org.ala.names.ws.core;
 
-import au.org.ala.names.model.LinnaeanRankClassification;
-import au.org.ala.names.model.NameSearchResult;
-import au.org.ala.names.model.RankType;
+import au.org.ala.bayesian.Match;
+import au.org.ala.bayesian.MatchMeasurement;
+import au.org.ala.bayesian.MatchOptions;
+import au.org.ala.names.ALANameSearcher;
+import au.org.ala.names.ALANameSearcherConfiguration;
+import au.org.ala.names.AlaLinnaeanClassification;
 import au.org.ala.util.TestUtils;
-import org.junit.Before;
-import org.junit.Test;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import org.gbif.nameparser.api.Rank;
+import org.junit.*;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
 
 public class SpeciesGroupsUtilTest extends TestUtils {
+    private static ALANameSearcherConfiguration searcherConfig;
+    private static ALANameSearcher searcher;
     private NameSearchConfiguration configuration;
     private SpeciesGroupsUtil speciesGroupsUtil;
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.INFO); // Stop logging insanity
+        searcherConfig = ALANameSearcherConfiguration.builder()
+                .index(new File("/data/lucene"))
+                .version("20230725-5")
+                .build();
+        searcher = new ALANameSearcher(searcherConfig);
+
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+        searcher.close();
+    }
 
     @Before
     public void setUp() throws Exception {
         this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20230725-5"); // Assumed to be there
+        this.configuration.setSearcher(searcherConfig);
         this.configuration.setGroups(this.getClass().getResource("test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("test-subgroups-1.json"));
-        this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);
+        this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(this.configuration, searcher);
+    }
+
+    @After
+    public void tearDown() throws Exception {
     }
 
     protected int getLeft(String name)  throws Exception {
-        LinnaeanRankClassification cl = new LinnaeanRankClassification();
-        cl.setScientificName(name);
-        cl.setRank("species");
-        NameSearchResult result =  this.speciesGroupsUtil
-                        .getNameIndex()
-                        .searchForAcceptedRecordDefaultHandling(cl, false, false);
-        if (result == null)
+        AlaLinnaeanClassification cl = new AlaLinnaeanClassification();
+        cl.scientificName = name;
+        cl.taxonRank = Rank.SPECIES;
+        Match<AlaLinnaeanClassification, MatchMeasurement> result =  this.speciesGroupsUtil.getSearcher().search(cl, MatchOptions.NONE);
+        if (!result.isValid())
             throw new IllegalStateException("Expecting result for " + name);
-        if (result.getAcceptedLsid() != null) {
-            result = this.speciesGroupsUtil
-                    .getNameIndex()
-                    .searchForRecordByLsid(result.getAcceptedLsid());
-        }
-        if (result == null)
-            throw new IllegalStateException("Expecting accepted result for " + name);
-        return Integer.parseInt(result.getLeft());
+        return result.getLeft();
     }
 
     protected SpeciesGroup getGroup(String name) {

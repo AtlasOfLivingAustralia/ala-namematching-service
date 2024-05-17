@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import lombok.With;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.Map;
 @JsonDeserialize(builder = NameUsageMatch.NameUsageMatchBuilder.class)
 @Value
 @Builder
+@With
 @EqualsAndHashCode
 @Schema(
         name = "Name Search Result",
@@ -219,7 +222,7 @@ public class NameUsageMatch {
      *
      * @param search The source search
      *
-     * @return True if the search matches the supplied hints.
+     * @return True if the match respects the supplied hints
      */
     public boolean check(NameSearch search) {
         Map<String, List<String>> hints = search.getHints();
