@@ -18,6 +18,7 @@
         <module>ala-ws-client-common</module>
         <module>ala-ws-client-testing</module>
         <module>ala-namematching-tools</module>
+        <module>ala-namematching-distribution</module>
     </modules>
 
     <groupId>au.org.ala.names</groupId>

@@ -22,4 +22,4 @@ server:
 search:
   searcher:
     version: 20230725-5
-    index: /data/namematching
+    index: /data/lucene

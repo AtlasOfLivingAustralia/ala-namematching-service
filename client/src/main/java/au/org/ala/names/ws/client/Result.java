@@ -1,4 +1,4 @@
-package au.org.ala.names.ws.client.v1;
+package au.org.ala.names.ws.client;
 
 import lombok.Data;
 

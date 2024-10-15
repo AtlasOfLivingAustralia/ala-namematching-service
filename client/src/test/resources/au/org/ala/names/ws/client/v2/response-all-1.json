@@ -1,0 +1,105 @@
+[
+  {
+    "success": true,
+    "scientificName": "Acacia dealbata",
+    "scientificNameAuthorship": "Link",
+    "taxonConceptID": "https://id.biodiversity.org.au/taxon/apni/51286863",
+    "rank": "species",
+    "rankID": 7000,
+    "lft": 293436,
+    "rgt": 293440,
+    "kingdom": "Plantae",
+    "kingdomID": "https://id.biodiversity.org.au/taxon/apni/51744352",
+    "phylum": "Charophyta",
+    "phylumID": "https://id.biodiversity.org.au/taxon/apni/51744351",
+    "classs": "Equisetopsida",
+    "classID": "https://id.biodiversity.org.au/taxon/apni/51744350",
+    "order": "Fabales",
+    "orderID": "https://id.biodiversity.org.au/taxon/apni/51702962",
+    "family": "Fabaceae",
+    "familyID": "https://id.biodiversity.org.au/taxon/apni/51702961",
+    "genus": "Acacia",
+    "genusID": "https://id.biodiversity.org.au/taxon/apni/51471290",
+    "speciesID": "https://id.biodiversity.org.au/taxon/apni/51286863",
+    "vernacularName": "Silver Wattle",
+    "distributionIDs": [
+      "http://vocab.getty.edu/tgn/1001989",
+      "http://vocab.getty.edu/tgn/7000430",
+      "http://vocab.getty.edu/tgn/7001828",
+      "http://vocab.getty.edu/tgn/7001831",
+      "http://vocab.getty.edu/tgn/7001834",
+      "http://vocab.getty.edu/tgn/7001992",
+      "http://vocab.getty.edu/tgn/7006238"
+    ],
+    "distribution": [
+      "Western Australia",
+      "New South Wales",
+      "Tasmania",
+      "Victoria",
+      "Australian Capital Territory",
+      "Norfolk Island",
+      "South Australia"
+    ],
+    "probability": 0.9999997146545523,
+    "fidelity": 1,
+    "speciesGroup": [
+      "Plants",
+      "Flowering plants"
+    ],
+    "speciesSubgroup": [
+      "Dicots"
+    ],
+    "issues": [
+      "http://ala.org.au/issues/1.0/acceptedAndSynonym"
+    ]
+  },
+  {
+    "success": true,
+    "scientificName": "Osphranter rufus",
+    "scientificNameAuthorship": "(Desmarest, 1822)",
+    "taxonConceptID": "https://biodiversity.org.au/afd/taxa/7e6e134b-2bc7-43c4-b23a-6e3f420f57ad",
+    "rank": "species",
+    "rankID": 7000,
+    "lft": 235630,
+    "rgt": 235630,
+    "kingdom": "Animalia",
+    "kingdomID": "https://biodiversity.org.au/afd/taxa/4647863b-760d-4b59-aaa1-502c8cdf8d3c",
+    "phylum": "CHORDATA",
+    "phylumID": "https://biodiversity.org.au/afd/taxa/065f1da4-53cd-40b8-a396-80fa5c74dedd",
+    "classs": "MAMMALIA",
+    "classID": "https://biodiversity.org.au/afd/taxa/e9e7db31-04df-41fb-bd8d-e0b0f3c332d6",
+    "order": "DIPROTODONTIA",
+    "orderID": "https://biodiversity.org.au/afd/taxa/bd223248-af12-4ce9-9380-4f9a85be38db",
+    "family": "MACROPODIDAE",
+    "familyID": "https://biodiversity.org.au/afd/taxa/93df984b-252a-4ffd-b1f3-fc0364371ba9",
+    "genus": "Osphranter",
+    "genusID": "https://biodiversity.org.au/afd/taxa/f7c18709-2075-4e33-8ade-e4c27f0b1208",
+    "speciesID": "https://biodiversity.org.au/afd/taxa/7e6e134b-2bc7-43c4-b23a-6e3f420f57ad",
+    "vernacularName": "Red Kangaroo",
+    "distributionIDs": [
+      "http://vocab.getty.edu/tgn/7001828",
+      "http://vocab.getty.edu/tgn/7001829",
+      "http://vocab.getty.edu/tgn/7001830",
+      "http://vocab.getty.edu/tgn/7001831",
+      "http://vocab.getty.edu/tgn/7001834",
+      "http://vocab.getty.edu/tgn/7006238"
+    ],
+    "distribution": [
+      "Western Australia",
+      "New South Wales",
+      "Victoria",
+      "Northern Territory",
+      "Queensland",
+      "South Australia"
+    ],
+    "probability": 1,
+    "fidelity": 1,
+    "speciesGroup": [
+      "Animals",
+      "Mammals"
+    ],
+    "speciesSubgroup": [
+      "Herbivorous Marsupials"
+    ]
+  }
+]

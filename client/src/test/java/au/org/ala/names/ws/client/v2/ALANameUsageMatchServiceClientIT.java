@@ -1,10 +1,11 @@
-package au.org.ala.names.ws.client.v1;
+package au.org.ala.names.ws.client.v2;
 
 import au.org.ala.names.ws.ALANameMatchingServiceApplication;
 import au.org.ala.names.ws.ALANameMatchingServiceConfiguration;
+import au.org.ala.names.ws.api.SearchStyle;
 import au.org.ala.names.ws.api.v1.NameSearch;
 import au.org.ala.names.ws.api.v1.NameUsageMatch;
-import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.names.ws.client.v1.ALANameUsageMatchServiceClient;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.DataCacheConfiguration;
@@ -20,7 +21,7 @@ import static org.junit.Assert.*;
 public class ALANameUsageMatchServiceClientIT extends TestUtils {
 
     private ClientConfiguration configuration;
-    private ALANameUsageMatchServiceClient client;
+    private au.org.ala.names.ws.client.v1.ALANameUsageMatchServiceClient client;
     private String NAMEMATCHING_SERVER_URL = "http://localhost:9179";
 
     public static final DropwizardTestSupport<ALANameMatchingServiceConfiguration> SUPPORT =
@@ -374,5 +375,4 @@ public class ALANameUsageMatchServiceClientIT extends TestUtils {
         assertEquals("Chelonia mydas", match.getScientificName());
         assertEquals("SYNONYM", match.getSynonymType());
     }
-
 }

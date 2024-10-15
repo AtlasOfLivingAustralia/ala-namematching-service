@@ -1,6 +1,7 @@
 package au.org.ala.names;
 
 
+import au.org.ala.names.ws.api.SearchStyle;
 import au.org.ala.names.ws.api.v1.NameUsageMatch;
 import au.org.ala.names.ws.client.v1.ALANameUsageMatchServiceClient;
 import au.org.ala.ws.ClientConfiguration;
@@ -75,7 +76,7 @@ public class LoadTest {
 
     protected LoadSource<NameUsageMatch> buildSource(ALANameUsageMatchServiceClient client) throws IOException, NoSuchMethodException, CsvValidationException {
         try (Reader reader = new InputStreamReader(this.args.openStream(), Charset.forName("UTF-8"))) {
-            Method method1 = client.getClass().getMethod("match", String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class);
+            Method method1 = client.getClass().getMethod("match", String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class, String.class, SearchStyle.class);
             return ListSource.fromCsv(reader, client, NameUsageMatch.class, method1);
         }
     }

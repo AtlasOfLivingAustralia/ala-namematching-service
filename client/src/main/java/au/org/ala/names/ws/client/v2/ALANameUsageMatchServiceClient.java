@@ -1,9 +1,10 @@
-package au.org.ala.names.ws.client.v1;
+package au.org.ala.names.ws.client.v2;
 
-import au.org.ala.names.ws.api.v1.NameMatchService;
-import au.org.ala.names.ws.api.v1.NameSearch;
-import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.bayesian.Trace;
 import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.names.ws.api.v2.NameMatchService;
+import au.org.ala.names.ws.api.v2.NameSearch;
+import au.org.ala.names.ws.api.v2.NameUsageMatch;
 import au.org.ala.names.ws.client.Result;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.ClientException;
@@ -54,12 +55,12 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      *
      * @return The matching result
      *
-     * @see NameMatchService#match(NameSearch)
+     * @see NameMatchService#match(NameSearch, au.org.ala.bayesian.Trace.TraceLevel)
       */
     @Override
-    public NameUsageMatch match(NameSearch search)  {
-        if (!this.matchCache.isPresent())
-            return this.call(this.alaNameUsageMatchService.match(search));
+    public NameUsageMatch match(NameSearch search, Trace.TraceLevel trace)  {
+        if (!this.matchCache.isPresent() || (trace != null && trace != Trace.TraceLevel.NONE))
+            return this.call(this.alaNameUsageMatchService.match(search, trace));
         MatchResult result = this.matchCache.get().get(search);
         return this.resolve(result);
     }
@@ -67,7 +68,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
     // Resolve a result and return the match
     protected NameUsageMatch resolve(MatchResult result) {
         if (result.getValue() == null) {
-            NameUsageMatch match = this.call(this.alaNameUsageMatchService.match(result.getKey()));
+            NameUsageMatch match = this.call(this.alaNameUsageMatchService.match(result.getKey(), Trace.TraceLevel.NONE));
             result.setValue(match);
             this.matchCache.get().put(result.getKey(), result);
         }
@@ -81,12 +82,12 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      *
      * @return The matching results
      *
-     * @see NameMatchService#matchAll(List)
+     * @see NameMatchService#matchAll(List, au.org.ala.bayesian.Trace.TraceLevel)
      */
     @Override
-    public List<NameUsageMatch> matchAll(List<NameSearch> searches)  {
-        if (!this.matchCache.isPresent())
-            return this.call(this.alaNameUsageMatchService.matchAll(searches));
+    public List<NameUsageMatch> matchAll(List<NameSearch> searches, Trace.TraceLevel trace)  {
+        if (!this.matchCache.isPresent() || (trace != null && trace != Trace.TraceLevel.NONE))
+            return this.call(this.alaNameUsageMatchService.matchAll(searches, trace));
         List<MatchResult> results = searches.stream()
                 .map(s -> this.matchCache.get().get(s))
                 .collect(Collectors.toList());
@@ -100,7 +101,7 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
             return results.stream().map(Result::getValue).collect(Collectors.toList());
         }
         final List<NameSearch> query = results.stream().map(r -> r.isSet() ? null : r.getKey()).collect(Collectors.toList());
-        final List<NameUsageMatch> values = this.call(this.alaNameUsageMatchService.matchAll(query));
+        final List<NameUsageMatch> values = this.call(this.alaNameUsageMatchService.matchAll(query, Trace.TraceLevel.NONE));
         final List<NameUsageMatch> matches = new ArrayList<>(query.size());
         final int len = Math.min(query.size(), values.size());
         for (int i = 0; i < len; i++) {
@@ -127,13 +128,56 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * @param specificEpithet      The specific epithet (species component of a binomial name)
      * @param infraspecificEpithet The infraspecific epithet (subspecies, variety etc component of a trinomial name)
      * @param rank                 The Linnaean rank name
+     * @param continent The continent where the observation took place
+     * @param country The country where the observation took place
+     * @param stateProvince The state or province where the observation took place
+     * @param islandGroup The island group where the observation took place
+     * @param island The island where the observation took place
+     * @param waterBody The water body (ocean, sea, bay etc.) where the observation took place
      * @param style                The search style (defaults to {@link SearchStyle#MATCH}
+     * @param trace The trace level (defaults to {@link Trace.TraceLevel#NONE}
      * @return A matching taxon, with success=false if not found
-     * @see #match(NameSearch)
+     * @see #match(NameSearch, au.org.ala.bayesian.Trace.TraceLevel)
      */
     @Override
-    public NameUsageMatch match(String scientificName, String kingdom, String phylum, String clazz, String order, String family, String genus, String specificEpithet, String infraspecificEpithet, String rank, SearchStyle style) {
-        return this.call(this.alaNameUsageMatchService.match(scientificName, kingdom, phylum, clazz, order, family, genus, specificEpithet, infraspecificEpithet, rank, style));
+    public NameUsageMatch match(
+            String scientificName,
+            String kingdom,
+            String phylum,
+            String clazz,
+            String order,
+            String family,
+            String genus,
+            String specificEpithet,
+            String infraspecificEpithet,
+            String rank,
+            String continent,
+            String country,
+            String stateProvince,
+            String islandGroup,
+            String island,
+            String waterBody,
+            SearchStyle style,
+            Trace.TraceLevel trace) {
+        return this.call(this.alaNameUsageMatchService.match(
+                scientificName,
+                kingdom,
+                phylum,
+                clazz,
+                order,
+                family,
+                genus,
+                specificEpithet,
+                infraspecificEpithet,
+                rank,
+                continent,
+                country,
+                stateProvince,
+                islandGroup,
+                island,
+                waterBody,
+                style,
+                trace));
     }
 
     /**
@@ -145,11 +189,12 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      *
      * @param scientificName The scientific name of the taxon
      * @param style The search style (defaults to {@link SearchStyle#MATCH}
+     * @param trace The trace level (defaults to {@link Trace.TraceLevel#NONE}
      * @return A matching taxon, with success=false if not found
      */
     @Override
-    public NameUsageMatch match(String scientificName, SearchStyle style) {
-        return this.call(this.alaNameUsageMatchService.match(scientificName, style));
+    public NameUsageMatch match(String scientificName, SearchStyle style, Trace.TraceLevel trace) {
+        return this.call(this.alaNameUsageMatchService.match(scientificName, style, trace));
     }
 
     /**
@@ -160,11 +205,12 @@ public class ALANameUsageMatchServiceClient implements NameMatchService {
      * </p>
      *
      * @param vernacularName The vernacular name to search for
+     * @param trace The trace level (defaults to {@link Trace.TraceLevel#NONE}
      * @return A matching taxon, with success=false if not found
      */
     @Override
-    public NameUsageMatch matchVernacular(String vernacularName) {
-        return this.call(this.alaNameUsageMatchService.matchVernacular(vernacularName));
+    public NameUsageMatch matchVernacular(String vernacularName, Trace.TraceLevel trace) {
+        return this.call(this.alaNameUsageMatchService.matchVernacular(vernacularName, trace));
     }
 
     /**

@@ -1,60 +1,60 @@
 package au.org.ala.names.ws.resources;
 
 import au.org.ala.bayesian.*;
-import au.org.ala.bayesian.Observable;
-import au.org.ala.names.*;
-import au.org.ala.names.ws.health.Checkable;
-import au.org.ala.vocab.TaxonomicStatus;
-import au.org.ala.names.ws.api.v1.NameMatchService;
-import au.org.ala.names.ws.api.v1.NameSearch;
-import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.location.AlaLocationClassification;
+import au.org.ala.names.AlaLinnaeanClassification;
+import au.org.ala.names.AlaLinnaeanFactory;
+import au.org.ala.names.AlaVernacularClassification;
 import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.names.ws.api.v2.LocationSearch;
+import au.org.ala.names.ws.api.v2.NameMatchService;
+import au.org.ala.names.ws.api.v2.NameSearch;
+import au.org.ala.names.ws.api.v2.NameUsageMatch;
 import au.org.ala.names.ws.core.NameSearchConfiguration;
-import au.org.ala.names.ws.core.SpeciesGroupsUtil;
+import au.org.ala.names.ws.health.Checkable;
 import com.codahale.metrics.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import old.au.org.ala.names.model.ErrorType;
-import old.au.org.ala.names.model.MatchType;
-import old.au.org.ala.names.model.SynonymType;
+import org.apache.commons.lang3.StringUtils;
 import org.cache2k.Cache;
 import org.cache2k.operation.CacheControl;
 import org.cache2k.operation.CacheStatistics;
-import org.gbif.dwc.terms.Term;
 import org.gbif.nameparser.api.NameType;
-import org.gbif.nameparser.api.Rank;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.*;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * Resource that implements the name search API.
- * <p>
- * TODO add diagnostics to payload - similar to GBIF
  */
 @Tag(
-        name = "Taxonomy search, version 1",
+        name = "Taxonomy search, version 2",
         description = "Search for taxonomic information on names, classifications or identifiers"
 )
 @Produces(MediaType.APPLICATION_JSON)
-@Path("/api")
+@Path("/api/v2/taxonomy")
 @Slf4j
 @Singleton
-public class NameSearchResourceV1 implements NameMatchService, Checkable {
+public class NameSearchResourceV2 implements NameMatchService, Checkable {
     private final TaxonomyResource taxonomy;
+    /** The location resource */
+    private final LocationResource locations;
     /**
      * Use hints to guide search
      */
@@ -71,6 +71,10 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
      * Default search style
      */
     private final SearchStyle defaultStyle;
+    /**
+     * Measure performance
+     */
+    private final boolean searchMetrics;
 
     // Cache2k instance for searches
     private final Cache<NameSearch, NameUsageMatch> searchCache;
@@ -88,135 +92,18 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
             SearchStyle.MATCH, MatchOptions.ALL
     );
 
-    private static final Map<Term, ErrorType> ERROR_MAP = Collections.unmodifiableMap(buildErrorMap());
-
-    private static final Map<Term, MatchType> MATCH_TYPE_MAP = Collections.unmodifiableMap(buildMatchTypeMap());
-
-    private static final Map<TaxonomicStatus, SynonymType> SYNONYM_TYPE_MAP = Collections.unmodifiableMap(buildSynonymTypeMap());
-
-    private static final List<MatchType> MATCH_TYPE_ORDER = Arrays.asList(
-            MatchType.RECURSIVE,
-            MatchType.VERNACULAR,
-            MatchType.SOUNDEX,
-            MatchType.PHRASE,
-            MatchType.CANONICAL,
-            MatchType.EXACT
-    );
-
-    private static Map<Term, ErrorType> buildErrorMap() {
-        Map<Term, ErrorType> errorMap = new HashMap<>();
-        // errorMap.put(AlaLinnaeanFactory.ACCEPTED_AND_SYNONYM, "");
-        errorMap.put(AlaLinnaeanFactory.AFFINITY_SPECIES_NAME, ErrorType.AFFINITY_SPECIES);
-        // errorMap.put(AlaLinnaeanFactory.BARE_PHRASE_NAME, "");
-        // errorMap.put(AlaLinnaeanFactory.CANONICAL_NAME, "");
-        errorMap.put(AlaLinnaeanFactory.CONFER_SPECIES_NAME, ErrorType.CONFER_SPECIES);
-        errorMap.put(AlaLinnaeanFactory.EXCLUDED_NAME, ErrorType.EXCLUDED);
-        // errorMap.put(AlaLinnaeanFactory.EXPANDED_KINGDOM, "");
-        // errorMap.put(AlaLinnaeanFactory.HIGHER_ORDER_MATCH, "");
-        errorMap.put(AlaLinnaeanFactory.INDETERMINATE_NAME, ErrorType.INDETERMINATE_SPECIES);
-        // errorMap.put(AlaLinnaeanFactory.INFERRED_KINGDOM, "");
-        // errorMap.put(AlaLinnaeanFactory.INFERRED_NOMENCLATURAL_CODE, "");
-        errorMap.put(AlaLinnaeanFactory.INVALID_KINGDOM, ErrorType.GENERIC);
-        errorMap.put(AlaLinnaeanFactory.LOCATION_OUT_OF_SCOPE, ErrorType.GENERIC);
-        errorMap.put(AlaLinnaeanFactory.MISAPPLIED_NAME, ErrorType.MISAPPLIED);
-        // errorMap.put(AlaLinnaeanFactory.MISSPELLED_SCIENTIFIC_NAME, "");
-        // errorMap.put(AlaLinnaeanFactory.MULTIPLE_MATCHES, "");
-        errorMap.put(AlaLinnaeanFactory.PARENT_CHILD_SYNONYM, ErrorType.PARENT_CHILD_SYNONYM);
-        errorMap.put(AlaLinnaeanFactory.PARTIALLY_EXCLUDED_NAME, ErrorType.ASSOCIATED_EXCLUDED);
-        errorMap.put(AlaLinnaeanFactory.PARTIALLY_MISAPPLIED_NAME, ErrorType.MATCH_MISAPPLIED);
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_AUTHORSHIP, "");
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_CLASS, "");
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_CULTIVAR, "");
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_FAMILY, "");
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_KINGDOM, "");
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_LOCATION, "");
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_ORDER, "");
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_PHRASENAME, "");
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_PHYLUM, "");
-        // errorMap.put(AlaLinnaeanFactory.REMOVED_RANK, "");
-        errorMap.put(AlaLinnaeanFactory.UNPARSABLE_NAME, ErrorType.GENERIC);
-        errorMap.put(AlaLinnaeanFactory.UNRESOLVED_HOMONYM, ErrorType.HOMONYM);
-        // errorMap.put(AlaLinnaeanFactory.VERNACULAR_MATCH, "");
-        return errorMap;
-    }
-
-    private static Map<Term, MatchType> buildMatchTypeMap() {
-        Map<Term, MatchType> matchTypeMap = new HashMap<>();
-        // matchTypeMap.put(AlaLinnaeanFactory.ACCEPTED_AND_SYNONYM, "");
-        // matchTypeMap.put(AlaLinnaeanFactory.AFFINITY_SPECIES_NAME, "");
-        matchTypeMap.put(AlaLinnaeanFactory.BARE_PHRASE_NAME, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.CANONICAL_NAME, MatchType.CANONICAL);
-        // matchTypeMap.put(AlaLinnaeanFactory.CONFER_SPECIES_NAME, "");
-        // matchTypeMap.put(AlaLinnaeanFactory.EXCLUDED_NAME, "");
-        matchTypeMap.put(AlaLinnaeanFactory.EXPANDED_KINGDOM, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.HIGHER_ORDER_MATCH, MatchType.RECURSIVE);
-        // matchTypeMap.put(AlaLinnaeanFactory.INDETERMINATE_NAME, "");
-        matchTypeMap.put(AlaLinnaeanFactory.INFERRED_KINGDOM, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.INFERRED_NOMENCLATURAL_CODE, MatchType.CANONICAL);
-        // matchTypeMap.put(AlaLinnaeanFactory.INVALID_KINGDOM, "");
-        matchTypeMap.put(AlaLinnaeanFactory.LOCATION_OUT_OF_SCOPE, MatchType.CANONICAL);
-        // matchTypeMap.put(AlaLinnaeanFactory.MISAPPLIED_NAME, "");
-        matchTypeMap.put(AlaLinnaeanFactory.MISSPELLED_SCIENTIFIC_NAME, MatchType.SOUNDEX);
-        // matchTypeMap.put(AlaLinnaeanFactory.MULTIPLE_MATCHES, "");
-        // matchTypeMap.put(AlaLinnaeanFactory.PARENT_CHILD_SYNONYM, "");
-        // matchTypeMap.put(AlaLinnaeanFactory.PARTIALLY_EXCLUDED_NAME, "");
-        // matchTypeMap.put(AlaLinnaeanFactory.PARTIALLY_MISAPPLIED_NAME, "");
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_AUTHORSHIP, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_CLASS, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_CULTIVAR, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_FAMILY, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_KINGDOM, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_LOCATION, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_ORDER, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_PHRASENAME, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_PHYLUM, MatchType.CANONICAL);
-        matchTypeMap.put(AlaLinnaeanFactory.REMOVED_RANK, MatchType.CANONICAL);
-        // matchTypeMap.put(AlaLinnaeanFactory.UNPARSABLE_NAME, "");
-        // matchTypeMap.put(AlaLinnaeanFactory.UNRESOLVED_HOMONYM, "");
-        matchTypeMap.put(AlaLinnaeanFactory.VERNACULAR_MATCH, MatchType.VERNACULAR);
-        return matchTypeMap;
-    }
-
-
-    private static Map<TaxonomicStatus, SynonymType> buildSynonymTypeMap() {
-        Map<TaxonomicStatus, SynonymType> synonymTypeMap = new HashMap<>();
-        synonymTypeMap.put(TaxonomicStatus.synonym, SynonymType.SYNONYM);
-        synonymTypeMap.put(TaxonomicStatus.unknown, SynonymType.SYNONYM);
-        synonymTypeMap.put(TaxonomicStatus.heterotypicSynonym, SynonymType.SUBJECTIVE_SYNONYM);
-        synonymTypeMap.put(TaxonomicStatus.homotypicSynonym, SynonymType.OBJECTIVE_SYNONYM);
-        synonymTypeMap.put(TaxonomicStatus.inferredSynonym, SynonymType.SYNONYM);
-        synonymTypeMap.put(TaxonomicStatus.accepted, null);
-        synonymTypeMap.put(TaxonomicStatus.excluded, SynonymType.EXCLUDES);
-        synonymTypeMap.put(TaxonomicStatus.incertaeSedis, SynonymType.INCLUDES_INCERTAE_SEDIS);
-        synonymTypeMap.put(TaxonomicStatus.inferredAccepted, null);
-        synonymTypeMap.put(TaxonomicStatus.inferredExcluded, SynonymType.EXCLUDES);
-        synonymTypeMap.put(TaxonomicStatus.inferredInvalid, SynonymType.INVALID);
-        synonymTypeMap.put(TaxonomicStatus.inferredUnplaced, SynonymType.UNPLACED);
-        synonymTypeMap.put(TaxonomicStatus.invalid, SynonymType.INVALID);
-        synonymTypeMap.put(TaxonomicStatus.misapplied, SynonymType.MISAPPLIED);
-        synonymTypeMap.put(TaxonomicStatus.miscellaneousLiterature, SynonymType.MISC_LITERATURE);
-        synonymTypeMap.put(TaxonomicStatus.objectiveSynonym, SynonymType.OBJECTIVE_SYNONYM);
-        synonymTypeMap.put(TaxonomicStatus.proParteSynonym, SynonymType.PRO_PARTE_SYNONYM);
-        synonymTypeMap.put(TaxonomicStatus.unknown, null);
-        synonymTypeMap.put(TaxonomicStatus.speciesInquirenda, SynonymType.INCLUDES_SP_INQUIRENDA);
-        synonymTypeMap.put(TaxonomicStatus.subjectiveSynonym, SynonymType.SUBJECTIVE_SYNONYM);
-        synonymTypeMap.put(TaxonomicStatus.unplaced, SynonymType.UNPLACED);
-        synonymTypeMap.put(TaxonomicStatus.unreviewed, null);
-        synonymTypeMap.put(TaxonomicStatus.unreviewedSynonym, SynonymType.SYNONYM);
-        return synonymTypeMap;
-    }
-
-
     @Inject
-    public NameSearchResourceV1(NameSearchConfiguration configuration, TaxonomyResource taxonomy) {
+    public NameSearchResourceV2(NameSearchConfiguration configuration, TaxonomyResource taxonomy, LocationResource locations) {
         try {
             this.taxonomy = taxonomy;
+            this.locations = locations;
             this.useHints = configuration.isUseHints();
             this.checkHints = configuration.isCheckHints();
             this.allowLoose = configuration.isAllowLoose();
             this.defaultStyle = configuration.getDefaultStyle();
+            this.searchMetrics = configuration.isSearchMetrics();
             this.searchCache = configuration.getCache().cacheBuilder(NameSearch.class, NameUsageMatch.class)
-                    .loader(nameSearch -> this.search(nameSearch)) //auto populating function
+                    .loader(nameSearch -> this.search(nameSearch, Trace.TraceLevel.NONE)) //auto populating function
                     .build();
             this.idCache = configuration.getCache().cacheBuilder(String.class, NameUsageMatch.class)
                     .loader(id -> this.lookup(id, false)) //auto populating function
@@ -261,9 +148,16 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
     @RequestBody(description = "Partially filled out classification", content = @Content(schema = @Schema(implementation = NameSearch.class), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("/searchByClassification")
-    public NameUsageMatch match(NameSearch search) {
+    public NameUsageMatch match(
+            NameSearch search,
+            @Parameter(description = "The trace level for debugging. If absent, no trace is returned", example = "NONE") @QueryParam("trace" ) Trace.TraceLevel trace
+    ) {
+        trace = trace == null ? Trace.TraceLevel.NONE : trace;
         try {
-            return this.searchCache.get(search);
+            if (trace == Trace.TraceLevel.NONE)
+                return this.searchCache.get(search);
+            else
+                return this.search(search, trace);
         } catch (Exception ex) {
             log.warn("Problem matching name : " + ex.getMessage() + " with nameSearch: " + search, ex);
             return NameUsageMatch.forException(ex, search);
@@ -287,14 +181,18 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
     @RequestBody(description = "List of partially filled out classifications", content = @Content(array = @ArraySchema(schema = @Schema(implementation = NameSearch.class)), mediaType = MediaType.APPLICATION_JSON))
     @Timed
     @Path("searchAllByClassification")
-    public List<NameUsageMatch> matchAll(List<NameSearch> search) {
-        return search.stream().map(s -> s == null ? null : this.match(s)).collect(Collectors.toList());
+    public List<NameUsageMatch> matchAll(
+            List<NameSearch> search,
+            @Parameter(description = "The trace level for debugging. If absent, no trace is returned", example = "NONE") @QueryParam("trace" ) Trace.TraceLevel trace
+    ) {
+        return search.stream().map(s -> s == null ? null : this.match(s, trace)).collect(Collectors.toList());
     }
 
     @Operation(
             summary = "Search by full classification via query parameters",
             description = "Search based on a partially filled out classification. " +
-                    "The search will use the parameters supplied to perform as precise a search as is possible."
+                    "The search will use the parameters supplied to perform as precise a search as is possible. " +
+                    "Location information can be given to disambiguate taxonomic concepts that apply to specific regions."
     )
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -312,9 +210,34 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
             @Parameter(description = "The specific epithet, the species part of a binomial name") @QueryParam("specificEpithet") String specificEpithet,
             @Parameter(description = "The below species (subspecies, variety, form etc.) epithet") @QueryParam("infraspecificEpithet") String infraspecificEpithet,
             @Parameter(description = "The taxon rank. If not supplied, it may be inferred from other parameters", example = "species") @QueryParam("rank") String rank,
-            @Parameter(description = "The search style. If not supplied the server default style is used.", example = "MATCH") @QueryParam("style") SearchStyle style
+            @Parameter(description = "The continent for distribution-aware matching", example = "Oceania") @QueryParam("continent") String continent,
+            @Parameter(description = "The country for distribution-aware matching", example = "Australia") @QueryParam("country") String country,
+            @Parameter(description = "The state or province for distribution-aware matching", example = "South Australia") @QueryParam("stateProvince") String stateProvince,
+            @Parameter(description = "The island group for distribution-aware matching") @QueryParam("islandGroup") String islandGroup,
+            @Parameter(description = "The island for distribution-aware matching", example = "Kangaroo Island") @QueryParam("island") String island,
+            @Parameter(description = "The water body for distribution-aware matching") @QueryParam("waterBody") String waterBody,
+            @Parameter(description = "The search style. If not supplied the server default style is used.", example = "MATCH") @QueryParam("style") SearchStyle style,
+            @Parameter(description = "The trace level for debugging. If absent, no trace is returned", example = "NONE") @QueryParam("trace" ) Trace.TraceLevel trace
     ) {
         style = style == null ? this.defaultStyle : style;
+        trace = trace == null ? Trace.TraceLevel.NONE : trace;
+        continent = StringUtils.trimToNull(continent);
+        country = StringUtils.trimToNull(country);
+        stateProvince = StringUtils.trimToNull(stateProvince);
+        islandGroup = StringUtils.trimToNull(islandGroup);
+        island = StringUtils.trimToNull(island);
+        waterBody = StringUtils.trimToNull(waterBody);
+        LocationSearch location = null;
+        if (continent != null || country != null || stateProvince != null || islandGroup != null || island != null || waterBody != null) {
+            location = LocationSearch.builder()
+                    .continent(continent)
+                    .country(country)
+                    .stateProvince(stateProvince)
+                    .islandGroup(islandGroup)
+                    .island(island)
+                    .waterBody(waterBody)
+                    .build();
+        }
         NameSearch search = NameSearch.builder()
                 .scientificName(scientificName)
                 .kingdom(kingdom)
@@ -326,11 +249,16 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
                 .specificEpithet(specificEpithet)
                 .infraspecificEpithet(infraspecificEpithet)
                 .rank(rank)
+                .location(location)
                 .loose(style.isLoose())
                 .style(style)
                 .build();
+
         try {
-            return this.searchCache.get(search);
+            if (trace == Trace.TraceLevel.NONE)
+                return this.searchCache.get(search);
+            else
+                return this.search(search, trace);
         } catch (Exception e) {
             log.warn("Problem matching name : " + e.getMessage() + " with nameSearch: " + search);
             return NameUsageMatch.forException(e, search);
@@ -349,12 +277,17 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
     @Path("/search")
     public NameUsageMatch match(
             @Parameter(description = "The scientific name", required = true, example = "Acacia dealbata") @QueryParam("q") String name,
-            @Parameter(description = "The search style. If not supplied the server default style is used.", example = "MATCH") @QueryParam("style") SearchStyle style
+            @Parameter(description = "The search style. If not supplied the server default style is used.", example = "MATCH") @QueryParam("style") SearchStyle style,
+            @Parameter(description = "The trace level for debugging. If absent, no trace is returned", example = "NONE") @QueryParam("trace" ) Trace.TraceLevel trace
     ) {
         style = style == null ? this.defaultStyle : style;
+        trace = trace == null ? Trace.TraceLevel.NONE : trace;
         NameSearch search = NameSearch.builder().scientificName(name).loose(true).style(style).build();
         try {
-            return this.searchCache.get(search);
+            if (trace == Trace.TraceLevel.NONE)
+                return this.searchCache.get(search);
+            else
+                return this.search(search, trace);
         } catch (Exception e) {
             log.warn("Problem matching name : " + e.getMessage() + " with query: " + name);
             return NameUsageMatch.forException(e, search);
@@ -363,8 +296,8 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
 
 
     @Operation(
-            summary = "Get taxon information by by vernacular (common) name.",
-            description = "The same Vernacular name may be given to multiple taxa with different scientific names. The result returned is a best-effort match."
+            summary = "Get taxon information by vernacular (common) name.",
+            description = "The same vernacular name may be given to multiple taxa with different scientific names. The result returned is a best-effort match."
     )
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -372,11 +305,16 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
     @Timed
     @Path("/searchByVernacularName")
     public NameUsageMatch matchVernacular(
-            @Parameter(description = "The common name", required = true, example = "Red Kangaroo") @QueryParam("vernacularName") String vernacularName
+            @Parameter(description = "The common name", required = true, example = "Red Kangaroo") @QueryParam("vernacularName") String vernacularName,
+            @Parameter(description = "The trace level for debugging. If absent, no trace is returned", example = "NONE") @QueryParam("trace" ) Trace.TraceLevel trace
     ) {
         NameSearch search = NameSearch.builder().vernacularName(vernacularName).build();
+        trace = trace == null ? Trace.TraceLevel.NONE : trace;
         try {
-            return this.searchCache.get(search);
+            if (trace == Trace.TraceLevel.NONE)
+                return this.searchCache.get(search);
+            else
+                return this.search(search, trace);
         } catch (Exception e) {
             log.warn("Problem matching name : " + e.getMessage() + " with vernacularName: " + vernacularName);
             return NameUsageMatch.forException(e, search);
@@ -398,9 +336,10 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
         try {
             Cache<String, NameUsageMatch> cache = follow ? this.idAcceptedCache : this.idCache;
             return cache.get(taxonID);
-        } catch (Exception e) {
-            log.warn("Problem matching name : " + e.getMessage() + " with taxonID: " + taxonID);
-            return NameUsageMatch.forException(e, null);
+        } catch (Exception ex) {
+            String msg = "Problem matching name : " + ex.getMessage() + " with taxonID: " + taxonID;
+            log.error(msg, ex);
+            throw new WebApplicationException(msg, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -422,9 +361,9 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
             NameUsageMatch match = NameUsageMatch.FAIL;
             try {
                 match = cache.get(taxonID);
-            } catch (Exception e) {
-                log.warn("Problem matching name : " + e.getMessage() + " with taxonID: " + taxonID);
-                match = NameUsageMatch.forException(e, null);
+            } catch (Exception ex) {
+                log.error("Problem matching name : " + ex.getMessage() + " with taxonID: " + taxonID, ex);
+                match = NameUsageMatch.forException(ex, null);
             }
             matches.add(match);
         }
@@ -439,95 +378,90 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
      * Perform a search based on a classification built from various calls.
      *
      * @param search The search classification
+     * @param trace The trace level
      * @return A match object, with success=false if there was no valid match
      * @throws Exception if something goes horribly wrong
      */
-    private NameUsageMatch search(NameSearch search) throws Exception {
+    private NameUsageMatch search(NameSearch search, Trace.TraceLevel trace) throws Exception {
         NameUsageMatch match = null;
         SearchStyle style = search.getStyle() == null ? this.defaultStyle : search.getStyle();
-        //attempt 1: search via taxonConceptID or taxonID if provided
-        Optional<Match<AlaLinnaeanClassification, MatchMeasurement>> result = Optional.empty();
+        MatchOptions strictOptions = SEARCH_STYLE_MAP.get(SearchStyle.STRICT).withTrace(trace).withMeasure(this.searchMetrics);
+        MatchOptions options = SEARCH_STYLE_MAP.getOrDefault(style, MatchOptions.NONE).withTrace(trace).withMeasure(this.searchMetrics);
 
-        if (search.getTaxonConceptID() != null) {
-            result = Optional.ofNullable(this.taxonomy.getSearcher().search(search.getTaxonConceptID()));
+        final NameSearch nsearch = search.normalised();
+
+        // First, get a locality, if available
+        final Match<AlaLocationClassification, MatchMeasurement> location = search.getLocation() == null ? null : this.locations.findMatch(search.getLocation(), options, false);
+
+        //attempt 1: search via taxonConceptID or taxonID if provided
+        Match<AlaLinnaeanClassification, MatchMeasurement> result = Match.emptyMatch();
+
+         if (search.getTaxonConceptID() != null) {
+            result = this.taxonomy.getSearcher().search(search.getTaxonConceptID());
         } else if (search.getTaxonID() != null) {
-            result = Optional.ofNullable(this.taxonomy.getSearcher().search(search.getTaxonID()));
+            result = this.taxonomy.getSearcher().search(search.getTaxonID());
         }
 
-        if (result.isPresent()) {
-            return create(result.get(), null, true);
+        if (this.possibleMatch(result)) {
+            return create(nsearch, result, location, true);
         }
         // Start searching by names
-        final NameSearch nsearch = search.normalised();
 
         // Get the first result that works with hints
         if (useHints) {
-            result = nsearch.bareStream()
-                    .map(s -> this.findMatch(s, SearchStyle.STRICT, true))
-                    .filter(m -> m != null && m.isValid())
-                    .findFirst();
+            result = this.findMatch(nsearch, location, strictOptions, true);
+            if (this.possibleMatch(result))
+                return create(nsearch, result, location, true);
         }
 
         // Look for an exact match
-        if (!result.isPresent()) {
-            result = nsearch.bareStream()
-                    .filter(s -> !s.equals(nsearch))
-                    .map(s -> this.findMatch(s, SearchStyle.STRICT, false))
-                    .filter(this::possibleMatch)
-                    .findFirst();
-        }
+        result = this.findMatch(nsearch, location, strictOptions, false);
+        if (this.possibleMatch(result))
+            return create(nsearch, result, location, true);
 
         // Try fuzzier approaches, if allowed
-        if (!result.isPresent() && style != SearchStyle.STRICT) {
-            result = nsearch.bareStream()
-                    .filter(s -> !s.equals(nsearch))
-                    .map(s -> this.findMatch(s, style, true))
-                    .filter(this::possibleMatch)
-                    .findFirst();
+        if (style != SearchStyle.STRICT) {
+            result = this.findMatch(nsearch, location, options, false);
+            if (this.possibleMatch(result))
+                return create(nsearch, result, location, true);
         }
 
         // Last try with what we've got
-        if (!result.isPresent()) {
-            Match<AlaLinnaeanClassification, MatchMeasurement> m = this.findMatch(nsearch, style, true);
-            if (this.possibleMatch(m))
-                result = Optional.of(m);
-        }
-
-        if (result.isPresent()) {
-            match = create(result.get(), null, true);
-            if (this.checkHints && !match.check(nsearch)) {
-                List<String> is = new ArrayList<>(match.getIssues());
-                is.remove("noIssue");
-                is.add("hintMismatch");
-                match = match.withIssues(is);
-            }
-            return match;
+        if (style != SearchStyle.STRICT) {
+            result = this.findMatch(nsearch, location, options, true);
+            if (this.possibleMatch(result))
+                return create(nsearch, result, location, true);
         }
 
         // See if the scientific name is actually a LSID
-        if (!result.isPresent() && this.allowLoose && search.isLoose()) {
-            Match<AlaLinnaeanClassification, MatchMeasurement> m = this.taxonomy.getSearcher().search(search.getScientificName());
-            if (m.isValid()) {
-                return create(m, "taxonIdMatch", true);
+        if (this.allowLoose && search.isLoose()) {
+            result = this.taxonomy.getSearcher().search(nsearch.getScientificName());
+            if (this.possibleMatch(result)) {
+                result = result.with(AlaLinnaeanFactory.VERNACULAR_MATCH);
+                return create(nsearch, result, location, true);
             }
         }
 
         // Last resort, search using a vernacular name in either the vernacular or scientific slots
-        if (!result.isPresent() && nsearch.getVernacularName() != null) {
-            Match<AlaLinnaeanClassification, MatchMeasurement> m = this.findVernacular(nsearch.getVernacularName());
-            if (m.isValid())
-                return create(m, "vernacularMatch", true);
+        if (nsearch.getVernacularName() != null) {
+            result = this.findVernacular(nsearch.getVernacularName());
+            if (this.possibleMatch(result)) {
+                result = result.with(AlaLinnaeanFactory.VERNACULAR_MATCH);
+                return create(nsearch, result, location, true);
+            }
         }
-        if (!result.isPresent() && nsearch.getScientificName() != null && this.allowLoose && search.isLoose()) {
-            Match<AlaLinnaeanClassification, MatchMeasurement> m = this.findVernacular(nsearch.getScientificName());
-            if (m.isValid())
-                return create(m, "vernacularMatch", true);
+        if (nsearch.getScientificName() != null && this.allowLoose && search.isLoose()) {
+            result = this.findVernacular(nsearch.getVernacularName());
+            if (this.possibleMatch(result)) {
+                result = result.with(AlaLinnaeanFactory.VERNACULAR_MATCH);
+                return create(nsearch, result, location, true);
+            }
         }
-
         return NameUsageMatch.FAIL;
     }
 
-    private @NonNull Match<AlaLinnaeanClassification, MatchMeasurement> findMatch(NameSearch search, SearchStyle style, boolean useHints) {
+
+    private @NonNull Match<AlaLinnaeanClassification, MatchMeasurement> findMatch(NameSearch search, Match<AlaLocationClassification, MatchMeasurement> location, MatchOptions options, boolean useHints) {
         if (search.getScientificName() == null)
             return Match.invalidMatch();
         AlaLinnaeanClassification classification = new AlaLinnaeanClassification();
@@ -542,6 +476,7 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
         classification.scientificName = search.getScientificName();
         classification.specificEpithet = search.getSpecificEpithet();
         classification.taxonRank = this.taxonomy.getRankAnalysis().fromString(search.getRank(), null);
+        classification.locationId = location != null && location.isValid() ? location.getAllIdentifiers() : null;
         if (useHints && search.getHints() != null) {
             for (Map.Entry<String, List<String>> he: search.getHints().entrySet()) {
                 Observable<String> observable = this.taxonomy.getObservable(he.getKey());
@@ -551,15 +486,15 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
                 }
             }
         }
-        MatchOptions options = SEARCH_STYLE_MAP.getOrDefault(style, MatchOptions.NONE);
         if (useHints)
             options = options.withUseHints(true);
 
         try {
             return this.taxonomy.getSearcher().search(classification, options);
         } catch (BayesianException ex) {
-            log.warn("Unable to search for " + search, ex);
-            return Match.invalidMatch();
+            String msg = "Unable to search for " + search;
+            log.error(msg, ex);
+            throw new WebApplicationException(msg, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -575,8 +510,9 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
                 return this.taxonomy.getSearcher().search(v.getAccepted().taxonId);
             return Match.emptyMatch();
         } catch (BayesianException ex) {
-            log.warn("Unable to search for " + name, ex);
-            return Match.invalidMatch();
+            String msg = "Unable to search for " + name;
+            log.error(msg, ex);
+            throw new WebApplicationException(msg, Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -593,32 +529,33 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
 
         if (!result.isValid())
             return NameUsageMatch.FAIL;
-        return create(result, "taxonIdMatch", follow);
+        return create(null, result, null, follow);
     }
 
     /**
      * Build a match result out of what we have found.
      *
+     * @param search The original search
      * @param match     The search result
-     * @param matchType An optional supplied match type, if null this is deduced from the issues list
+     * @param location The location used when searching
      * @param useAccepted Use the accepted concept, rather than the matched concept
      * @return A corresponding match object
      * @throws Exception if unable to build the match, usually as a result of some underlying interface problem
      */
-    private NameUsageMatch create(Match<AlaLinnaeanClassification, MatchMeasurement> match, String matchType, boolean useAccepted) throws Exception {
+    private NameUsageMatch create(NameSearch search, Match<AlaLinnaeanClassification, MatchMeasurement> match, Match<AlaLocationClassification, MatchMeasurement> location, boolean useAccepted) throws Exception {
         Issues mi = match.getIssues() == null ? Issues.of() : match.getIssues();
-        List<String> issues = mi.stream().map(i -> ERROR_MAP.get(i)).filter(Objects::nonNull).sorted().map(ErrorType::toString).collect(Collectors.toList());
-        if (matchType == null) {
-            final Set<MatchType> mt = mi.stream().map(i -> MATCH_TYPE_MAP.get(i)).filter(Objects::nonNull).collect(Collectors.toSet());
-            matchType = MATCH_TYPE_ORDER.stream().filter(t -> mt.contains(t)).findFirst().orElse(MatchType.EXACT).toString();
+        if (location != null) {
+            if (!location.isValid())
+                mi = mi.with(AlaLinnaeanFactory.INVALID_LOCATION);
+            else if (location.getIssues() != null)
+                mi = mi.merge(location.getIssues());
         }
+        List<String> issues = mi.stream().map(i -> i.qualifiedName()).sorted().collect(Collectors.toList());
         if (!match.isValid()) {
             return NameUsageMatch.builder()
                     .success(false)
-                    .matchType(matchType)
-                    .nameType(null)
-                    .synonymType(null)
-                    .issues(issues.isEmpty() ? Collections.singletonList("noMatch") : issues)
+                    .issues(issues)
+                    .trace(match.getTrace())
                     .build();
         }
         AlaLinnaeanClassification matched = match.getMatch();
@@ -626,17 +563,13 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
         Integer left = match.getLeft();
         Integer right = match.getRight();
         NameType nameType = matched.nameType;
-        SynonymType synonymType = SYNONYM_TYPE_MAP.get(matched.taxonomicStatus);
-        return NameUsageMatch.builder()
+        NameUsageMatch usage = NameUsageMatch.builder()
                 .success(true)
                 .scientificName(accepted.scientificName)
                 .scientificNameAuthorship(accepted.scientificNameAuthorship)
                 .taxonConceptID(accepted.taxonId)
                 .rank(this.taxonomy.getRankAnalysis().toStore(accepted.taxonRank))
                 .rankID(accepted.rankId)
-                .matchType(matchType)
-                .nameType(nameType != null ? nameType.toString() : null)
-                .synonymType(synonymType == null ? null : synonymType.toString())
                 .lft(left)
                 .rgt(right)
                 .kingdom(accepted.kingdom)
@@ -654,10 +587,24 @@ public class NameSearchResourceV1 implements NameMatchService, Checkable {
                 .species(null)
                 .speciesID(accepted.speciesId)
                 .vernacularName(accepted.vernacularName)
+                .probability(match.getProbability().getPosterior())
+                .fidelity(match.getFidelity().getFidelity())
+                .locationID(location != null && location.isValid() ? location.getAccepted().locationId : null)
+                .locality(location != null && location.isValid() ? location.getAccepted().locality : null)
+                .distributionIDs(accepted.locationId)
+                .distribution(accepted.locationId == null ? null :
+                        accepted.locationId.stream()
+                                .map(id -> this.locations.get(id, false))
+                                .filter(l -> l != null && l.isSuccess())
+                                .map(l -> l.getLocality())
+                                .collect(Collectors.toSet())
+                )
                 .speciesGroup(this.taxonomy.getSpeciesGroups().getSpeciesGroups(left))
                 .speciesSubgroup(this.taxonomy.getSpeciesGroups().getSpeciesSubGroups(left))
-                .issues(issues.isEmpty() ? Collections.singletonList("noIssue") : issues)
+                .issues(issues)
+                .trace(match.getTrace())
                 .build();
+        return usage;
     }
 
     /**

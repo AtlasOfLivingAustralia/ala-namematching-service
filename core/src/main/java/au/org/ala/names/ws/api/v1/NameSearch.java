@@ -1,5 +1,8 @@
 package au.org.ala.names.ws.api.v1;
 
+import au.org.ala.bayesian.Normaliser;
+import au.org.ala.names.ws.api.SearchStyle;
+import au.org.ala.util.BasicNormaliser;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -33,7 +36,7 @@ public class NameSearch {
     /**
      * Used to normalise request strings before processing
      */
-    private static final Normaliser NORMALISER = new BasicNormaliser(true, true, true, false, false, true);
+    private static final Normaliser NORMALISER = new BasicNormaliser("v1", true, false, true, false, false, false);
 
     /**
      * The order in which hints are applied. Hints are tried in <em>reverse</em> order to the list.

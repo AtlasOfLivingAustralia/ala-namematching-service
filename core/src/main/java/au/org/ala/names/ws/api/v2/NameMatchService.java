@@ -1,9 +1,12 @@
-package au.org.ala.names.ws.api.v1;
+package au.org.ala.names.ws.api.v2;
 
+import au.org.ala.bayesian.Trace;
 import au.org.ala.names.ws.api.SearchStyle;
 
 import java.io.Closeable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Name matching interface.
@@ -19,10 +22,11 @@ public interface NameMatchService extends Closeable {
      * </p>
      *
      * @param search The search specification
+     * @param trace The trace level for debugging
      *
      * @return A matching taxon, with success=false if not found
      */
-    NameUsageMatch match(NameSearch search);
+    NameUsageMatch match(NameSearch search, Trace.TraceLevel trace);
 
     /**
      * Bulk name search
@@ -35,17 +39,18 @@ public interface NameMatchService extends Closeable {
      * </p>
      *
      * @param searches The search specifications. possibly containing nulls
+     * @param trace The trace level for debugging
      *
      * @return A list of matches, with success=false if not found and nulls for null requests
      *
-     * @see #match(NameSearch)
+     * @see #match(NameSearch, au.org.ala.bayesian.Trace.TraceLevel)
      */
-    List<NameUsageMatch> matchAll(List<NameSearch> searches);
+    List<NameUsageMatch> matchAll(List<NameSearch> searches, Trace.TraceLevel trace);
 
     /**
      * Find a mataching taxon based on the Linnaean hierarchy.
      *
-     * @see #match(NameSearch)
+     * @see #match(NameSearch, au.org.ala.bayesian.Trace.TraceLevel)
      *
      * @param scientificName The scientific name
      * @param kingdom The Linnaean kingdom name
@@ -57,7 +62,14 @@ public interface NameMatchService extends Closeable {
      * @param specificEpithet The specific epithet (species component of a binomial name)
      * @param infraspecificEpithet The infraspecific epithet (subspecies, variety etc component of a trinomial name)
      * @param rank The Linnaean rank name
+     * @param continent The continent where the observation took place
+     * @param country The country where the observation took place
+     * @param stateProvince The state or province where the observation took place
+     * @param islandGroup The island group where the observation took place
+     * @param island The island where the observation took place
+     * @param waterBody The water body (ocean, sea, bay etc.) where the observation took place
      * @param style The search style to use
+     * @param trace The trace level for debugging
      *
      * @return A matching taxon, with success=false if not found
      */
@@ -72,7 +84,14 @@ public interface NameMatchService extends Closeable {
             String specificEpithet,
             String infraspecificEpithet,
             String rank,
-            SearchStyle style
+            String continent,
+            String country,
+            String stateProvince,
+            String islandGroup,
+            String island,
+            String waterBody,
+            SearchStyle style,
+            Trace.TraceLevel trace
     );
 
     /**
@@ -84,10 +103,11 @@ public interface NameMatchService extends Closeable {
      *
      * @param scientificName The scientific name of the taxon
      * @param style The search style to use
+     * @param trace The trace level for debugging
      *
      * @return A matching taxon, with success=false if not found
      */
-    NameUsageMatch match(String scientificName, SearchStyle style);
+    NameUsageMatch match(String scientificName, SearchStyle style, Trace.TraceLevel trace);
 
     /**
      * Search for a taxon with a given vernacular (common) name.
@@ -97,10 +117,11 @@ public interface NameMatchService extends Closeable {
      * </p>
      *
      * @param vernacularName The vernacular name to search for
+     * @param trace The trace level for debugging
      *
      * @return A matching taxon, with success=false if not found
      */
-    NameUsageMatch matchVernacular(String vernacularName);
+    NameUsageMatch matchVernacular(String vernacularName, Trace.TraceLevel trace);
 
     /**
      * Get taxon information via a specific taxon identifier.

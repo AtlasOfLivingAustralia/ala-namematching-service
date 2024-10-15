@@ -1,7 +1,7 @@
 package au.org.ala.names.ws.core;
 
 import au.org.ala.names.ALANameSearcherConfiguration;
-import au.org.ala.names.ws.api.v1.SearchStyle;
+import au.org.ala.names.ws.api.SearchStyle;
 import au.org.ala.ws.DataCacheConfiguration;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,6 +42,9 @@ public class NameSearchConfiguration {
     /** The default search style to use, if not specified */
     @JsonProperty
     private SearchStyle defaultStyle = SearchStyle.MATCH;
+    /** The report search metrics */
+    @JsonProperty
+    private boolean searchMetrics = false;
     /** The cache configuration */
     @JsonProperty
     private DataCacheConfiguration cache = DataCacheConfiguration.builder().build();

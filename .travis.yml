@@ -6,19 +6,33 @@ branches:
   only:
   - master
   - develop
-  - new-services
+  - namematching-2
 before_install:
 - mkdir -p ~/.m2; wget -q -O ~/.m2/settings.xml https://raw.githubusercontent.com/AtlasOfLivingAustralia/travis-build-configuration/master/travis_maven_settings_simple.xml
-- sudo mkdir -p /data/lucene; sudo wget -O /data/lucene/namematching-20230725-5.tgz https://archives.ala.org.au/archives/nameindexes/20230725-5/namematching-20230725-5.tgz
+- sudo mkdir /data
+- sudo chown ${USER} /data
+- mkdir -p /data/lucene
+- mkdir -p /data/tmp
+- wget -O /data/lucene/namematching-20230725-5.tgz https://archives.ala.org.au/archives/nameindexes/20230725-5/namematching-20230725-5.tgz
+- wget -O /data/lucene/linnaean-20230725-5.zip https://ala-nameindexes.s3.amazonaws.com/20230725-5/linnaean-20230725-5.zip
+- wget -O /data/lucene/vernacular-20230725-5.zip https://ala-nameindexes.s3.amazonaws.com/20230725-5/vernacular-20230725-5.zip
+- wget -O /data/lucene/location-20230725-5.zip https://ala-nameindexes.s3.amazonaws.com/20230725-5/location-20230725-5.zip
+- wget -O /data/tmp/suggester-20230725-5.zip https://ala-nameindexes.s3.amazonaws.com/20230725-5/suggester-20230725-5.zip
 - cd /data/lucene
-- sudo tar zxvf namematching-20230725-5.tgz
-- sudo ln -s namematching-20230725-5 namematching
+- tar zxvf namematching-20230725-5.tgz
+- ln -s namematching-20230725-5 namematching
+- unzip linnaean-20230725-5.zip
+- unzip vernacular-20230725-5.zip
+- unzip location-20230725-5.zip
+- ls -laF
+- cd /data/tmp
+- unzip suggester-20230725-5.zip
 - ls -laF
 - cd $TRAVIS_BUILD_DIR
 - echo TRAVIS_PULL_REQUEST = ${TRAVIS_PULL_REQUEST}
-- sudo mkdir -p /data/ala-namematching-service/config/
-- sudo cp $TRAVIS_BUILD_DIR/server/src/main/resources/groups.json /data/ala-namematching-service/config/
-- sudo cp $TRAVIS_BUILD_DIR/server/src/main/resources/subgroups.json /data/ala-namematching-service/config/
+- mkdir -p /data/ala-namematching-service/config/
+- cp $TRAVIS_BUILD_DIR/server/src/main/resources/groups.json /data/ala-namematching-service/config/
+- cp $TRAVIS_BUILD_DIR/server/src/main/resources/subgroups.json /data/ala-namematching-service/config/
 script:
 - 'if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then mvn -P travis clean install deploy; else mvn -P travis clean install; fi'
 env:

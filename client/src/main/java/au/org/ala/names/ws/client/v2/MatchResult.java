@@ -1,7 +1,7 @@
-package au.org.ala.names.ws.client.v1;
+package au.org.ala.names.ws.client.v2;
 
-import au.org.ala.names.ws.api.v1.NameSearch;
-import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.names.ws.api.v2.NameSearch;
+import au.org.ala.names.ws.api.v2.NameUsageMatch;
 import au.org.ala.names.ws.client.Result;
 
 public class MatchResult extends Result<NameSearch, NameUsageMatch> {

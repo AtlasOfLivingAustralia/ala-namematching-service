@@ -1,7 +1,9 @@
-package au.org.ala.names.ws.client.v1;
+package au.org.ala.names.ws.client.v2;
 
-import au.org.ala.names.ws.api.v1.NameSearch;
-import au.org.ala.names.ws.api.v1.NameUsageMatch;
+import au.org.ala.bayesian.Trace;
+import au.org.ala.names.ws.api.v2.NameSearch;
+import au.org.ala.names.ws.api.v2.NameUsageMatch;
+import au.org.ala.names.ws.client.v2.ALANameUsageMatchServiceClient;
 import au.org.ala.util.TestUtils;
 import au.org.ala.ws.ClientConfiguration;
 import au.org.ala.ws.DataCacheConfiguration;
@@ -51,17 +53,17 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
 
         server.enqueue(new MockResponse().setBody(response));
         NameSearch search = NameSearch.builder().scientificName("Acacia dealbata").build();
-        NameUsageMatch match = client.match(search);
+        NameUsageMatch match = client.match(search, Trace.TraceLevel.NONE);
 
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
         assertEquals("species", match.getRank());
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
         assertEquals("Plantae", match.getKingdom());
-        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+        assertEquals(Collections.singletonList("http://ala.org.au/issues/1.0/acceptedAndSynonym"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals("/api/v2/taxonomy/searchByClassification?trace=NONE", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -74,27 +76,27 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
 
         server.enqueue(new MockResponse().setBody(response));
         NameSearch search = NameSearch.builder().scientificName("Acacia dealbata").build();
-        NameUsageMatch match = client.match(search);
+        NameUsageMatch match = client.match(search, Trace.TraceLevel.NONE);
 
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
         assertEquals("species", match.getRank());
         assertEquals("https://id.biodiversity.org.au/taxon/apni/51286863", match.getTaxonConceptID());
         assertEquals("Plantae", match.getKingdom());
-        assertEquals(Collections.singletonList("noIssue"), match.getIssues());
+        assertEquals(Collections.singletonList("http://ala.org.au/issues/1.0/acceptedAndSynonym"), match.getIssues());
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchByClassification", req.getPath());
+        assertEquals("/api/v2/taxonomy/searchByClassification?trace=NONE", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
 
         search = NameSearch.builder().scientificName("Acacia dealbata").build();
-        match = client.match(search);
+        match = client.match(search, Trace.TraceLevel.NONE);
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
         assertEquals(1, server.getRequestCount());
 
         search = NameSearch.builder().scientificName("Acacia dealbata").build();
-        match = client.match(search);
+        match = client.match(search, Trace.TraceLevel.NONE);
         assertTrue(match.isSuccess());
         assertEquals("Acacia dealbata", match.getScientificName());
         assertEquals(1, server.getRequestCount());
@@ -110,7 +112,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         List<NameSearch> searches = new ArrayList<>();
         searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
         searches.add(NameSearch.builder().scientificName("Osphranter rufus").build());
-        List<NameUsageMatch> matches = client.matchAll(searches);
+        List<NameUsageMatch> matches = client.matchAll(searches, Trace.TraceLevel.NONE);
 
         assertNotNull(matches);
         assertEquals(2, matches.size());
@@ -123,11 +125,11 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Osphranter rufus", match.getScientificName());
         assertEquals("species", match.getRank());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/7e6e134b-2bc7-43c4-b23a-6e3f420f57ad", match.getTaxonConceptID());
 
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchAllByClassification", req.getPath());
+        assertEquals("/api/v2/taxonomy/searchAllByClassification?trace=NONE", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -141,7 +143,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         List<NameSearch> searches = new ArrayList<>();
         searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
         searches.add(NameSearch.builder().scientificName("Osphranter rufus").build());
-        List<NameUsageMatch> matches = client.matchAll(searches);
+        List<NameUsageMatch> matches = client.matchAll(searches, Trace.TraceLevel.NONE);
 
         assertNotNull(matches);
         assertEquals(2, matches.size());
@@ -154,9 +156,9 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Osphranter rufus", match.getScientificName());
         assertEquals("species", match.getRank());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/7e6e134b-2bc7-43c4-b23a-6e3f420f57ad", match.getTaxonConceptID());
 
-        matches = client.matchAll(searches);
+        matches = client.matchAll(searches, Trace.TraceLevel.NONE);
         assertNotNull(matches);
         assertEquals(2, matches.size());
         match = matches.get(0);
@@ -168,11 +170,11 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Osphranter rufus", match.getScientificName());
         assertEquals("species", match.getRank());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:e6aff6af-ff36-4ad5-95f2-2dfdcca8caff", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/7e6e134b-2bc7-43c4-b23a-6e3f420f57ad", match.getTaxonConceptID());
 
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/searchAllByClassification", req.getPath());
+        assertEquals("/api/v2/taxonomy/searchAllByClassification?trace=NONE", req.getPath());
         assertEquals(request, req.getBody().readUtf8());
     }
 
@@ -193,7 +195,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         searches = new ArrayList<>();
         searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
         searches.add(NameSearch.builder().scientificName("Osphranter rufus").build());
-        matches = client.matchAll(searches);
+        matches = client.matchAll(searches, Trace.TraceLevel.NONE);
 
         assertNotNull(matches);
         assertEquals(2, matches.size());
@@ -202,7 +204,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         searches.add(NameSearch.builder().scientificName("Acacia dealbata").build());
         searches.add(NameSearch.builder().scientificName("Vachellia nilotica").build());
         searches.add(NameSearch.builder().scientificName("Dalatias licha").build());
-        matches = client.matchAll(searches);
+        matches = client.matchAll(searches, Trace.TraceLevel.NONE);
 
         assertNotNull(matches);
         assertEquals(3, matches.size());
@@ -220,14 +222,14 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         assertTrue(match.isSuccess());
         assertEquals("Dalatias licha", match.getScientificName());
         assertEquals("species", match.getRank());
-        assertEquals("urn:lsid:biodiversity.org.au:afd.taxon:2bd8e210-9bc2-42a1-a432-9212ce959682", match.getTaxonConceptID());
+        assertEquals("https://biodiversity.org.au/afd/taxa/2bd8e210-9bc2-42a1-a432-9212ce959682", match.getTaxonConceptID());
 
         assertEquals(2, server.getRequestCount());
         RecordedRequest req1 = server.takeRequest();
-        assertEquals("/api/searchAllByClassification", req1.getPath());
+        assertEquals("/api/v2/taxonomy/searchAllByClassification?trace=NONE", req1.getPath());
         assertEquals(request1, req1.getBody().readUtf8());
         RecordedRequest req2 = server.takeRequest();
-        assertEquals("/api/searchAllByClassification", req2.getPath());
+        assertEquals("/api/v2/taxonomy/searchAllByClassification?trace=NONE", req2.getPath());
         assertEquals(request2, req2.getBody().readUtf8());
     }
 
@@ -236,7 +238,7 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
     public void testError1() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(500).setBody("Unable to connect to index"));
         try {
-            NameUsageMatch match = client.match("Acacia dealbata", null);
+            NameUsageMatch match = client.match("Acacia dealbata", null,null);
             fail("Expecting HttpException");
         } catch (HttpException ex) {
             assertEquals(500, ex.code());
@@ -244,6 +246,6 @@ public class ALANameUsageMatchServiceCachingClientTest extends TestUtils {
         }
         assertEquals(1, server.getRequestCount());
         RecordedRequest req = server.takeRequest();
-        assertEquals("/api/search?q=Acacia%20dealbata", req.getPath());
+        assertEquals("/api/v2/taxonomy/search?q=Acacia%20dealbata", req.getPath());
     }
 }
