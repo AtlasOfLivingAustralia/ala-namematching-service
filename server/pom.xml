@@ -81,8 +81,8 @@
         <!-- Old search library, for models -->
         <dependency>
             <groupId>au.org.ala.names</groupId>
-            <artifactId>old-name-matching-shaded</artifactId>
-            <version>${old-name-matching.version}</version>
+            <artifactId>shaded-old-name-matching</artifactId>
+            <version>${ala-name-matching.version}</version>
         </dependency>
 
         <!-- Caching -->
