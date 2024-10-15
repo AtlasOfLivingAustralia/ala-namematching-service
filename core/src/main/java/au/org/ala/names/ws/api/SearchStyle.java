@@ -41,11 +41,11 @@ public enum SearchStyle {
     private boolean fuzzy;
     /** Does this style allow higher order lookups? */
     @Getter
-    private boolean hisherOrder;
+    private boolean higherOrder;
 
     SearchStyle(boolean loose, boolean fuzzy, boolean higherOrder) {
         this.loose = loose;
         this.fuzzy = fuzzy;
-        this.hisherOrder = higherOrder;
+        this.higherOrder = higherOrder;
     }
 }

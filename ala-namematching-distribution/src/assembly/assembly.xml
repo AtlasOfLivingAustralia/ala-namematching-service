@@ -1,0 +1,32 @@
+<assembly>
+    <id>distribution</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <moduleSets>
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>au.org.ala.w:ala-ws-client-common:jar</include>
+                <include>au.org.ala.names:ala-namematching-core:jar</include>
+                <include>au.org.ala.names:ala-namematching-client:jar</include>
+                <include>au.org.ala.names:ala-namematching-server:jar</include>
+                <include>au.org.ala.names:ala-namematching-tools:jar</include>
+            </includes>
+            <binaries>
+                <outputDirectory>lib</outputDirectory>
+                <unpack>false</unpack>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.scriptSourceDirectory}</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>server.sh</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

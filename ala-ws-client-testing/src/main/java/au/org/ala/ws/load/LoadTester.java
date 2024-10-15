@@ -81,6 +81,8 @@ public class LoadTester<T> implements Runnable {
         writer.write("clients");
         writer.write(",");
         Statistics.reportHeader(writer);
+        writer.write(",");
+        writer.write("rate");
         writer.write("\n");
         writer.flush();
     }

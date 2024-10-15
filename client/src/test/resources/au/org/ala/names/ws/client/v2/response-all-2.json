@@ -1,0 +1,97 @@
+[
+  null,
+  {
+    "success": true,
+    "scientificName": "Vachellia nilotica",
+    "scientificNameAuthorship": "(L.) P.J.H.Hurter & Mabb.",
+    "taxonConceptID": "https://id.biodiversity.org.au/node/apni/7384761",
+    "rank": "species",
+    "rankID": 7000,
+    "lft": 290246,
+    "rgt": 290247,
+    "kingdom": "Plantae",
+    "kingdomID": "https://id.biodiversity.org.au/taxon/apni/51744352",
+    "phylum": "Charophyta",
+    "phylumID": "https://id.biodiversity.org.au/taxon/apni/51744351",
+    "classs": "Equisetopsida",
+    "classID": "https://id.biodiversity.org.au/taxon/apni/51744350",
+    "order": "Fabales",
+    "orderID": "https://id.biodiversity.org.au/taxon/apni/51702962",
+    "family": "Fabaceae",
+    "familyID": "https://id.biodiversity.org.au/taxon/apni/51702961",
+    "genus": "Vachellia",
+    "genusID": "https://id.biodiversity.org.au/taxon/apni/51300992",
+    "speciesID": "https://id.biodiversity.org.au/node/apni/7384761",
+    "vernacularName": "Gum Arabic Tree",
+    "distributionIDs": [
+      "http://vocab.getty.edu/tgn/7001829",
+      "http://vocab.getty.edu/tgn/7001830",
+      "http://vocab.getty.edu/tgn/7001831",
+      "http://vocab.getty.edu/tgn/7001834"
+    ],
+    "distribution": [
+      "Western Australia",
+      "Northern Territory",
+      "Queensland",
+      "South Australia"
+    ],
+    "probability": 0.9999999921616619,
+    "fidelity": 1,
+    "speciesGroup": [
+      "Plants",
+      "Flowering plants"
+    ],
+    "speciesSubgroup": [
+      "Dicots"
+    ]
+  },
+  {
+    "success": true,
+    "scientificName": "Dalatias licha",
+    "scientificNameAuthorship": "(Bonnaterre, 1788)",
+    "taxonConceptID": "https://biodiversity.org.au/afd/taxa/2bd8e210-9bc2-42a1-a432-9212ce959682",
+    "rank": "species",
+    "rankID": 7000,
+    "lft": 241339,
+    "rgt": 241339,
+    "kingdom": "Animalia",
+    "kingdomID": "https://biodiversity.org.au/afd/taxa/4647863b-760d-4b59-aaa1-502c8cdf8d3c",
+    "phylum": "CHORDATA",
+    "phylumID": "https://biodiversity.org.au/afd/taxa/065f1da4-53cd-40b8-a396-80fa5c74dedd",
+    "classs": "CHONDRICHTHYES",
+    "classID": "https://biodiversity.org.au/afd/taxa/6f1093ab-9b44-4a55-9066-7daa2f902093",
+    "order": "SQUALIFORMES",
+    "orderID": "https://biodiversity.org.au/afd/taxa/a96a2f84-12b4-49d7-9c67-5275eda8e74e",
+    "family": "DALATIIDAE",
+    "familyID": "https://biodiversity.org.au/afd/taxa/574aae25-1339-4708-a0e3-843a792e8f6b",
+    "genus": "Dalatias",
+    "genusID": "https://biodiversity.org.au/afd/taxa/314b1ef4-c31f-4dd2-a73d-ec384aab378c",
+    "speciesID": "https://biodiversity.org.au/afd/taxa/2bd8e210-9bc2-42a1-a432-9212ce959682",
+    "vernacularName": "Black Shark",
+    "distributionIDs": [
+      "http://vocab.getty.edu/tgn/7001828",
+      "http://vocab.getty.edu/tgn/7001830",
+      "http://vocab.getty.edu/tgn/7001831",
+      "http://vocab.getty.edu/tgn/7001834",
+      "http://vocab.getty.edu/tgn/7001992",
+      "http://vocab.getty.edu/tgn/7006238"
+    ],
+    "distribution": [
+      "Western Australia",
+      "New South Wales",
+      "Tasmania",
+      "Victoria",
+      "Queensland",
+      "South Australia"
+    ],
+    "probability": 1,
+    "fidelity": 1,
+    "speciesGroup": [
+      "Animals",
+      "Fishes"
+    ],
+    "speciesSubgroup": [
+      "Dogfish Sharks"
+    ]
+  }
+]

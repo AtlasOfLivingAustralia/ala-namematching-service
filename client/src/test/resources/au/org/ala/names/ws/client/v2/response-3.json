@@ -1,0 +1,54 @@
+{
+  "success": true,
+  "scientificName": "Acacia dealbata",
+  "scientificNameAuthorship": "Link",
+  "taxonConceptID": "https://id.biodiversity.org.au/taxon/apni/51286863",
+  "rank": "species",
+  "rankID": 7000,
+  "lft": 293436,
+  "rgt": 293440,
+  "kingdom": "Plantae",
+  "kingdomID": "https://id.biodiversity.org.au/taxon/apni/51744352",
+  "phylum": "Charophyta",
+  "phylumID": "https://id.biodiversity.org.au/taxon/apni/51744351",
+  "classs": "Equisetopsida",
+  "classID": "https://id.biodiversity.org.au/taxon/apni/51744350",
+  "order": "Fabales",
+  "orderID": "https://id.biodiversity.org.au/taxon/apni/51702962",
+  "family": "Fabaceae",
+  "familyID": "https://id.biodiversity.org.au/taxon/apni/51702961",
+  "genus": "Acacia",
+  "genusID": "https://id.biodiversity.org.au/taxon/apni/51471290",
+  "speciesID": "https://id.biodiversity.org.au/taxon/apni/51286863",
+  "vernacularName": "Silver Wattle",
+  "distributionIDs": [
+    "http://vocab.getty.edu/tgn/1001989",
+    "http://vocab.getty.edu/tgn/7000430",
+    "http://vocab.getty.edu/tgn/7001828",
+    "http://vocab.getty.edu/tgn/7001831",
+    "http://vocab.getty.edu/tgn/7001834",
+    "http://vocab.getty.edu/tgn/7001992",
+    "http://vocab.getty.edu/tgn/7006238"
+  ],
+  "distribution": [
+    "Western Australia",
+    "New South Wales",
+    "Tasmania",
+    "Victoria",
+    "Australian Capital Territory",
+    "Norfolk Island",
+    "South Australia"
+  ],
+  "probability": 0.9999997146545523,
+  "fidelity": 1,
+  "speciesGroup": [
+    "Plants",
+    "Flowering plants"
+  ],
+  "speciesSubgroup": [
+    "Dicots"
+  ],
+  "issues": [
+    "http://ala.org.au/issues/1.0/acceptedAndSynonym"
+  ]
+}

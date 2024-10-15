@@ -5,12 +5,11 @@
     <parent>
         <artifactId>ala-namematching-service</artifactId>
         <groupId>au.org.ala.names</groupId>
-        <version>1.9-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ala-namematching-core</artifactId>
-    <version>${project.parent.version}</version>
     <name>ALA Name Matching Service Core Class and Interfaces</name>
 
     <dependencies>
@@ -29,12 +28,23 @@
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+        <dependency>
+            <groupId>au.org.ala.names</groupId>
+            <artifactId>bayesian-core</artifactId>
+            <version>${ala-name-matching.version}</version>
+        </dependency>
 
         <!-- Documentation -->
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
             <version>${swagger-v3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>au.org.ala.names</groupId>
+            <artifactId>taxonomic-tools</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

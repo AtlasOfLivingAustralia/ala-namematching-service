@@ -1,7 +1,8 @@
 package au.org.ala.names.ws;
 
-import au.org.ala.names.ws.health.NameSearchHealthCheck;
-import au.org.ala.names.ws.resources.NameSearchResource;
+import au.org.ala.names.ws.core.NameSearchConfiguration;
+import au.org.ala.names.ws.health.ResourceHealthCheck;
+import au.org.ala.names.ws.resources.*;
 import com.google.common.collect.ImmutableMap;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
@@ -47,20 +48,38 @@ public class ALANameMatchingServiceApplication extends Application<ALANameMatchi
     @Override
     public void run(final ALANameMatchingServiceConfiguration configuration,
                     final Environment environment) {
-        // swagger-ui assets
-        (new AssetsBundle("/swagger-static", "/swagger-static", (String)null, "swagger-assets")).run(configuration, environment);
 
-        environment.jersey().register(new SwaggerResource("",
-                configuration.getSwaggerBundleConfiguration().getSwaggerViewConfiguration(),
-                configuration.getSwaggerBundleConfiguration().getSwaggerOAuth2Configuration(),
-                configuration.getSwaggerBundleConfiguration().getContextRoot()));
+        try {
+            // swagger-ui assets
+            (new AssetsBundle("/swagger-static", "/swagger-static", (String)null, "swagger-assets")).run(configuration, environment);
+
+            environment.jersey().register(new SwaggerResource("",
+                    configuration.getSwaggerBundleConfiguration().getSwaggerViewConfiguration(),
+                    configuration.getSwaggerBundleConfiguration().getSwaggerOAuth2Configuration(),
+                    configuration.getSwaggerBundleConfiguration().getContextRoot()));
 
 
-        environment.jersey().register(new OpenApiResource()
-                .openApiConfiguration(configuration.getSwaggerConfiguration()));
+            environment.jersey().register(new OpenApiResource()
+                    .openApiConfiguration(configuration.getSwaggerConfiguration()));
 
-        final NameSearchResource resource = new NameSearchResource(configuration.getSearch());
-        environment.jersey().register(resource);
-        environment.healthChecks().register("namesearch", new NameSearchHealthCheck(resource));
+            final NameSearchConfiguration ns = configuration.getSearch();
+            final TaxonomyResource taxonomyResource = new TaxonomyResource(ns);
+            final LocationResource locationResource = new LocationResource(ns, taxonomyResource);
+            final LookupResource lookupResource = new LookupResource(ns, taxonomyResource);
+            final NameSearchResourceV1 v1Resource = new NameSearchResourceV1(ns, taxonomyResource);
+            final NameSearchResourceV2 v2Resource = new NameSearchResourceV2(ns, taxonomyResource, locationResource);
+            environment.jersey().register(lookupResource);
+            environment.jersey().register(v1Resource);
+            environment.jersey().register(v2Resource);
+            environment.jersey().register(locationResource);
+            environment.healthChecks().register("taxonomy", new ResourceHealthCheck(taxonomyResource));
+            environment.healthChecks().register("location", new ResourceHealthCheck(locationResource));
+            environment.healthChecks().register("lookup", new ResourceHealthCheck(lookupResource));
+            environment.healthChecks().register("v1", new ResourceHealthCheck(v1Resource));
+            environment.healthChecks().register("v2", new ResourceHealthCheck(v2Resource));
+            environment.lifecycle().manage(taxonomyResource);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

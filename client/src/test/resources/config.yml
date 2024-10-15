@@ -20,4 +20,6 @@ server:
     - type: http
       port: 9180
 search:
-  index: /data/lucene/namematching-20230329-2
+  searcher:
+    version: 20230725-5
+    index: /data/lucene
