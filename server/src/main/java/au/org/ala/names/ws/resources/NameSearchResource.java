@@ -399,7 +399,6 @@ public class NameSearchResource implements NameMatchService {
     @Path("/getGuidsForTaxa")
     public List<String> getGuidsForTaxa(List<String> taxa) {
         try {
-            log.error("getGuisForTaxa:" + taxa.size());
             List<String> guids = this.searcher.getGuidsForTaxa(taxa);
             return guids;
         } catch (Exception e){
