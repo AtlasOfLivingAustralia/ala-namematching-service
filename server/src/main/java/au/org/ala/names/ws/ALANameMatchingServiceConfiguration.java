@@ -56,7 +56,7 @@ public class ALANameMatchingServiceConfiguration extends Configuration {
         this.swaggerBundleConfiguration.setContactEmail("support@ala.org.au");
         this.swaggerBundleConfiguration.setResourcePackage("au.org.ala.names.ws.api,au.org.ala.names.ws.client,au.org.ala.names.ws.resources");
         this.swaggerBundleConfiguration.setLicense("Mozilla Public Licence 1.1");
-        this.swaggerBundleConfiguration.setVersion("1.8.1");
+        this.swaggerBundleConfiguration.setVersion("1.8.2");
         this.swaggerBundleConfiguration.getSwaggerViewConfiguration().setPageTitle("ALA Namematching API");
 
         // swagger openapi v3
@@ -66,7 +66,7 @@ public class ALANameMatchingServiceConfiguration extends Configuration {
                 .description("A taxonomy service that maps scientific name queries onto taxon concepts")
                 .contact(new Contact().email("support@ala.org.au").url("https://ala.org.au"))
                 .license(new License().name("Mozilla Public Licence 1.1"))
-                .version("1.8.1");
+                .version("1.8.2");
 
         oas.info(info);
         swaggerConfiguration = new SwaggerConfiguration()
