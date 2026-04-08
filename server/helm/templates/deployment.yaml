@@ -57,7 +57,7 @@ spec:
               echo "{{ .Values.index.sha1 }}  /tmp/namematching.tgz" | sha1sum -c -
               {{- end }}
               echo "Extracting index to /tmp/nm ..."
-              tar zxf /tmp/namematching.tgz -C /tmp/nm --no-same-owner
+              tar xf /tmp/namematching.tgz -C /tmp/nm --no-same-owner
               # The tarball contains a single versioned directory (e.g. namematching-2025v1-5).
               # Rename it to the expected path (e.g. /data/lucene/namematching-nm).
               EXTRACTED=$(ls /tmp/nm | head -1)
