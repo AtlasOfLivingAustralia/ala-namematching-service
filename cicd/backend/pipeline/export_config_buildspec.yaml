@@ -9,7 +9,6 @@ env:
   variables:
     DEBIAN_FRONTEND: noninteractive
   exported-variables:
-    - ACCESS_LOGS_S3_BUCKET_NAME
     - ALA_SECRETS_NAME
     - APP_CERTIFICATE
     - CODEBUILD_BUILD_NUMBER
@@ -81,8 +80,6 @@ phases:
             echo Generating the template config for $stack
             cicd/gen_template_config.py --template ${stack}_template_config.j2 > ${stack}_template_config.json
           done
-      - echo importing base stack outputs...
-      - ACCESS_LOGS_S3_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name $BASE_STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='LoadBalancerAccessLogsBucket'].OutputValue" --output text)
       - echo generating values file for helm...
       - |
         echo "index:
@@ -90,7 +87,6 @@ phases:
           sha1: \"$INDEX_SHA1\"
         ingress:
           accessLogsPrefix: \"logs\"
-          accessLogsBucket: \"${ACCESS_LOGS_S3_BUCKET_NAME}\"
         tags:
           product: \"${PRODUCT_NAME}\"
           component: \"${PRODUCT_COMPONENT}\"

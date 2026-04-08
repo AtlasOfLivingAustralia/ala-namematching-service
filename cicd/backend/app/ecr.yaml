@@ -12,6 +12,9 @@ Parameters:
   pEnvironment:
     Type: String
     Description: The AWS environment this belongs to
+  pProductName:
+    Type: String
+    Description: The product name, used in resource naming
 
 Conditions:
 
@@ -25,6 +28,44 @@ Conditions:
   IsFirstBuild: !Equals [!Ref pBuild, "1"]
 
 Resources:
+
+  LoadBalancerAccessLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub
+        - ala-${pProductName}-${ResourceName}-alb-access-logs
+        - ResourceName: !If [ IsDev, !Ref pCleanBranch, !Ref pEnvironment ]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: "ExpireOldLogs"
+            Status: Enabled
+            ExpirationInDays: 90
+            Prefix: "logs/"
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      Tags:
+        - Key: Name
+          Value: LoadBalancerAccessLogs
+
+  LoadBalancerAccessLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref LoadBalancerAccessLogsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowELBAccess
+            Effect: Allow
+            Principal:
+              Service: "logdelivery.elasticloadbalancing.amazonaws.com"
+            Action: "s3:PutObject"
+            Resource: !Sub "arn:aws:s3:::${LoadBalancerAccessLogsBucket}/logs/AWSLogs/${AWS::AccountId}/*"
 
   NamematchingRepository:
     Type: AWS::ECR::Repository
@@ -68,3 +109,7 @@ Outputs:
   NamematchingRepositoryName:
     Description: The ECR repository name for the ALA Namematching service
     Value: !Ref NamematchingRepository
+
+  AccessLogsBucketName:
+    Description: The S3 bucket name for ALB access logs
+    Value: !Ref LoadBalancerAccessLogsBucket

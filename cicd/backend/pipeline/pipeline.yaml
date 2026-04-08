@@ -11,9 +11,6 @@ Parameters:
   pAutoDeploy:
     Type: String
     Description: Sets the pipeline to auto deploy on repo changes
-  pBaseStackName:
-    Type: String
-    Description: The name of the base stack
   pBootstrapStackName:
     Type: String
     Description: the name of the bootstrap stack
@@ -328,7 +325,7 @@ Resources:
                 Fn::Sub:
                   - |
                    [
-                   {"name":"ACCESS_LOGS_S3_BUCKET_NAME", "value":"#{ExportConfigNS.ACCESS_LOGS_S3_BUCKET_NAME}"},
+                   {"name":"ACCESS_LOGS_S3_BUCKET_NAME", "value":"#{EcrCloudFormationOutNS.AccessLogsBucketName}"},
                    {"name":"APP_CERTIFICATE","value":"#{ExportConfigNS.APP_CERTIFICATE}"},
                    {"name":"AWS_ACCOUNT_ID","value":"${AWS::AccountId}"},
                    {"name":"BUILD_TAG","value":"#{BuildNamematchingNS.BUILD_TAG}"},
