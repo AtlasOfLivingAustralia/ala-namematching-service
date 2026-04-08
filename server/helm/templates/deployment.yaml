@@ -24,7 +24,9 @@ spec:
       annotations:
         {{- include "ala-namematching.deploymentAnnotations" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- with .Values.serviceAccount.name }}
+      serviceAccountName: {{ . }}
+      {{- end }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -39,7 +41,7 @@ spec:
       # so the index is ready on disk when Dropwizard initialises.
       initContainers:
         - name: fetch-index
-          image: curlimages/curl:latest
+          image: curlimages/curl:8.7.1
           command:
             - sh
             - -c

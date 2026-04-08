@@ -22,9 +22,11 @@ metadata:
       access_logs.s3.bucket={{ .Values.ingress.accessLogsBucket }},
       access_logs.s3.prefix={{ .Values.ingress.accessLogsPrefix }}
     alb.ingress.kubernetes.io/tags: >
-      {{- range $key, $value := .Values.tags }}
-      {{ $key }}={{ $value }},
-      {{- end }}
+      {{- $tags := list -}}
+      {{- range $key, $value := .Values.tags -}}
+      {{- $tags = append $tags (printf "%s=%s" $key $value) -}}
+      {{- end -}}
+      {{ join "," $tags }}
     external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.hostname }}
     {{- include "ala-namematching.labels" . | nindent 4 }}
 spec:

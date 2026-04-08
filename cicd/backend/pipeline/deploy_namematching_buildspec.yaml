@@ -36,7 +36,7 @@ phases:
                       --set ingress.certificateArn=$APP_CERTIFICATE
                       --set ingress.accessLogsBucket=$ACCESS_LOGS_S3_BUCKET_NAME
                       -f $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml
-                      --set deploymentAnnotations.checksum/configs="$(md5sum $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml | awk '{print $1}')"
+                      --set deploymentAnnotations.checksum/configs="$(cat $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml server/helm/config/groups.json server/helm/config/subgroups.json | md5sum | awk '{print $1}')"
                       --set deploymentAnnotations.commitHash=$CODEBUILD_RESOLVED_SOURCE_VERSION
       - helm upgrade --install $HELM_RELEASE_NAME .
                       -n $EKS_NAMESPACE
@@ -46,7 +46,7 @@ phases:
                       --set ingress.certificateArn=$APP_CERTIFICATE
                       --set ingress.accessLogsBucket=$ACCESS_LOGS_S3_BUCKET_NAME
                       -f $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml
-                      --set deploymentAnnotations.checksum/configs="$(md5sum $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml | awk '{print $1}')"
+                      --set deploymentAnnotations.checksum/configs="$(cat $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml server/helm/config/groups.json server/helm/config/subgroups.json | md5sum | awk '{print $1}')"
                       --set deploymentAnnotations.commitHash=$CODEBUILD_RESOLVED_SOURCE_VERSION
 
   post_build:

@@ -52,7 +52,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Deployment annotations — checksum forces a pod roll when the ConfigMap changes.
 */}}
 {{- define "ala-namematching.deploymentAnnotations" -}}
-{{- $configChecksum := dict "checksum/config" (print .Values.config | sha256sum) -}}
-{{- $annotations := merge .Values.deploymentAnnotations $configChecksum -}}
+{{- $checksumInput := dict "config" .Values.config "groups.json" (.Files.Get "config/groups.json") "subgroups.json" (.Files.Get "config/subgroups.json") -}}
+{{- $configChecksum := dict "checksum/config" ($checksumInput | toJson | sha256sum) -}}
+{{- $annotations := merge (default (dict) .Values.deploymentAnnotations) $configChecksum -}}
 {{ toYaml $annotations }}
 {{- end }}

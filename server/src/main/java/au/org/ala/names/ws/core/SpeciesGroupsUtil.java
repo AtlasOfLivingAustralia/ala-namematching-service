@@ -43,6 +43,9 @@ public class SpeciesGroupsUtil {
      * @throws IllegalArgumentException if unable to load the species group resources
      */
     private SpeciesGroupsUtil(NameSearchConfiguration configuration, ALANameSearcher nameIndex) throws IllegalArgumentException {
+        if (nameIndex == null) {
+            throw new IllegalArgumentException("nameIndex must not be null");
+        }
         try {
             this.nameIndex = nameIndex;
             this.speciesGroups = this.readSpeciesGroups(configuration.getGroups());

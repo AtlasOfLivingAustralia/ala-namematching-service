@@ -7,7 +7,7 @@ Swagger UI:
   https://{{ .Values.ingress.hostname }}/swagger
 
 Health check (admin port — not publicly routed):
-  kubectl port-forward svc/svc-{{ include "ala-namematching.fullname" . }} 9180:80 -n {{ .Release.Namespace }}
+  kubectl port-forward deployment/{{ include "ala-namematching.fullname" . }} 9180:9180 -n {{ .Release.Namespace }}
   curl http://localhost:9180/healthcheck
 
 IMPORTANT — Startup time:
