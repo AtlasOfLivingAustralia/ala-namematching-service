@@ -2,6 +2,7 @@ package au.org.ala.names.ws.core;
 
 import au.org.ala.names.model.NameSearchResult;
 import au.org.ala.names.model.RankType;
+import au.org.ala.names.search.ALANameSearcher;
 import au.org.ala.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +23,8 @@ public class SpeciesGroupsUtilTest extends TestUtils {
         this.configuration.setIndex("/data/lucene/namematching-20210811-3"); // Assumed to be there
         this.configuration.setGroups(this.getClass().getResource("test-groups-1.json"));
         this.configuration.setSubgroups(this.getClass().getResource("test-subgroups-1.json"));
-        this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);
+        ALANameSearcher nameSearcher = new ALANameSearcher(this.configuration.getIndex());
+        this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration, nameSearcher);
     }
 
     protected int getLeft(String name)  throws Exception {

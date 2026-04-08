@@ -1,0 +1,186 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ala-namematching.fullname" . }}
+  labels:
+    {{- include "ala-namematching.labels" . | nindent 4 }}
+spec:
+  # Stateless — safe to run multiple replicas. Min 2 recommended; see values.yaml.
+  replicas: {{ .Values.replicaCount }}
+  # RollingUpdate is safe: no RWO volume constraint. New pods start and pass
+  # readiness before old pods terminate.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "ala-namematching.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ala-namematching.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- include "ala-namematching.deploymentAnnotations" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      # Allow up to 60s after SIGTERM for in-flight requests to complete.
+      # Paired with the preStop sleep below to let the ALB drain first.
+      terminationGracePeriodSeconds: 60
+
+      # Init container: download and extract the Lucene name index into the
+      # shared emptyDir volume. This runs before the main container starts,
+      # so the index is ready on disk when Dropwizard initialises.
+      initContainers:
+        - name: fetch-index
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              INDEX_PARENT=$(dirname {{ .Values.index.path }})
+              INDEX_NAME=$(basename {{ .Values.index.path }})
+              mkdir -p $INDEX_PARENT /tmp/nm
+              echo "Downloading name index from {{ .Values.index.url }} ..."
+              curl -fsSL -o /tmp/namematching.tgz "{{ .Values.index.url }}"
+              {{- if .Values.index.sha1 }}
+              echo "Verifying SHA1..."
+              echo "{{ .Values.index.sha1 }}  /tmp/namematching.tgz" | sha1sum -c -
+              {{- end }}
+              echo "Extracting index to /tmp/nm ..."
+              tar zxf /tmp/namematching.tgz -C /tmp/nm --no-same-owner
+              # The tarball contains a single versioned directory (e.g. namematching-2025v1-5).
+              # Rename it to the expected path (e.g. /data/lucene/namematching-nm).
+              EXTRACTED=$(ls /tmp/nm | head -1)
+              echo "Extracted as: $EXTRACTED — moving to {{ .Values.index.path }}"
+              rm -rf {{ .Values.index.path }}
+              mv /tmp/nm/$EXTRACTED {{ .Values.index.path }}
+              echo "Index ready at {{ .Values.index.path }}"
+              rm /tmp/namematching.tgz
+              rm -rf /tmp/nm
+          volumeMounts:
+            - name: lucene-index
+              mountPath: /data/lucene
+
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+            - name: admin
+              containerPort: {{ .Values.adminPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          # Give the ALB 15s to drain connections before the JVM starts shutting down.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "15"]
+
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.startupProbe.httpGet.path }}
+              port: {{ .Values.startupProbe.httpGet.port }}
+              scheme: {{ .Values.startupProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.livenessProbe.httpGet.port }}
+              scheme: {{ .Values.livenessProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.readinessProbe.httpGet.port }}
+              scheme: {{ .Values.readinessProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+
+          # JVM flags matching EC2 production (Ansible inventory: max_memory/min_memory=8g,
+          # -Djava.awt.headless=true -XX:+UseConcMarkSweepGC).
+          # MaxRAMPercentage caps heap at 75% of the container memory limit.
+          command: ["java"]
+          args:
+            - "-Djava.awt.headless=true"
+            - "-XX:+UseContainerSupport"
+            - "-XX:MaxRAMPercentage=75.0"
+            - "-XX:+UseConcMarkSweepGC"
+            - "-jar"
+            - "/data/ala-namematching-server.jar"
+            - "server"
+            - "/data/config.yml"
+
+          {{- with .Values.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          volumeMounts:
+            # Lucene index fetched by init container
+            - name: lucene-index
+              mountPath: /data/lucene
+            # Dropwizard config.yml
+            - name: config-volume
+              mountPath: /data/config.yml
+              subPath: config.yml
+            # Species groups and subgroups
+            - name: config-volume
+              mountPath: /data/ala-namematching-service/config/groups.json
+              subPath: groups.json
+            - name: config-volume
+              mountPath: /data/ala-namematching-service/config/subgroups.json
+              subPath: subgroups.json
+
+      volumes:
+        - name: lucene-index
+          emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: {{ include "ala-namematching.fullname" . }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
