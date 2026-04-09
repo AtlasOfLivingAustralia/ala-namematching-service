@@ -305,7 +305,9 @@ Resources:
                   { "name":"ECR_REPO", "value":"#{EcrCloudFormationOutNS.NamematchingRepositoryUri}" },
                   { "name":"ENVIRONMENT", "value":"${pEnvironment}" },
                   { "name":"IMAGE_NAME", "value":"#{ExportConfigNS.IMAGE_NAME}" },
-                  { "name":"IMAGE_TAG", "value":"#{ExportConfigNS.IMAGE_TAG}" }
+                  { "name":"IMAGE_TAG", "value":"#{ExportConfigNS.IMAGE_TAG}" },
+                  { "name":"INDEX_URL", "value":"#{ExportConfigNS.INDEX_URL}" },
+                  { "name":"INDEX_SHA1", "value":"#{ExportConfigNS.INDEX_SHA1}" }
                 ]
             Namespace: BuildNamematchingNS
             InputArtifacts:
@@ -437,6 +439,13 @@ Resources:
                        Fn::Sub: '${pBootstrapStackName}-CloudFormationServiceRoleArn'
               RunOrder: 4
         - !Ref AWS::NoValue
+
+  BuildNamematchingLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub /aws/codebuild/${BuildNamematching}
+      RetentionInDays: 30
 
   DeployNamematchingLogGroup:
     Type: AWS::Logs::LogGroup

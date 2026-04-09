@@ -28,6 +28,8 @@ phases:
       - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
       - echo Building the Docker image...
       - docker build -t $IMAGE_NAME -f server/Dockerfile .
+                     --build-arg INDEX_URL=$INDEX_URL
+                     --build-arg INDEX_SHA1=$INDEX_SHA1
       - aws ecr get-login-password | docker login -u AWS --password-stdin "https://$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
       - echo Tagging the Docker image...
       - BUILD_TAG=$CLEAN_BRANCH-$CODEBUILD_BUILD_NUMBER

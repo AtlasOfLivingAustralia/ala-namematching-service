@@ -10,13 +10,12 @@ Health check (admin port — not publicly routed):
   kubectl port-forward deployment/{{ include "ala-namematching.fullname" . }} 9180:9180 -n {{ .Release.Namespace }}
   curl http://localhost:9180/healthcheck
 
-IMPORTANT — Startup time:
-  Each pod downloads and extracts the Lucene name index (~2GB) before becoming
-  ready. Allow up to 10 minutes for new pods to pass the readiness probe.
+Startup time:
+  The Lucene name index is baked into the Docker image, so pods start in ~30s.
   Monitor startup with:
-    kubectl logs -f deployment/{{ include "ala-namematching.fullname" . }} -c fetch-index -n {{ .Release.Namespace }}
     kubectl logs -f deployment/{{ include "ala-namematching.fullname" . }} -n {{ .Release.Namespace }}
 
 Index update procedure:
   Update INDEX_URL and INDEX_SHA1 in cicd/backend/config.ini and push.
-  The pipeline will trigger a rolling restart; new pods will download the new index.
+  The pipeline will rebuild the image with the new index baked in and
+  perform a rolling deployment.

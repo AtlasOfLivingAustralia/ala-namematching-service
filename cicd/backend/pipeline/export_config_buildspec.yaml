@@ -82,10 +82,7 @@ phases:
           done
       - echo generating values file for helm...
       - |
-        echo "index:
-          url: \"$INDEX_URL\"
-          sha1: \"$INDEX_SHA1\"
-        ingress:
+        echo "ingress:
           accessLogsPrefix: \"logs\"
         tags:
           product: \"${PRODUCT_NAME}\"

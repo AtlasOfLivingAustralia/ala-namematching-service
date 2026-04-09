@@ -60,21 +60,20 @@ resources:
 extraEnv: []
 
 # =============================================================================
-# Name index — downloaded by the init container into an emptyDir volume.
+# Name index — baked into the Docker image at build time (see server/Dockerfile).
 # Update INDEX_URL and INDEX_SHA1 in cicd/backend/config.ini when the index
-# is refreshed; the pipeline will propagate them here via helm-values.yaml.
+# is refreshed; the pipeline passes them as Docker build args and the new
+# image layer is cached when the values are unchanged.
 # =============================================================================
 index:
-  url: "https://archives.ala.org.au/archives/nameindexes/2025v1-5/namematching-2025v1-5.tar.gz"
-  sha1: "5953177a7fcd34667fb279db270643996fa93adc"
-  # Path inside the container where the extracted index lives.
-  # Matches the EC2/Ansible convention (/data/lucene/namematching-nm) and
-  # the server/config.yml default — do not change without updating both.
+  # Path inside the container where the index lives (set at image build time).
+  # Matches the EC2/Ansible convention — do not change without rebuilding the image.
   path: "/data/lucene/namematching-nm"
 
 # =============================================================================
-# Startup probe covers the index download + extraction + species group init.
-# Allow up to 10 minutes total before declaring failure.
+# Startup probe covers Dropwizard init + Lucene index open + species group init.
+# Index is already on disk (baked into the image), so startup is ~30s.
+# Allow up to 2 minutes as a conservative safety margin.
 # Liveness/readiness kick in only after the startupProbe succeeds.
 # =============================================================================
 startupProbe:
@@ -87,7 +86,7 @@ startupProbe:
   periodSeconds: 10
   timeoutSeconds: 5
   successThreshold: 1
-  failureThreshold: 60   # 60 * 10s = 10 minutes total startup window
+  failureThreshold: 12   # 12 * 10s = 2 minutes total startup window
 
 livenessProbe:
   enabled: true

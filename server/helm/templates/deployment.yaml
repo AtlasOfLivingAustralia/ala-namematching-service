@@ -36,41 +36,6 @@ spec:
       # Paired with the preStop sleep below to let the ALB drain first.
       terminationGracePeriodSeconds: 60
 
-      # Init container: download and extract the Lucene name index into the
-      # shared emptyDir volume. This runs before the main container starts,
-      # so the index is ready on disk when Dropwizard initialises.
-      initContainers:
-        - name: fetch-index
-          image: curlimages/curl:8.7.1
-          command:
-            - sh
-            - -c
-            - |
-              set -e
-              INDEX_PARENT=$(dirname {{ .Values.index.path }})
-              INDEX_NAME=$(basename {{ .Values.index.path }})
-              mkdir -p $INDEX_PARENT /tmp/nm
-              echo "Downloading name index from {{ .Values.index.url }} ..."
-              curl -fsSL -o /tmp/namematching.tgz "{{ .Values.index.url }}"
-              {{- if .Values.index.sha1 }}
-              echo "Verifying SHA1..."
-              echo "{{ .Values.index.sha1 }}  /tmp/namematching.tgz" | sha1sum -c -
-              {{- end }}
-              echo "Extracting index to /tmp/nm ..."
-              tar xf /tmp/namematching.tgz -C /tmp/nm --no-same-owner
-              # The tarball contains a single versioned directory (e.g. namematching-2025v1-5).
-              # Rename it to the expected path (e.g. /data/lucene/namematching-nm).
-              EXTRACTED=$(ls /tmp/nm | head -1)
-              echo "Extracted as: $EXTRACTED — moving to {{ .Values.index.path }}"
-              rm -rf {{ .Values.index.path }}
-              mv /tmp/nm/$EXTRACTED {{ .Values.index.path }}
-              echo "Index ready at {{ .Values.index.path }}"
-              rm /tmp/namematching.tgz
-              rm -rf /tmp/nm
-          volumeMounts:
-            - name: lucene-index
-              mountPath: /data/lucene
-
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -152,9 +117,6 @@ spec:
           {{- end }}
 
           volumeMounts:
-            # Lucene index fetched by init container
-            - name: lucene-index
-              mountPath: /data/lucene
             # Dropwizard config.yml
             - name: config-volume
               mountPath: /data/config.yml
@@ -168,8 +130,6 @@ spec:
               subPath: subgroups.json
 
       volumes:
-        - name: lucene-index
-          emptyDir: {}
         - name: config-volume
           configMap:
             name: {{ include "ala-namematching.fullname" . }}
