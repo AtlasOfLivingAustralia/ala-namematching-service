@@ -64,7 +64,7 @@ public class ALANameMatchingServiceApplication extends Application<ALANameMatchi
         environment.jersey().register(resource);
         environment.healthChecks().register("namesearch", new NameSearchHealthCheck(resource));
         environment.lifecycle().manage(new Managed() {
-            @Override public void start() {}
+            @Override public void start() {} // resource initialised in its constructor
             @Override public void stop() throws Exception { resource.close(); }
         });
     }

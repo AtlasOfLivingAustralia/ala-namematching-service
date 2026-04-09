@@ -218,9 +218,14 @@ public class SpeciesGroupsUtil {
      * Passing the already-open searcher avoids opening a second Lucene index handle
      * per pod, halving memory usage and startup time.
      * </p>
+     * <p>
+     * <strong>Note:</strong> instances are cached by {@code configuration}. If an
+     * instance already exists for the given configuration, {@code nameIndex} is
+     * ignored and the cached instance is returned unchanged.
+     * </p>
      *
      * @param configuration The configuration
-     * @param nameIndex     An already-open searcher to reuse
+     * @param nameIndex     An already-open searcher to reuse (ignored if a cached instance exists)
      *
      * @return A species group resource
      *

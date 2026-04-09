@@ -4,7 +4,9 @@ import au.org.ala.names.model.NameSearchResult;
 import au.org.ala.names.model.RankType;
 import au.org.ala.names.search.ALANameSearcher;
 import au.org.ala.util.TestUtils;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -14,17 +16,32 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class SpeciesGroupsUtilTest extends TestUtils {
-    private NameSearchConfiguration configuration;
+    // Shared across all test methods — ALANameSearcher is expensive to open and
+    // does not implement Closeable, so one instance per suite is the right approach.
+    private static ALANameSearcher sharedSearcher;
+    private static NameSearchConfiguration sharedConfiguration;
+
     private SpeciesGroupsUtil speciesGroupsUtil;
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+        sharedConfiguration = new NameSearchConfiguration();
+        sharedConfiguration.setIndex("/data/lucene/namematching-20210811-3"); // Assumed to be there
+        sharedConfiguration.setGroups(SpeciesGroupsUtilTest.class.getResource("test-groups-1.json"));
+        sharedConfiguration.setSubgroups(SpeciesGroupsUtilTest.class.getResource("test-subgroups-1.json"));
+        sharedSearcher = new ALANameSearcher(sharedConfiguration.getIndex());
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        // ALANameSearcher does not implement Closeable; null out to allow GC of the
+        // index reader between test suites rather than holding it for JVM lifetime.
+        sharedSearcher = null;
+    }
 
     @Before
     public void setUp() throws Exception {
-        this.configuration = new NameSearchConfiguration();
-        this.configuration.setIndex("/data/lucene/namematching-20210811-3"); // Assumed to be there
-        this.configuration.setGroups(this.getClass().getResource("test-groups-1.json"));
-        this.configuration.setSubgroups(this.getClass().getResource("test-subgroups-1.json"));
-        ALANameSearcher nameSearcher = new ALANameSearcher(this.configuration.getIndex());
-        this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration, nameSearcher);
+        this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(sharedConfiguration, sharedSearcher);
     }
 
     protected int getLeft(String name)  throws Exception {
