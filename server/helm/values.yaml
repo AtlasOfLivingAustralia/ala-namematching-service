@@ -128,7 +128,7 @@ affinity: {}
 # =============================================================================
 # Application configuration — rendered into /data/config.yml (Dropwizard).
 # groups.json and subgroups.json are embedded in the ConfigMap from
-# server/helm/config/ (copied there by the deploy buildspec).
+# server/helm/config/
 # =============================================================================
 config:
   useHints: true
