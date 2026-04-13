@@ -12,7 +12,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
+      # Allow many new pods to spin up in parallel
+      maxSurge: "50%"
       maxUnavailable: 0
   selector:
     matchLabels:

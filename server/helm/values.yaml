@@ -117,8 +117,18 @@ readinessProbe:
 autoscaling:
   enabled: true
   minReplicas: 2
-  maxReplicas: 6
-  targetCPUUtilizationPercentage: 70
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60   # trigger scaling a bit earlier (was 70)
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 10   # react to load within 10 s (was 60)
+      pods: 3                          # add up to 4 pods per period (was 1)
+      percent: 100                     # …or double the current replica count — whichever is greater
+      periodSeconds: 60                # evaluation window
+    scaleDown:
+      stabilizationWindowSeconds: 300  # keep pods warm for 5 min before scaling down
+      pods: 1                          # remove only 1 pod at a time
+      periodSeconds: 120               # …every 2 min
 
 nodeSelector: {}
 tolerations: []
