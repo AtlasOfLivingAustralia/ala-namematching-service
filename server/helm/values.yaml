@@ -117,8 +117,8 @@ readinessProbe:
 autoscaling:
   enabled: true
   minReplicas: 2
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 60   # trigger scaling a bit earlier (was 70)
+  maxReplicas: 15
+  targetCPUUtilizationPercentage: 70
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 10   # react to load within 10 s (was 60)
