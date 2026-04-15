@@ -1,0 +1,429 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Namematching regional WAF resources
+
+Parameters:
+  pBuildNumber:
+    Type: Number
+  pCleanBranch:
+    Type: String
+    Description: The clean branch, can be used in resource names
+  pEnvironment:
+    Type: String
+
+Conditions:
+  IsProd: !Equals
+    - !Ref pEnvironment
+    - production
+  IsDev: !Equals
+    - !Ref pEnvironment
+    - development
+
+
+Resources:
+
+  NamematchingDenylistIpSet:
+    Type: AWS::WAFv2::IPSet
+    Properties:
+      Name: !Sub
+              - namematching-eks-denylist-ip-set-${ResourceName}
+              - ResourceName: !If [ IsDev, !Ref pCleanBranch, !Ref pEnvironment ]
+      Description: List of IPs to deny for namematching
+      Scope: REGIONAL
+      IPAddressVersion: IPV4
+      Addresses:
+        - 172.59.129.122/32
+
+  NamematchingAllowlistIpSet:
+    Type: AWS::WAFv2::IPSet
+    Properties:
+      Name: !Sub
+              - namematching-allowlist-ip-set-${ResourceName}
+              - ResourceName: !If [ IsDev, !Ref pCleanBranch, !Ref pEnvironment ]
+      Description: List of IPs to allow
+      Scope: REGIONAL
+      IPAddressVersion: IPV4
+      Addresses:  # allow all traffic from our private IPs and public NAT-GW IPs
+        - 172.30.0.0/16
+        - 52.65.75.50/32
+        - 13.238.5.100/32
+
+  NamematchingWaf:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub
+              - namematching-eks-${ResourceName}
+              - ResourceName: !If [ IsDev, !Ref pCleanBranch, !Ref pEnvironment ]
+      Description: ACL for the EKS namematching WAF
+      Scope: REGIONAL
+      DefaultAction:
+        Allow: { }
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub ${pEnvironment}-namematching-DefaultAction
+      Rules:
+        - Name: ALAHostHeaderCheck
+          Priority: 0
+          Action:
+            Block: {}
+          Statement:
+            NotStatement:
+                Statement:
+                  ByteMatchStatement:
+                    SearchString: '.ala.org.au'
+                    FieldToMatch:
+                      SingleHeader:
+                        Name: 'Host'
+                    PositionalConstraint: ENDS_WITH
+                    TextTransformations:
+                      - Priority: 0
+                        Type: NONE
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-ALAHostHeaderCheck
+        - Name: ALAIpAllowList
+          Action:
+            Allow: { }
+          Priority: 1
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-ALAIpAllowList
+          Statement:
+            IPSetReferenceStatement:
+              Arn: !GetAtt NamematchingAllowlistIpSet.Arn
+        - Name: ALAIpDenyList
+          Action:
+            Block: { }
+          Priority: 2
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-ALAIpDenyList
+          Statement:
+            IPSetReferenceStatement:
+              Arn: !GetAtt NamematchingDenylistIpSet.Arn
+        - Name: ALABlockJa4Fingerprint
+          Priority: 3
+          Action:
+            Block: {}
+          Statement:
+            OrStatement:
+              Statements:
+                - ByteMatchStatement:
+                    # over 1M in the last 3 days, mostly CN and BR, 200K user agents! 2025/04/07
+                    SearchString: 't13d311000_e8f1e7e78f70_a29327ec888c'
+                    FieldToMatch:
+                      JA4Fingerprint:
+                        FallbackBehavior: NO_MATCH
+                    PositionalConstraint: EXACTLY
+                    TextTransformations:
+                      - Priority: 0
+                        Type: NONE
+                - ByteMatchStatement:
+                    # multiple IPs, UAs from BR and VN, may be the cause of AVH performance problems 2025/05/28
+                    SearchString: 't13d1812h1_85036bcba153_d41ae481755e'
+                    FieldToMatch:
+                      JA4Fingerprint:
+                        FallbackBehavior: NO_MATCH
+                    PositionalConstraint: EXACTLY
+                    TextTransformations:
+                      - Priority: 0
+                        Type: NONE
+                - ByteMatchStatement:
+                    # Another BR bot, 200K hits on BIE in the last 24hrs 2025/05/30
+                    SearchString: 't13d4412h1_fd39b124ee10_58ed7828516f'
+                    FieldToMatch:
+                      JA4Fingerprint:
+                        FallbackBehavior: NO_MATCH
+                    PositionalConstraint: EXACTLY
+                    TextTransformations:
+                      - Priority: 0
+                        Type: NONE
+                - ByteMatchStatement:
+                    # SG,BR,VN bot, 200K hits on Biocache over the last few days 2025/08/15 ASN 136907
+                    SearchString: 't13d311100_e8f1e7e78f70_d41ae481755e'
+                    FieldToMatch:
+                      JA4Fingerprint:
+                        FallbackBehavior: NO_MATCH
+                    PositionalConstraint: EXACTLY
+                    TextTransformations:
+                      - Priority: 0
+                        Type: NONE
+                - ByteMatchStatement:
+                    # Thinkbot, mostly from china, 250k in the last 3 days 2025/08/25
+                    SearchString: 't13d131000_f57a46bbacb6_e7c285222651'
+                    FieldToMatch:
+                      JA4Fingerprint:
+                        FallbackBehavior: NO_MATCH
+                    PositionalConstraint: EXACTLY
+                    TextTransformations:
+                      - Priority: 0
+                        Type: NONE
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-ALABlockJa4Fingerprint
+        - Name: ALABlockSpecificBots
+          Action:
+            Block: {}
+          Priority: 4
+          RuleLabels:
+            - Name: bot:specific_blocked
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-ALABlockSpecificBots
+          Statement:
+            AndStatement:
+              Statements:
+                - NotStatement:
+                    Statement:
+                      ByteMatchStatement:
+                        SearchString: '/robots.txt'
+                        FieldToMatch:
+                          UriPath: {}
+                        PositionalConstraint: STARTS_WITH
+                        TextTransformations:
+                          - Priority: 0
+                            Type: NONE
+                - OrStatement:
+                    Statements:
+                      - ByteMatchStatement:
+                          SearchString: 'facebookexternalhit'
+                          FieldToMatch:
+                            SingleHeader:
+                              Name: User-Agent
+                          PositionalConstraint: STARTS_WITH
+                          TextTransformations:
+                            - Priority: 0
+                              Type: NONE
+                      - ByteMatchStatement:
+                          SearchString: 'meta-externalagent'
+                          FieldToMatch:
+                            SingleHeader:
+                              Name: User-Agent
+                          PositionalConstraint: STARTS_WITH
+                          TextTransformations:
+                            - Priority: 0
+                              Type: NONE
+                      - ByteMatchStatement:
+                          SearchString: 'PerplexityBot'
+                          FieldToMatch:
+                            SingleHeader:
+                              Name: User-Agent
+                          PositionalConstraint: CONTAINS_WORD
+                          TextTransformations:
+                            - Priority: 0
+                              Type: NONE
+        - Name: ALARateLimitJa4
+          Action:
+            Block: { }
+          Priority: 5
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-ALARateLimitJa4
+          Statement:
+            RateBasedStatement:
+              Limit: 300
+              AggregateKeyType: CUSTOM_KEYS
+              CustomKeys:
+                - JA4Fingerprint:
+                    FallbackBehavior: MATCH
+              EvaluationWindowSec: 60
+              ScopeDownStatement:
+                NotStatement:
+                  Statement:
+                    GeoMatchStatement:
+                      CountryCodes:
+                        - AU
+        - Name: AWSManagedRulesAmazonIpReputationList
+          OverrideAction:
+            None: {}
+          Priority: 6
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: AWSManagedRulesAmazonIpReputationList
+              VendorName: AWS
+              RuleActionOverrides:
+               - ActionToUse:
+                   Block: {}
+                 Name: AWSManagedIPDDoSList
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-AWSManagedRulesAmazonIpReputationList
+            SampledRequestsEnabled: true
+        - Name: AWSManagedRulesAnonymousIpList
+          OverrideAction:
+            None: {}
+          Priority: 7
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: AWSManagedRulesAnonymousIpList
+              VendorName: AWS
+              RuleActionOverrides:
+               - ActionToUse:
+                   Count: {}
+                 Name: AnonymousIPList
+               - ActionToUse:
+                   Count: {}
+                 Name: HostingProviderIPList
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-AWSManagedRulesAnonymousIpList
+            SampledRequestsEnabled: true
+        - Name: AWSManagedRulesKnownBadInputsRuleSet
+          OverrideAction:
+            None: {}
+          Priority: 8
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+              VendorName: AWS
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-AWSManagedRulesKnownBadInputsRuleSet
+            SampledRequestsEnabled: true
+        - Name: AWSManagedRulesCommonRuleSet
+          OverrideAction:
+            None: {}
+          Priority: 9
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: AWSManagedRulesCommonRuleSet
+              VendorName: AWS
+              RuleActionOverrides:
+               - ActionToUse:
+                   Count: {}
+                 Name: NoUserAgent_HEADER
+               - ActionToUse:
+                   Count: {}
+                 Name: SizeRestrictions_QUERYSTRING
+               - ActionToUse:
+                   Count: {}
+                 Name: SizeRestrictions_BODY
+               - ActionToUse:
+                   Count: {}
+                 Name: SizeRestrictions_URIPATH
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-AWSManagedRulesCommonRuleSet
+            SampledRequestsEnabled: true
+        - Name: AWSManagedRulesBotControlRuleSet-ws
+          OverrideAction:
+            None: {}
+          Priority: 10
+          Statement:
+            ManagedRuleGroupStatement:
+              Name: AWSManagedRulesBotControlRuleSet
+              ManagedRuleGroupConfigs:
+                - AWSManagedRulesBotControlRuleSet:
+                    EnableMachineLearning: FALSE
+                    InspectionLevel: COMMON
+              VendorName: AWS
+              RuleActionOverrides:
+               - ActionToUse:
+                   Count: {}
+                 Name: CategoryHttpLibrary
+               - ActionToUse:
+                   Allow: {}
+                 Name: CategoryLinkChecker
+               - ActionToUse:
+                   Allow: {}
+                 Name: CategoryMonitoring
+               - ActionToUse:
+                   Count: {}
+                 Name: SignalAutomatedBrowser
+               - ActionToUse:
+                   Count: {}
+                 Name: SignalNonBrowserUserAgent
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-AWSManagedRulesBotControlRuleSet-ws
+            SampledRequestsEnabled: true
+        - Name: ALARateLimitGoodBots
+          Action:
+            Block: { }
+          Priority: 11
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-ALARateLimitGoodBots
+          Statement:
+            RateBasedStatement:
+              Limit: 120
+              AggregateKeyType: CONSTANT
+              EvaluationWindowSec: 60
+              ScopeDownStatement:
+                LabelMatchStatement:
+                  Key: bot:verified
+                  Scope: LABEL
+        - Name: ALABlockDatacenterBrowsers
+          Action:
+            Block: {}
+          Priority: 12
+          RuleLabels:
+            - Name: bot:datacenterbrowsers
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: !Sub ${pEnvironment}-namematching-ALABlockDatacenterBrowsers
+          Statement:
+            AndStatement:
+              Statements:
+                - NotStatement:
+                    Statement:
+                      GeoMatchStatement:
+                        CountryCodes:
+                          - AU
+                          - NZ
+                - NotStatement:
+                    Statement:
+                      ByteMatchStatement:
+                        SearchString: '/ws'
+                        FieldToMatch:
+                          UriPath: {}
+                        PositionalConstraint: STARTS_WITH
+                        TextTransformations:
+                          - Priority: 0
+                            Type: NONE
+                - LabelMatchStatement:
+                    Key: 'awswaf:managed:aws:anonymous-ip-list:HostingProviderIPList'
+                    Scope: LABEL
+                - NotStatement:
+                    Statement:
+                      LabelMatchStatement:
+                        Key: 'awswaf:managed:aws:bot-control:signal:non_browser_user_agent'
+                        Scope: LABEL
+                - NotStatement:
+                    Statement:
+                      LabelMatchStatement:
+                        Key: 'awswaf:managed:aws:bot-control:bot:'
+                        Scope: NAMESPACE
+
+  NamematchingLoggingConfiguration:
+    Type: AWS::WAFv2::LoggingConfiguration
+    Properties:
+      ResourceArn: !GetAtt NamematchingWaf.Arn
+      LogDestinationConfigs:
+        - !GetAtt NamematchingWafLogGroup.Arn
+
+  NamematchingWafLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub
+                       - aws-waf-logs-${pEnvironment}/${NamematchingWafName}-ia
+                       - NamematchingWafName: !Select [ 0, !Split [ '|', !Ref NamematchingWaf]]
+      LogGroupClass: INFREQUENT_ACCESS
+      RetentionInDays: 14
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+
+Outputs:
+  NamematchingWafArn:
+    Description: The ARN of the WAF
+    Value: !GetAtt NamematchingWaf.Arn

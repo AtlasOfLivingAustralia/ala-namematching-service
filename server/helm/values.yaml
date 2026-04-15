@@ -39,6 +39,7 @@ ingress:
   hostname: ""
   accessLogsBucket: ""
   accessLogsPrefix: ""
+  wafArn: ""
 
 tags:
   branch: ""

@@ -282,6 +282,26 @@ Resources:
             Namespace: EcrCloudFormationOutNS
             RunOrder: 2
 
+          - Name: DeployWafCFStack
+            ActionTypeId:
+              Owner: AWS
+              Category: Deploy
+              Version: 1
+              Provider: CloudFormation
+            Configuration:
+              TemplatePath: !Sub 'ExportConfigArtifact::cicd/${pProductComponent}/app/#{ExportConfigNS.WAF_STACK_FILE_PFIX}.yaml'
+              ActionMode: !If [ IsDev, REPLACE_ON_FAILURE, CREATE_UPDATE ]
+              TemplateConfiguration: !Sub 'ExportConfigArtifact::cicd/${pProductComponent}/app/#{ExportConfigNS.WAF_STACK_FILE_PFIX}_template_config.json'
+              Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND,CAPABILITY_NAMED_IAM
+              RoleArn:
+                   Fn::ImportValue:
+                     Fn::Sub: '${pBootstrapStackName}-CloudFormationServiceRoleArn'
+              StackName: '#{ExportConfigNS.WAF_STACK_NAME}'
+            InputArtifacts:
+              - Name: ExportConfigArtifact
+            Namespace: WafCloudFormationOutNS
+            RunOrder: 2
+
       - Name: BuildNamematching
         Actions:
           - Name: BuildNamematching
@@ -335,6 +355,7 @@ Resources:
                    {"name":"HELM_RELEASE_NAME","value":"#{ExportConfigNS.HELM_RELEASE_NAME}"},
                    {"name":"HOSTED_ZONE","value":"#{ExportConfigNS.HOSTED_ZONE}"},
                    {"name":"IMAGE_TAG","value":"#{ExportConfigNS.IMAGE_TAG}"},
+                   {"name":"WAF_ARN","value":"#{WafCloudFormationOutNS.NamematchingWafArn}"},
                    {"name":"WS_SUB_DOMAIN","value":"#{ExportConfigNS.WS_SUB_DOMAIN}"}
                    ]
                   - EksClusterName:
@@ -421,6 +442,19 @@ Resources:
                   Fn::ImportValue:
                     Fn::Sub: '${pBootstrapStackName}-CloudFormationServiceRoleArn'
               RunOrder: 3
+            - Name: TeardownWafStack
+              ActionTypeId:
+                Owner: AWS
+                Category: Deploy
+                Version: 1
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: DELETE_ONLY
+                StackName: '#{ExportConfigNS.WAF_STACK_NAME}'
+                RoleArn:
+                  Fn::ImportValue:
+                    Fn::Sub: '${pBootstrapStackName}-CloudFormationServiceRoleArn'
+              RunOrder: 4
             - Name: TeardownCodePipeline
               ActionTypeId:
                 Owner: AWS
@@ -433,7 +467,7 @@ Resources:
                 RoleArn:
                      Fn::ImportValue:
                        Fn::Sub: '${pBootstrapStackName}-CloudFormationServiceRoleArn'
-              RunOrder: 4
+              RunOrder: 5
         - !Ref AWS::NoValue
 
   DeployNamematchingLogGroup:

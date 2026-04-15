@@ -35,6 +35,7 @@ phases:
                       --set ingress.hostname=$WS_SUB_DOMAIN.$HOSTED_ZONE
                       --set ingress.certificateArn=$APP_CERTIFICATE
                       --set ingress.accessLogsBucket=$ACCESS_LOGS_S3_BUCKET_NAME
+                      --set ingress.wafArn=$WAF_ARN
                       -f $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml
                       --set deploymentAnnotations.checksum/configs="$(cat $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml config/groups.json config/subgroups.json | md5sum | awk '{print $1}')"
                       --set deploymentAnnotations.commitHash=$CODEBUILD_RESOLVED_SOURCE_VERSION
