@@ -206,10 +206,6 @@ Resources:
               - Branches:
                   Includes:
                     - !If [ AutoDeploy, !Ref pGitHubBranch, bogo-branch ]
-                FilePaths:
-                  Includes:
-                    - !Sub cicd/${pProductComponent}/**
-                    - server/**
             SourceActionName: CheckoutSrc
       Variables:
         - Name: SRC_BRANCH

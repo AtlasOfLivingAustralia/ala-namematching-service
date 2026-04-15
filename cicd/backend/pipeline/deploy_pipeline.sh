@@ -78,6 +78,12 @@ else
   RESTART_PIPELINE_ON_UPDATE=true
 fi
 
+# check that any changes are commited and pushed
+if [[ $real_branch -eq 1 && -n "$(git status --porcelain)" ]] ; then
+  echo "changes must be committed and pushed before deploying"
+  exit 1;
+fi
+
 # check the remote branch exists
 if [[ $real_branch -eq 1 ]] && ! git ls-remote --exit-code origin $branch > /dev/null 2>&1 ; then
   echo "changes must be committed and pushed before deploying"

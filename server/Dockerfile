@@ -2,7 +2,7 @@
 # Reuses the same pinned curl image as the former init container.
 # The index layer is cached by Docker when INDEX_URL and INDEX_SHA1 are unchanged,
 # so app-only rebuilds do not re-download the index.
-FROM curlimages/curl:8.7.1 AS index-fetcher
+FROM curlimages/curl:8.19.0 AS index-fetcher
 
 ARG INDEX_URL
 ARG INDEX_SHA1
