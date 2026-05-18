@@ -1,0 +1,21 @@
+ALA Namematching Service deployed successfully.
+
+Service URL:
+  https://{{ .Values.ingress.hostname }}/api
+
+Swagger UI:
+  https://{{ .Values.ingress.hostname }}/swagger
+
+Health check (admin port — not publicly routed):
+  kubectl port-forward deployment/{{ include "ala-namematching.fullname" . }} 9180:9180 -n {{ .Release.Namespace }}
+  curl http://localhost:9180/healthcheck
+
+Startup time:
+  The Lucene name index is baked into the Docker image, so pods start in ~30s.
+  Monitor startup with:
+    kubectl logs -f deployment/{{ include "ala-namematching.fullname" . }} -n {{ .Release.Namespace }}
+
+Index update procedure:
+  Update INDEX_URL and INDEX_SHA1 in cicd/backend/config.ini and push.
+  The pipeline will rebuild the image with the new index baked in and
+  perform a rolling deployment.

@@ -7,6 +7,7 @@ import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.bundles.redirect.PathRedirect;
 import io.dropwizard.bundles.redirect.RedirectBundle;
+import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
@@ -62,5 +63,9 @@ public class ALANameMatchingServiceApplication extends Application<ALANameMatchi
         final NameSearchResource resource = new NameSearchResource(configuration.getSearch());
         environment.jersey().register(resource);
         environment.healthChecks().register("namesearch", new NameSearchHealthCheck(resource));
+        environment.lifecycle().manage(new Managed() {
+            @Override public void start() {} // resource initialised in its constructor
+            @Override public void stop() throws Exception { resource.close(); }
+        });
     }
 }

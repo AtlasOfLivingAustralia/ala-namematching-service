@@ -31,15 +31,23 @@ public class SpeciesGroupsUtil {
     private final List<SpeciesGroup> speciesSubgroups;
 
     /**
-     * Construct for a name index configuration
+     * Construct for a name index configuration, reusing an already-open searcher.
+     * <p>
+     * The provided searcher is not owned by this instance and will not be closed
+     * when this instance is discarded.
+     * </p>
      *
      * @param configuration The name index configuration
+     * @param nameIndex     An already-open searcher to reuse (avoids opening a second handle to the index)
      *
-     * @throws IllegalArgumentException if unable to open any of the resources specified in the configuration, which makes an invalid configuration
+     * @throws IllegalArgumentException if unable to load the species group resources
      */
-    private SpeciesGroupsUtil(NameSearchConfiguration configuration) throws IllegalArgumentException {
+    private SpeciesGroupsUtil(NameSearchConfiguration configuration, ALANameSearcher nameIndex) throws IllegalArgumentException {
+        if (nameIndex == null) {
+            throw new IllegalArgumentException("nameIndex must not be null");
+        }
         try {
-            this.nameIndex = new ALANameSearcher(configuration.getIndex());
+            this.nameIndex = nameIndex;
             this.speciesGroups = this.readSpeciesGroups(configuration.getGroups());
             this.speciesSubgroups = this.readSpeciesSubgroups(configuration.getSubgroups());
         } catch (Exception ex) {
@@ -205,18 +213,25 @@ public class SpeciesGroupsUtil {
     }
 
     /**
-     * Get an instance of the species group resource, based on configuration.
+     * Get an instance of the species group resource, reusing a shared searcher.
      * <p>
-     * It's a bit of a pain to import the groups.
-     * So keep a copy available.
+     * Passing the already-open searcher avoids opening a second Lucene index handle
+     * per pod, halving memory usage and startup time.
      * </p>
-     * @param configuration The configuration
+     * <p>
+     * <strong>Note:</strong> instances are cached by {@code configuration}. If an
+     * instance already exists for the given configuration, {@code nameIndex} is
+     * ignored and the cached instance is returned unchanged.
+     * </p>
      *
-     * @return An species group resource
+     * @param configuration The configuration
+     * @param nameIndex     An already-open searcher to reuse (ignored if a cached instance exists)
+     *
+     * @return A species group resource
      *
      * @throws Exception if unable to load the resource
      */
-    synchronized public static SpeciesGroupsUtil getInstance(NameSearchConfiguration configuration) throws Exception {
-        return managerCache.computeIfAbsent(configuration, c -> new SpeciesGroupsUtil(c));
+    synchronized public static SpeciesGroupsUtil getInstance(NameSearchConfiguration configuration, ALANameSearcher nameIndex) throws Exception {
+        return managerCache.computeIfAbsent(configuration, c -> new SpeciesGroupsUtil(c, nameIndex));
     }
 }

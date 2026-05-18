@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ala-namematching.fullname" . }}
+  labels:
+    {{- include "ala-namematching.labels" . | nindent 4 }}
+spec:
+  # Stateless — safe to run multiple replicas. Min 2 recommended; see values.yaml.
+  replicas: {{ .Values.replicaCount }}
+  # RollingUpdate is safe: no RWO volume constraint. New pods start and pass
+  # readiness before old pods terminate.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # Allow many new pods to spin up in parallel
+      maxSurge: "50%"
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "ala-namematching.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ala-namematching.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- include "ala-namematching.deploymentAnnotations" . | nindent 8 }}
+    spec:
+      {{- with .Values.serviceAccount.name }}
+      serviceAccountName: {{ . }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      # Allow up to 60s after SIGTERM for in-flight requests to complete.
+      # Paired with the preStop sleep below to let the ALB drain first.
+      terminationGracePeriodSeconds: 60
+
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+            - name: admin
+              containerPort: {{ .Values.adminPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          # Give the ALB 15s to drain connections before the JVM starts shutting down.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "15"]
+
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.startupProbe.httpGet.path }}
+              port: {{ .Values.startupProbe.httpGet.port }}
+              scheme: {{ .Values.startupProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.livenessProbe.httpGet.port }}
+              scheme: {{ .Values.livenessProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.readinessProbe.httpGet.port }}
+              scheme: {{ .Values.readinessProbe.httpGet.scheme }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+
+          # JVM flags matching EC2 production (Ansible inventory: max_memory/min_memory=8g,
+          # -Djava.awt.headless=true -XX:+UseConcMarkSweepGC).
+          # MaxRAMPercentage caps heap at 75% of the container memory limit.
+          command: ["java"]
+          args:
+            - "-Djava.awt.headless=true"
+            - "-XX:+UseContainerSupport"
+            - "-XX:MaxRAMPercentage=75.0"
+            - "-XX:+UseConcMarkSweepGC"
+            - "-jar"
+            - "/data/ala-namematching-server.jar"
+            - "server"
+            - "/data/config.yml"
+
+          {{- with .Values.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          volumeMounts:
+            # Dropwizard config.yml
+            - name: config-volume
+              mountPath: /data/config.yml
+              subPath: config.yml
+            # Species groups and subgroups
+            - name: config-volume
+              mountPath: /data/ala-namematching-service/config/groups.json
+              subPath: groups.json
+            - name: config-volume
+              mountPath: /data/ala-namematching-service/config/subgroups.json
+              subPath: subgroups.json
+
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "ala-namematching.fullname" . }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,45 @@
+version: 0.2
+###
+# Builds the ALA Namematching Service jar with Maven, builds the Docker image,
+# and pushes it to Amazon ECR.
+
+env:
+  shell: bash
+  variables:
+    JAVA_TOOL_OPTIONS: -Dhttps.protocols=TLSv1.2
+  secrets-manager:
+    DOCKER_PASSWORD: $ALA_SECRETS_NAME:dockerhub-password
+  exported-variables:
+    - BUILD_TAG
+
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+
+  build:
+    commands:
+      - echo Build started on $(date)
+      - echo Building the Maven project...
+      - mvn package -pl server -am -DskipTests
+      - echo Renaming jar to fixed name for Dockerfile COPY...
+      - cp server/target/ala-namematching-server-*.jar server/target/ala-namematching-server.jar
+      - echo Logging in to DockerHub to avoid pull rate limits...
+      - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - echo Building the Docker image...
+      - docker build -t $IMAGE_NAME -f server/Dockerfile .
+                     --build-arg INDEX_URL=$INDEX_URL
+                     --build-arg INDEX_SHA1=$INDEX_SHA1
+      - aws ecr get-login-password | docker login -u AWS --password-stdin "https://$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+      - echo Tagging the Docker image...
+      - BUILD_TAG=$CLEAN_BRANCH-$CODEBUILD_BUILD_NUMBER
+      - echo build tag is $BUILD_TAG
+      - docker tag $IMAGE_NAME:$IMAGE_TAG $ECR_REPO:$BUILD_TAG
+      - docker tag $IMAGE_NAME:$IMAGE_TAG $ECR_REPO:$IMAGE_TAG
+      - echo Pushing the Docker image to Amazon ECR...
+      - docker push $ECR_REPO:$BUILD_TAG
+      - docker push $ECR_REPO:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo Build completed on $(date)

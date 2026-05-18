@@ -32,6 +32,7 @@ public class NameSearchConfiguration {
     @JsonProperty
     private boolean checkHints = true;
     /** Allow loose searching on taxon identifier and vernacular name in place of scientific name, if requested */
+    @JsonProperty
     private boolean allowLoose = true;
     /** The cache configuration */
     @JsonProperty
