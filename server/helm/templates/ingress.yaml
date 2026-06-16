@@ -24,10 +24,12 @@ metadata:
     alb.ingress.kubernetes.io/success-codes: 200,404,301,302
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-Res-PQ-2025-09
     alb.ingress.kubernetes.io/load-balancer-attributes: >
-      idle_timeout.timeout_seconds=30,
+      idle_timeout.timeout_seconds={{ .Values.ingress.idleTimeoutSeconds }},
       access_logs.s3.enabled=true,
       access_logs.s3.bucket={{ .Values.ingress.accessLogsBucket }},
       access_logs.s3.prefix={{ .Values.ingress.accessLogsPrefix }}
+    alb.ingress.kubernetes.io/target-group-attributes: >
+      deregistration_delay.timeout_seconds={{ .Values.ingress.deregistrationDelaySeconds }}
     alb.ingress.kubernetes.io/tags: {{ join "," $tagParts | quote }}
     alb.ingress.kubernetes.io/listener-attributes.HTTPS-443: >-
       routing.http.response.access_control_allow_origin.header_value=*,

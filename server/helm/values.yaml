@@ -40,6 +40,8 @@ ingress:
   accessLogsBucket: ""
   accessLogsPrefix: ""
   wafArn: ""
+  idleTimeoutSeconds: 60
+  deregistrationDelaySeconds: 60
 
 tags:
   branch: ""
@@ -92,14 +94,14 @@ startupProbe:
 livenessProbe:
   enabled: true
   httpGet:
-    path: /healthcheck
+    path: /ping
     port: 9180
     scheme: HTTP
   initialDelaySeconds: 0
   periodSeconds: 30
   timeoutSeconds: 5
   successThreshold: 1
-  failureThreshold: 3
+  failureThreshold: 5    # 5 * 30s = 150s — tolerates GC pauses before restarting
 
 readinessProbe:
   enabled: true
@@ -109,7 +111,7 @@ readinessProbe:
     scheme: HTTP
   initialDelaySeconds: 0
   periodSeconds: 15
-  timeoutSeconds: 5
+  timeoutSeconds: 10
   successThreshold: 1
   failureThreshold: 3
 
@@ -117,7 +119,7 @@ readinessProbe:
 # Scale based on CPU; consider KEDA + request-rate metric for better accuracy.
 autoscaling:
   enabled: true
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 20
   targetCPUUtilizationPercentage: 70
   behavior:
@@ -127,9 +129,13 @@ autoscaling:
       percent: 100                     # …or double the current replica count — whichever is greater
       periodSeconds: 60                # evaluation window
     scaleDown:
-      stabilizationWindowSeconds: 300  # keep pods warm for 5 min before scaling down
+      stabilizationWindowSeconds: 600  # keep pods warm for 10 min before scaling down
       pods: 1                          # remove only 1 pod at a time
-      periodSeconds: 120               # …every 2 min
+      periodSeconds: 300               # …every 5 min
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
 
 nodeSelector: {}
 tolerations: []
