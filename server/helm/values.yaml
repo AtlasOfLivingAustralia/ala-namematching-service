@@ -43,6 +43,16 @@ ingress:
   idleTimeoutSeconds: 60
   deregistrationDelaySeconds: 60
 
+internalIngress:
+  enabled: false
+  # Internal hostname — resolvable within the VPC only (external-dns creates
+  # a Route53 private hosted zone record pointing at the internal ALB).
+  hostname: ""
+  accessLogsBucket: ""
+  accessLogsPrefix: ""
+  idleTimeoutSeconds: 60
+  deregistrationDelaySeconds: 60
+
 tags:
   branch: ""
   component: "backend"

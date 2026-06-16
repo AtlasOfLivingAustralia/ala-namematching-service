@@ -45,7 +45,7 @@ Resources:
           - Id: "ExpireOldLogs"
             Status: Enabled
             ExpirationInDays: 90
-            Prefix: "logs/"
+            Prefix: ""
       OwnershipControls:
         Rules:
           - ObjectOwnership: ObjectWriter
@@ -65,7 +65,7 @@ Resources:
             Principal:
               Service: "logdelivery.elasticloadbalancing.amazonaws.com"
             Action: "s3:PutObject"
-            Resource: !Sub "arn:aws:s3:::${LoadBalancerAccessLogsBucket}/logs/AWSLogs/${AWS::AccountId}/*"
+            Resource: !Sub "arn:aws:s3:::${LoadBalancerAccessLogsBucket}/*/AWSLogs/${AWS::AccountId}/*"
           - Sid: SSLOnlyAccess
             Effect: Deny
             Principal: "*"
