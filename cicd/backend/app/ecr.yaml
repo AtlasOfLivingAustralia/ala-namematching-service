@@ -66,6 +66,16 @@ Resources:
               Service: "logdelivery.elasticloadbalancing.amazonaws.com"
             Action: "s3:PutObject"
             Resource: !Sub "arn:aws:s3:::${LoadBalancerAccessLogsBucket}/logs/AWSLogs/${AWS::AccountId}/*"
+          - Sid: SSLOnlyAccess
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub arn:aws:s3:::${LoadBalancerAccessLogsBucket}
+              - !Sub arn:aws:s3:::${LoadBalancerAccessLogsBucket}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
 
   NamematchingRepository:
     Type: AWS::ECR::Repository
