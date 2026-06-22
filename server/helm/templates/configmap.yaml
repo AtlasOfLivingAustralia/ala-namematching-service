@@ -18,7 +18,7 @@ data:
         - type: http
           port: {{ .Values.service.targetPort }}
           outputBufferSize: 32KiB
-          idleTimeout: 30 seconds
+          idleTimeout: 55 seconds
           minBufferPoolSize: 64 bytes
           bufferPoolIncrement: 1KiB
           maxBufferPoolSize: 64KiB
