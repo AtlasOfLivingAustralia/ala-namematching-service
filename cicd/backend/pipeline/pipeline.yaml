@@ -323,7 +323,8 @@ Resources:
                   { "name":"IMAGE_NAME", "value":"#{ExportConfigNS.IMAGE_NAME}" },
                   { "name":"IMAGE_TAG", "value":"#{ExportConfigNS.IMAGE_TAG}" },
                   { "name":"INDEX_URL", "value":"#{ExportConfigNS.INDEX_URL}" },
-                  { "name":"INDEX_SHA1", "value":"#{ExportConfigNS.INDEX_SHA1}" }
+                  { "name":"INDEX_SHA1", "value":"#{ExportConfigNS.INDEX_SHA1}" },
+                  { "name":"INDEX_VERSION", "value":"#{ExportConfigNS.INDEX_VERSION}" }
                 ]
             Namespace: BuildNamematchingNS
             InputArtifacts:

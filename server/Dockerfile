@@ -31,6 +31,11 @@ COPY --from=index-fetcher /tmp/namematching-index /data/lucene/namematching-nm
 # Jar is pre-built by the CI pipeline (mvn package) and renamed to a fixed name
 COPY server/target/ala-namematching-server.jar /data/ala-namematching-server.jar
 
+# Default config so the image is runnable standalone (docker run/compose).
+COPY server/config.yml /data/config.yml
+COPY server/docker/groups.json /data/ala-namematching-service/config/groups.json
+COPY server/docker/subgroups.json /data/ala-namematching-service/config/subgroups.json
+
 EXPOSE 9179 9180
 
 ENTRYPOINT ["java"]

@@ -6,35 +6,35 @@
 },
   {
     "name": "Mammals",
-    "rank": "classs",
+    "rank": "class",
     "included": ["Mammalia"],
     "excluded": [],
     "parent": "Animals"
   },
   {
     "name": "Birds",
-    "rank": "classs",
+    "rank": "class",
     "included": ["Aves"],
     "excluded": [],
     "parent": "Animals"
   },
   {
     "name": "Reptiles",
-    "rank": "classs",
+    "rank": "class",
     "included": ["Reptilia"],
     "excluded": [],
     "parent": "Animals"
   },
   {
     "name": "Amphibians",
-    "rank": "classs",
+    "rank": "class",
     "included": ["Amphibia"],
     "excluded": [],
     "parent": "Animals"
   },
   {
     "name": "Fishes",
-    "rank": "classs",
+    "rank": "class",
     "included": ["Agnatha", "Chondrichthyes", "Osteichthyes", "Actinopterygii", "Sarcopterygii"],
     "excluded": [],
     "parent": "Animals"
@@ -55,14 +55,14 @@
   },
   {
     "name": "Crustaceans",
-    "rank": "classs",
+    "rank": "class",
     "included": ["Branchiopoda", "Remipedia", "Maxillopoda", "Ostracoda", "Malacostraca"],
     "excluded": [],
     "parent": "Arthropods"
   },
   {
     "name": "Insects",
-    "rank": "classs",
+    "rank": "class",
     "included": ["Insecta"],
     "excluded": [],
     "parent": "Arthropods"
