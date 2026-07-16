@@ -18,7 +18,7 @@ phases:
     commands:
       - echo Installing dependencies...
       - echo Registering QEMU emulators for cross-platform builds...
-      - docker run --rm --privileged tonistiigi/binfmt --install all
+      - docker run --rm --privileged public.ecr.aws/eks-distro-build-tooling/binfmt-misc:qemu-v9.2.2 --install all
       - docker buildx create --use --name multiarch-builder
 
   build:
@@ -26,12 +26,15 @@ phases:
       - echo Build started on $(date)
       - echo Building the Maven project...
       - mvn package -pl server -am -DskipTests
+      - echo Resolving the app version from the server pom...
+      - APP_VERSION=$(mvn -q -f server/pom.xml help:evaluate -Dexpression=project.version -DforceStdout)
+      - echo app version is $APP_VERSION
       - echo Renaming jar to fixed name for Dockerfile COPY...
       - cp server/target/ala-namematching-server-*.jar server/target/ala-namematching-server.jar
       - echo Logging in to DockerHub to avoid pull rate limits...
       - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
       - aws ecr get-login-password | docker login -u AWS --password-stdin "https://$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
-      - echo Tagging the Docker image...
+      - echo Setting the Docker image tag...
       - BUILD_TAG=$CLEAN_BRANCH-$CODEBUILD_BUILD_NUMBER
       - echo build tag is $BUILD_TAG
       - echo Building and pushing the multi-arch Docker image to ECR...
@@ -44,13 +47,16 @@ phases:
                                -t $ECR_REPO:$IMAGE_TAG \
                                --push \
                                .
-      # Update this $ENVIRONMENT to "production" when merging to master for production release
+      # Update this condition to [ "$ENVIRONMENT" = "production" ] when merging to master for production release
+      # we only want to push to Docker Hub for production releases
       - |
-          if [ "$ENVIRONMENT" = "development" ]; then
+          if [ "$ENVIRONMENT" = "testing" ]; then
+            : "${INDEX_VERSION:?INDEX_VERSION must be set to publish to Docker Hub}"
+            : "${APP_VERSION:?APP_VERSION must be set to publish to Docker Hub}"
             echo Logging in to Docker Hub with the org access token to push only...
             echo $DOCKERHUB_ORG_ACCESS_TOKEN | docker login -u atlasoflivingaustralia --password-stdin
             echo Copying the built image from ECR to the public Docker Hub repo...
-            docker buildx imagetools create -t atlasoflivingaustralia/ala-namematching-service:$INDEX_VERSION $ECR_REPO:$IMAGE_TAG
+            docker buildx imagetools create -t atlasoflivingaustralia/ala-namematching-service:$INDEX_VERSION-$APP_VERSION $ECR_REPO:$IMAGE_TAG
           fi
 
   post_build:
