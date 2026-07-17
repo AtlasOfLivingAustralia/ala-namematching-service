@@ -32,6 +32,8 @@ env:
     - SLACK_ALERT_CHANNEL
     - SLACK_DEPLOY_NOTIFICATION
     - WS_SUB_DOMAIN
+    - INTERNAL_WS_SUB_DOMAIN
+    - INTERNAL_HOSTED_ZONE
 
 phases:
 
@@ -86,7 +88,10 @@ phases:
           done
       - echo generating values file for helm...
       - |
-        echo "ingress:
+        echo "internalIngress:
+          enabled: true
+          accessLogsPrefix: \"logs-internal\"
+        ingress:
           accessLogsPrefix: \"logs\"
         tags:
           product: \"${PRODUCT_NAME}\"

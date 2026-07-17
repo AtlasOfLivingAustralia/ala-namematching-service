@@ -357,7 +357,9 @@ Resources:
                    {"name":"HOSTED_ZONE","value":"#{ExportConfigNS.HOSTED_ZONE}"},
                    {"name":"IMAGE_TAG","value":"#{ExportConfigNS.IMAGE_TAG}"},
                    {"name":"WAF_ARN","value":"#{WafCloudFormationOutNS.NamematchingWafArn}"},
-                   {"name":"WS_SUB_DOMAIN","value":"#{ExportConfigNS.WS_SUB_DOMAIN}"}
+                   {"name":"WS_SUB_DOMAIN","value":"#{ExportConfigNS.WS_SUB_DOMAIN}"},
+                   {"name":"INTERNAL_WS_SUB_DOMAIN","value":"#{ExportConfigNS.INTERNAL_WS_SUB_DOMAIN}"},
+                   {"name":"INTERNAL_HOSTED_ZONE","value":"#{ExportConfigNS.INTERNAL_HOSTED_ZONE}"}
                    ]
                   - EksClusterName:
                       Fn::ImportValue:
