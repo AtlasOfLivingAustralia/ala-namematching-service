@@ -27,6 +27,8 @@ phases:
         else
           echo "Release $HELM_RELEASE_NAME does not exist."
         fi
+      - echo Emptying the load balancer access logs bucket $ACCESS_LOGS_S3_BUCKET_NAME...
+      - aws s3 rm s3://$ACCESS_LOGS_S3_BUCKET_NAME --recursive
 
   post_build:
     commands:
