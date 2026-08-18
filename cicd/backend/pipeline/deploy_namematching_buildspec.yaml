@@ -24,9 +24,6 @@ phases:
     commands:
       - echo Build started on $(date)
       - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
-      # Copy groups/subgroups JSON into the helm chart config directory so .Files.Get can read them
-      - cp server/src/main/resources/groups.json    server/helm/config/groups.json
-      - cp server/src/main/resources/subgroups.json server/helm/config/subgroups.json
       - cd server/helm
       - helm upgrade --install $HELM_RELEASE_NAME .
                       -n $EKS_NAMESPACE
