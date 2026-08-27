@@ -1,0 +1,51 @@
+{{- if .Values.internalIngress.enabled }}
+{{- $tagParts := list -}}
+{{- range $key, $value := .Values.tags -}}
+{{- $tagParts = append $tagParts (printf "%s=%s" $key $value) -}}
+{{- end -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-internal-{{ include "ala-namematching.fullname" . }}
+  labels:
+    {{- include "ala-namematching.labels" . | nindent 4 }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.className }}
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: "{{ .Values.adminPort }}"
+    alb.ingress.kubernetes.io/healthcheck-path: /healthcheck
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/success-codes: 200,404,301,302
+    alb.ingress.kubernetes.io/load-balancer-attributes: >
+      idle_timeout.timeout_seconds={{ .Values.internalIngress.idleTimeoutSeconds }},
+      {{- if .Values.internalIngress.accessLogsBucket }}
+      access_logs.s3.enabled=true,
+      access_logs.s3.bucket={{ .Values.internalIngress.accessLogsBucket }},
+      access_logs.s3.prefix={{ .Values.internalIngress.accessLogsPrefix }}
+      {{- else }}
+      access_logs.s3.enabled=false
+      {{- end }}
+    alb.ingress.kubernetes.io/target-group-attributes: >
+      deregistration_delay.timeout_seconds={{ .Values.internalIngress.deregistrationDelaySeconds }}
+    alb.ingress.kubernetes.io/listener-attributes.HTTP-80: >-
+      routing.http.response.access_control_allow_origin.header_value=*,
+      routing.http.response.access_control_allow_methods.header_value=GET\,POST\,PUT\,DELETE\,OPTIONS\,HEAD,
+      routing.http.response.access_control_allow_headers.header_value=X-Requested-With\,Content-Type\,Accept\,Origin\,Authorization
+    alb.ingress.kubernetes.io/tags: {{ join "," $tagParts | quote }}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.internalIngress.hostname }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ .Values.internalIngress.hostname }}
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: svc-{{ include "ala-namematching.fullname" . }}
+                port:
+                  number: {{ .Values.service.port }}
+{{- end }}

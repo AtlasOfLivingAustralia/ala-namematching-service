@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: ECR repository for the ALA Namematching service
+
+Parameters:
+  pBuild:
+    Type: String
+    Description: The build number
+  pCleanBranch:
+    Type: String
+    Description: The clean branch, can be used in resource names
+  pEnvironment:
+    Type: String
+    Description: The AWS environment this belongs to
+  pProductName:
+    Type: String
+    Description: The product name, used in resource naming
+
+Conditions:
+
+  IsDev: !Equals
+    - !Ref pEnvironment
+    - development
+  NotProd: !Not
+    - !Equals
+      - !Ref pEnvironment
+      - production
+  IsFirstBuild: !Equals [!Ref pBuild, "1"]
+
+Resources:
+
+  LoadBalancerAccessLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub
+        - ala-${pProductName}-${ResourceName}-alb-access-logs
+        - ResourceName: !If [ IsDev, !Ref pCleanBranch, !Ref pEnvironment ]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: "ExpireOldLogs"
+            Status: Enabled
+            ExpirationInDays: 90
+            Prefix: ""
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      Tags:
+        - Key: Name
+          Value: LoadBalancerAccessLogs
+
+  LoadBalancerAccessLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref LoadBalancerAccessLogsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowELBAccess
+            Effect: Allow
+            Principal:
+              Service: "logdelivery.elasticloadbalancing.amazonaws.com"
+            Action: "s3:PutObject"
+            Resource:
+              - !Sub "arn:aws:s3:::${LoadBalancerAccessLogsBucket}/AWSLogs/${AWS::AccountId}/*"
+              - !Sub "arn:aws:s3:::${LoadBalancerAccessLogsBucket}/*/AWSLogs/${AWS::AccountId}/*"
+          - Sid: SSLOnlyAccess
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub arn:aws:s3:::${LoadBalancerAccessLogsBucket}
+              - !Sub arn:aws:s3:::${LoadBalancerAccessLogsBucket}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+
+  NamematchingRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      EmptyOnDelete: !If [ NotProd, true, false ]
+      EncryptionConfiguration:
+        EncryptionType: AES256
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      RepositoryName: !Sub
+                         - ala-namematching-service-${ResourceName}
+                         - ResourceName: !If [ IsDev, !Ref pCleanBranch, !Ref pEnvironment ]
+      RepositoryPolicyText:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowPublicPull
+            Effect: Allow
+            Principal: '*'
+            Action:
+              - 'ecr:GetDownloadUrlForLayer'
+              - 'ecr:BatchGetImage'
+              - 'ecr:BatchCheckLayerAvailability'
+      Tags:
+        - Key: Environment
+          Value: !Ref pEnvironment
+        - Key: Branch
+          Value: !Ref pCleanBranch
+
+Outputs:
+
+  NamematchingRepositoryArn:
+    Description: The ECR repository ARN for the ALA Namematching service
+    Value: !GetAtt NamematchingRepository.Arn
+
+  NamematchingRepositoryUri:
+    Description: The ECR repository URI for the ALA Namematching service
+    Value: !GetAtt NamematchingRepository.RepositoryUri
+    Export:
+      Name: !Sub ${AWS::StackName}-NamematchingRepositoryUri
+
+  NamematchingRepositoryName:
+    Description: The ECR repository name for the ALA Namematching service
+    Value: !Ref NamematchingRepository
+
+  AccessLogsBucketName:
+    Description: The S3 bucket name for ALB access logs
+    Value: !Ref LoadBalancerAccessLogsBucket

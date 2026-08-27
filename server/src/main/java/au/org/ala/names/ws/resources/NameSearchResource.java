@@ -59,7 +59,7 @@ public class NameSearchResource implements NameMatchService {
         try {
             log.info("Initialising NameSearchResource.....");
             this.searcher = new ALANameSearcher(configuration.getIndex());
-            this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration);
+            this.speciesGroupsUtil = SpeciesGroupsUtil.getInstance(configuration, this.searcher);
             this.useHints = configuration.isUseHints();
             this.checkHints = configuration.isCheckHints();
             this.allowLoose = configuration.isAllowLoose();
@@ -399,7 +399,7 @@ public class NameSearchResource implements NameMatchService {
     @Path("/getGuidsForTaxa")
     public List<String> getGuidsForTaxa(List<String> taxa) {
         try {
-            log.error("getGuisForTaxa:" + taxa.size());
+            log.debug("getGuidsForTaxa: {} taxa requested", taxa.size());
             List<String> guids = this.searcher.getGuidsForTaxa(taxa);
             return guids;
         } catch (Exception e){
@@ -633,9 +633,13 @@ public class NameSearchResource implements NameMatchService {
     }
 
     /**
-     * Close the resource.
+     * Close the resource, releasing cache resources so in-flight requests can
+     * complete before the pod terminates.
      */
     @Override
-    public void close()  {
+    public void close() {
+        searchCache.close();
+        idCache.close();
+        idAcceptedCache.close();
     }
 }

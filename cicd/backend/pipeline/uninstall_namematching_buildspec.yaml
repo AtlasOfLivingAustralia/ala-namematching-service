@@ -1,0 +1,35 @@
+version: 0.2
+###
+# Sets up the EKS context and uninstalls the ALA Namematching Service using Helm.
+
+env:
+  shell: bash
+  variables:
+    JAVA_TOOL_OPTIONS: -Dhttps.protocols=TLSv1.2
+
+phases:
+
+  install:
+    commands:
+      - echo Installing Helm...
+      - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+      - chmod 700 get_helm.sh
+      - ./get_helm.sh
+
+  build:
+    commands:
+      - echo Build started on $(date)
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+      - echo helm uninstall $HELM_RELEASE_NAME -n $EKS_NAMESPACE
+      - |
+        if helm list -n $EKS_NAMESPACE | grep -q $HELM_RELEASE_NAME; then
+          helm uninstall $HELM_RELEASE_NAME -n $EKS_NAMESPACE
+        else
+          echo "Release $HELM_RELEASE_NAME does not exist."
+        fi
+      - echo Emptying the load balancer access logs bucket $ACCESS_LOGS_S3_BUCKET_NAME...
+      - aws s3 rm s3://$ACCESS_LOGS_S3_BUCKET_NAME --recursive
+
+  post_build:
+    commands:
+      - echo Build completed on $(date)

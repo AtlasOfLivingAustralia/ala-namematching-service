@@ -1,0 +1,44 @@
+version: 0.2
+###
+# Sets up the EKS context and deploys the ALA Namematching Service using Helm.
+
+env:
+  shell: bash
+  variables:
+    JAVA_TOOL_OPTIONS: -Dhttps.protocols=TLSv1.2
+
+phases:
+
+  install:
+    commands:
+      - echo Installing Helm...
+      - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+      - chmod 700 get_helm.sh
+      - ./get_helm.sh
+
+  pre_build:
+    commands:
+      - echo Entered the pre_build phase...
+
+  build:
+    commands:
+      - echo Build started on $(date)
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+      - cd server/helm
+      - helm upgrade --install $HELM_RELEASE_NAME .
+                      -n $EKS_NAMESPACE
+                      --set image.repository=$ECR_REPO
+                      --set image.tag=$BUILD_TAG
+                      --set ingress.hostname=$WS_SUB_DOMAIN.$HOSTED_ZONE
+                      --set ingress.certificateArn=$APP_CERTIFICATE
+                      --set ingress.accessLogsBucket=$ACCESS_LOGS_S3_BUCKET_NAME
+                      --set ingress.wafArn=$WAF_ARN
+                      --set internalIngress.hostname=$INTERNAL_WS_SUB_DOMAIN.$INTERNAL_HOSTED_ZONE
+                      --set internalIngress.accessLogsBucket=$ACCESS_LOGS_S3_BUCKET_NAME
+                      -f $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml
+                      --set deploymentAnnotations.checksum/configs="$(cat $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml config/groups.json config/subgroups.json | md5sum | awk '{print $1}')"
+                      --set deploymentAnnotations.commitHash=$CODEBUILD_RESOLVED_SOURCE_VERSION
+
+  post_build:
+    commands:
+      - echo Build completed on $(date)

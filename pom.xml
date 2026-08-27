@@ -22,7 +22,7 @@
 
     <groupId>au.org.ala.names</groupId>
     <artifactId>ala-namematching-service</artifactId>
-    <version>1.8.2</version>
+    <version>1.8.3</version>
     <packaging>pom</packaging>
 
     <name>ALA Name Matching Service</name>
@@ -87,7 +87,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
+            <version>1.18.32</version>
             <scope>provided</scope>
         </dependency>
 

@@ -1,0 +1,120 @@
+version: 0.2
+###
+# Exports variables needed for later stages and generates the CloudFormation
+# template configs for the ECR repository.
+
+env:
+  shell: bash
+  git-credential-helper: yes
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+  exported-variables:
+    - ALA_SECRETS_NAME
+    - APP_CERTIFICATE
+    - CODEBUILD_BUILD_NUMBER
+    - DOCKER_USERNAME
+    - ECR_REPO
+    - ECR_STACK_NAME
+    - ECR_STACK_FILE_PFIX
+    - WAF_STACK_NAME
+    - WAF_STACK_FILE_PFIX
+    - COMMON_WAF_RULE_GROUP_STACK_NAME
+    - EKS_NAMESPACE
+    - HELM_RELEASE_NAME
+    - HOSTED_ZONE
+    - IMAGE_NAME
+    - IMAGE_TAG
+    - INDEX_URL
+    - INDEX_SHA1
+    - INDEX_VERSION
+    - PRODUCT_COMPONENT
+    - PRODUCT_NAME
+    - SLACK_ALERT_CHANNEL
+    - SLACK_DEPLOY_NOTIFICATION
+    - WS_SUB_DOMAIN
+    - INTERNAL_WS_SUB_DOMAIN
+    - INTERNAL_HOSTED_ZONE
+
+phases:
+
+  install:
+    commands:
+      - echo Running on $(lsb_release -d | cut -f2)
+      - echo aws-cli version $(aws --version)
+      - pip install jinja2
+      - export CUR_PIPELINE_FINGERPRINT=$(md5sum cicd/$PRODUCT_COMPONENT/pipeline/pipeline.yaml | awk '{print $1}')
+      - |
+          if [[ $PIPELINE_FINGERPRINT != $CUR_PIPELINE_FINGERPRINT ]]; then
+            echo existing pipeline is out of sync with current code revision, relaunching!
+            cd cicd/$PRODUCT_COMPONENT/pipeline/
+            ./deploy_pipeline.sh -e ${ENVIRONMENT:0:4} -b $SRC_BRANCH
+            exit 1
+          else
+            echo existing pipeline is in sync with current code revision, proceeding with the deploy!
+          fi
+
+  pre_build:
+    commands:
+      - echo Entered the pre_build phase...
+      - echo source branch is $SRC_BRANCH
+      - echo clean branch is $CLEAN_BRANCH
+      - echo Environment is $ENVIRONMENT
+      - echo generating environment vars...
+      - cicd/gen_env_vars.py --env $ENVIRONMENT --clean-branch $CLEAN_BRANCH --conf cicd/$PRODUCT_COMPONENT/config.ini > env.txt
+      - echo loading config..
+      - set -a ; source env.txt ; set +a
+      - echo creating the app environment for the namematching deployment...
+      - |
+         source cicd/unset_codebuild_env_vars.sh
+         for var in $(printenv | awk -F= '{print $1}'); do
+           echo "$var=\"$(printenv $var)\"" >> app.env
+         done
+
+  build:
+    commands:
+      - echo Entered the build phase...
+      # package CloudFormation templates and generate template configs
+      - |
+          for i in cicd/$PRODUCT_COMPONENT/app/*.yaml; do
+            stack=$(echo $i | sed 's/.yaml$//')
+            aws cloudformation package --template-file $stack.yaml \
+                                       --s3-bucket $ARTIFACTS_BUCKET \
+                                       --s3-prefix $PRODUCT_NAME/$PRODUCT_COMPONENT/$CLEAN_BRANCH-$CODEBUILD_BUILD_NUMBER \
+                                       --output-template-file ${stack}.yaml \
+                                       --region $REGION
+
+            echo Generating the template config for $stack
+            cicd/gen_template_config.py --template ${stack}_template_config.j2 > ${stack}_template_config.json
+          done
+      - echo generating values file for helm...
+      - |
+        echo "internalIngress:
+          enabled: true
+          accessLogsPrefix: \"logs-internal\"
+        ingress:
+          accessLogsPrefix: \"logs\"
+        tags:
+          product: \"${PRODUCT_NAME}\"
+          component: \"${PRODUCT_COMPONENT}\"
+          environment: \"${ENVIRONMENT}\"
+          branch: \"${CLEAN_BRANCH}\"
+          version: \"${COMMIT_ID}\"
+          Name: \"${HELM_RELEASE_NAME}\"
+        environment: \"${ENVIRONMENT}\"
+        config:
+          useHints: ${USE_HINTS}
+          checkHints: ${CHECK_HINTS}
+          allowLoose: ${ALLOW_LOOSE}
+          cache:
+            entryCapacity: ${CACHE_ENTRY_CAPACITY}
+        resources:
+          requests:
+            cpu: \"${CPU_REQUEST}\"
+            memory: \"${MEMORY_REQUEST}\"
+          limits:
+            cpu: \"${CPU_LIMIT}\"
+            memory: \"${MEMORY_LIMIT}\"" > helm-values.yaml
+
+artifacts:
+  files:
+    - '**/*'

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ala-namematching.fullname" . }}
+  labels:
+    {{- include "ala-namematching.labels" . | nindent 4 }}
+data:
+  config.yml: |
+    logging:
+      level: {{ .Values.config.logging.level }}
+      loggers:
+        au.org.ala: {{ .Values.config.logging.alaLevel }}
+        org.reflections: ERROR
+      # No file appenders — containers log to stdout/stderr.
+      # Dropwizard's default console appender is used.
+    server:
+      applicationConnectors:
+        - type: http
+          port: {{ .Values.service.targetPort }}
+          outputBufferSize: 32KiB
+          idleTimeout: 55 seconds
+          minBufferPoolSize: 64 bytes
+          bufferPoolIncrement: 1KiB
+          maxBufferPoolSize: 64KiB
+          acceptorThreads: 1
+          selectorThreads: 2
+          acceptQueueSize: 1024
+          reuseAddress: true
+      adminConnectors:
+        - type: http
+          port: {{ .Values.adminPort }}
+      # Suppress Dropwizard's access log — the ALB handles access logging.
+      requestLog:
+        appenders: []
+    search:
+      index: {{ .Values.index.path }}
+      groups: file:/data/ala-namematching-service/config/groups.json
+      subgroups: file:/data/ala-namematching-service/config/subgroups.json
+      useHints: {{ .Values.config.useHints }}
+      checkHints: {{ .Values.config.checkHints }}
+      allowLoose: {{ .Values.config.allowLoose }}
+      cache:
+        entryCapacity: {{ .Values.config.cache.entryCapacity }}
+        eternal: true
+        permitNullValues: true
+
+  groups.json: |
+{{ .Files.Get "config/groups.json" | indent 4 }}
+
+  subgroups.json: |
+{{ .Files.Get "config/subgroups.json" | indent 4 }}
