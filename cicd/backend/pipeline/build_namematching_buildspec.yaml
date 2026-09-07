@@ -47,10 +47,8 @@ phases:
                                -t $ECR_REPO:$IMAGE_TAG \
                                --push \
                                .
-      # Update this condition to [ "$ENVIRONMENT" = "production" ] when merging to master for production release
-      # we only want to push to Docker Hub for production releases
       - |
-          if [ "$ENVIRONMENT" = "testing" ]; then
+          if [ "$ENVIRONMENT" = "production" ]; then
             : "${INDEX_VERSION:?INDEX_VERSION must be set to publish to Docker Hub}"
             : "${APP_VERSION:?APP_VERSION must be set to publish to Docker Hub}"
             echo Logging in to Docker Hub with the org access token to push only...
