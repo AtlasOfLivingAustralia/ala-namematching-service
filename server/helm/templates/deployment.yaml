@@ -6,7 +6,9 @@ metadata:
     {{- include "ala-namematching.labels" . | nindent 4 }}
 spec:
   # Stateless — safe to run multiple replicas. Min 2 recommended; see values.yaml.
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   # RollingUpdate is safe: no RWO volume constraint. New pods start and pass
   # readiness before old pods terminate.
   strategy:

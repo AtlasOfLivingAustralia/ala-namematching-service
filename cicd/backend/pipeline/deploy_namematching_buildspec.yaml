@@ -38,6 +38,8 @@ phases:
                       -f $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml
                       --set deploymentAnnotations.checksum/configs="$(cat $CODEBUILD_SRC_DIR_ExportConfigArtifact/helm-values.yaml config/groups.json config/subgroups.json | md5sum | awk '{print $1}')"
                       --set deploymentAnnotations.commitHash=$CODEBUILD_RESOLVED_SOURCE_VERSION
+                      --wait --atomic --timeout 10m
+      - kubectl rollout status deployment -n $EKS_NAMESPACE -l app.kubernetes.io/instance=$HELM_RELEASE_NAME --timeout=5m
 
   post_build:
     commands:
